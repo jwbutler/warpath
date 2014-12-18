@@ -8,7 +8,7 @@ public class HumanUnit extends Unit implements Serializable {
   
   public HumanUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "player", defaultActivities, posn, player);
+    this(game, name, "player", activities, posn, player);
     this.setyOffset(-32);
   }  
   
@@ -19,8 +19,7 @@ public class HumanUnit extends Unit implements Serializable {
   
   public HumanUnit(RPG game, String name, String animationName,
   String[] activities, Posn posn, Player player) {
-    super(game, name, animationName, defaultActivities, posn, player);
+    super(game, name, animationName, activities, posn, player);
     this.setyOffset(-32);
   }
-
 }

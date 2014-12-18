@@ -7,7 +7,7 @@ public abstract class Accessory {
   // inheritance. fuck java
   private String slot;
   private Animation[] animations;
-  private String[] activities = {"walking", "standing", "attacking"};
+  private String[] activities = {"walking", "standing", "attacking", "bashing"};
   protected String animationName;
   protected RPG game;
   protected Unit unit;
@@ -66,7 +66,7 @@ public abstract class Accessory {
         return;
       }
     }
-    System.out.println("fux");
+    System.out.println("fuxxx");
   }
 
   public void nextFrame() {

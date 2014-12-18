@@ -1,3 +1,6 @@
+/* This class defines the basic set of animations that are used by basically
+ * everything in the game.
+ */
 
 public class AnimationTemplates {
   public static final String[] STANDING = {

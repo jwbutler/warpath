@@ -32,6 +32,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected Posn nextTargetPosn;
   private String[] activities;
   protected String currentActivity;
+  protected String nextActivity;
   private Animation currentAnimation;
   private Player player;
   protected LinkedList<Posn> path;
@@ -147,13 +148,19 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       setCurrentActivity("standing");
       clearTargets();
       return;
+    } else if (currentActivity.equals("bashing")) {
+      setCurrentActivity("standing");
+      clearTargets();
+      return;
     }
-
     if (targetUnit != null) {
       if (isHostile(targetUnit)) {
         if (game.distance(this, targetUnit) <= 1) {
           pointAt(targetUnit);
-          setCurrentActivity("attacking");
+          if (nextActivity.equals("attacking") || nextActivity.equals("bashing")) {
+            setCurrentActivity(nextActivity);
+            setNextActivity(null);
+          }
           return;
         } else {
           setCurrentActivity("walking");
@@ -251,6 +258,36 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         //System.out.println(targetUnit + " " + nextPosn);
         if (targetUnit.getPosn().equals(nextPosn)) {
           doAttackHit(targetUnit);
+        } else {
+          //System.out.println("Missed");
+        }
+      }
+    } else if (getCurrentActivity().equals("bashing")) {
+      if (getCurrentAnimation().getIndex() == 0) {
+        if (game.distance(this, targetUnit) > 1) {
+          setPath(game.findPath(this, targetUnit));
+          if (path != null && path.size() > 0) {
+            targetPosn = targetUnit.getPosn();
+            setCurrentActivity("walking");
+          } else {
+            setCurrentActivity("standing");
+            clearTargets();
+            System.out.println("uh oh");
+          }
+        }
+      } else if (getCurrentAnimation().getIndex() == 2) {
+        // What happens if the unit has moved away?
+        Posn nextPosn = new Posn(getX()+dx, getY()+dy);
+        
+        // Why are we sometimes losing targetUnit?
+        if (targetUnit == null) {
+          System.out.println("FIX TARGETING PROBLEM IDIOT");
+          return;
+        }
+        
+        //System.out.println(targetUnit + " " + nextPosn);
+        if (targetUnit.getPosn().equals(nextPosn)) {
+          doBashHit(targetUnit);
         } else {
           //System.out.println("Missed");
         }
@@ -446,6 +483,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public void setCurrentAnimation(String activity, String direction) {
     int i = 0;
+    Animation oldAnimation = currentAnimation;
+    currentAnimation = null;
     while (i < animations.length) {
       if (!animations[i].getActivity().equals(activity)) {
         i += 8;
@@ -457,6 +496,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         currentAnimation.setIndex(0);
         break;
       }
+    }
+    if (currentAnimation == null) {
+      //System.out.println("fuck, couldn't find animation");
+      currentAnimation = oldAnimation;
     }
     for (Accessory e : equipment.values()) {
       e.setCurrentAnimation(activity, direction);
@@ -484,6 +527,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return player;
   }
 
+  // Overridden by damage mechanics?
   public void doAttackHit(Unit u) {
     int d = 1; // ...
     u.takeDamage(d);
@@ -491,6 +535,17 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     //System.out.println(this + " hit unit " + u);
   }
   
+  public void doBashHit(Unit u) {
+    int d = 20; // ...
+    int dx = u.getX() - getX();
+    int dy = u.getY() - getY();
+    u.move(dx, dy);
+    u.setCurrentActivity("standing");
+    u.clearTargets();
+    u.takeDamage(d);
+    // TODO Auto-generated method stub
+    //System.out.println(this + " hit unit " + u);
+  }
   public void setNextTargetUnit(Unit u) {
     nextTargetUnit = u;
   }
@@ -555,6 +610,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void addAccessory(Accessory e) {
     equipment.put(e.getSlot(), e);
     e.setCurrentAnimation(this.getCurrentActivity(), game.coordsToDir(dx,dy));
+  }
+
+  public void setNextActivity(String activity) {
+    // TODO Auto-generated method stub
+    nextActivity = activity;
   }
 
 }

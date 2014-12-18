@@ -339,7 +339,7 @@ public class RPG implements ActionListener, WindowListener {
   }
   
   // Give orders to selected units: movement, attack, etc.
-  public void doRightClick(Posn pixel) {
+  public void doRightClick(Posn pixel, String activity) {
     Posn posn = pixelToGrid(pixel);
     Unit u = getPlayerUnit();
     if (pixel == null) return;
@@ -350,6 +350,7 @@ public class RPG implements ActionListener, WindowListener {
         if (posn.equals(v.getPosn())) {
           //u.doUnitInteraction(v);
           u.setNextTargetUnit(v);
+          u.setNextActivity(activity);
           return;
         }
       }
@@ -372,10 +373,12 @@ public class RPG implements ActionListener, WindowListener {
     u.setTargetPosnOverlay(posn);
     u.setNextTargetPosn(posn);
   }
+  public void doRightClick(Posn pixel) {
+    doRightClick(pixel, "attacking");
+  }
 
-
-  public void doBashOrder(Posn posn) {
-    // TODO Auto-generated method stub
+  public void doBashOrder(Posn pixel) {
+    doRightClick(pixel, "bashing");
     
   }
   // Moves the camera posn; x and y are offsets in pixels.

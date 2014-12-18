@@ -8,7 +8,6 @@ public class RPGDriver {
     //CreatorPanel cc = new CreatorPanel(800, 600);
     /*CharacterCreator cc = new CharacterCreator();
     return;*/
-    
     RPG me = new RPG();
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
@@ -35,6 +34,5 @@ public class RPGDriver {
     me.addObject(new Wall(me, new Posn(9,9), "wall_48x78_1.png"));
     me.addObject(new Wall(me, new Posn(9,10), "wall_48x78_1.png"));
     me.start();
-    
   }
 }

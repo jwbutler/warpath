@@ -79,7 +79,7 @@ public class Animation {
   public String fixFilename(String animName, String filename, String direction) {
     String fixedFilename = animName + "_" + filename.split("_")[0] + "_" +
     direction + "_" + filename.split("_")[1] + ".png";
-    String path = "bin" + File.separator + "png" + File.separator + fixedFilename;
+    String path = "png" + File.separator + fixedFilename;
 
     File f = new File(path);
     if (f.exists()) {

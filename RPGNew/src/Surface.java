@@ -57,7 +57,7 @@ public class Surface {
     this.imagePath = imagePath;
     try {
       // Copy the source image into a new image w/ transparency
-      BufferedImage tmp = ImageIO.read(new File("bin" + File.separator + "png" + File.separator + imagePath));
+      BufferedImage tmp = ImageIO.read(new File("png" + File.separator + imagePath));
       int width = tmp.getWidth();
       int height = tmp.getHeight();
       image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -72,7 +72,7 @@ public class Surface {
     } catch (IOException e) {
       // invalid path
       System.out.println("Invalid path");
-      System.out.println("&&&&& " + "bin" + File.separator + "png" + File.separator + imagePath);
+      System.out.println("&&&&& " + "png" + File.separator + imagePath);
       return;
     }
 
@@ -84,11 +84,11 @@ public class Surface {
     BufferedImage tmpImage;
     try {
       // Copy the source image into a new image w/ transparency
-      tmpImage = ImageIO.read(new File("bin" + File.separator + "png" + File.separator + imagePath));
+      tmpImage = ImageIO.read(new File("png" + File.separator + imagePath));
       //tmp = ImageIO.read(new File("png" + File.separator + imagePath));
     } catch (IOException e) {
       System.out.println("Invalid path");
-      System.out.println("##### " + "bin" + File.separator + "png" + File.separator + imagePath);
+      System.out.println("##### " + "png" + File.separator + imagePath);
       return false;
     }
     

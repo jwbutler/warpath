@@ -424,6 +424,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     //game.getFloorOverlays().remove(floorOverlay);
     if (floorOverlay != null) {
       game.getDepthTree().remove(floorOverlay);
+      floorOverlay = null;
     }
     if (game.getHumanPlayer().isHostile(getPlayer())) {
       boolean unitIsTargeted = false;
@@ -561,15 +562,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   
   public void doBashHit(Unit u) {
-    int d = 20; // ...
-    int dx = u.getX() - getX();
-    int dy = u.getY() - getY();
-    u.move(dx, dy);
-    u.setCurrentActivity("standing");
-    u.clearTargets();
+    int d = 1; // ...
     u.takeDamage(d);
-    // TODO Auto-generated method stub
-    //System.out.println(this + " hit unit " + u);
   }
   public void setNextTargetUnit(Unit u) {
     nextTargetUnit = u;

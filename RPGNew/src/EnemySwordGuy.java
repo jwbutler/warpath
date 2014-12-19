@@ -4,8 +4,9 @@ import java.util.Random;
 
 public class EnemySwordGuy extends HumanUnit {
   private int minDamage, maxDamage;
+  private static String[] activities = {"walking", "standing", "attacking", "stunned_short"};
   public EnemySwordGuy(RPG game, String name, Posn posn, Player player) {
-    super(game, name, posn, player);
+    super(game, name, activities, posn, player);
     currentHP = maxHP = 100;
     minDamage = 5;
     maxDamage = 10;

@@ -26,5 +26,16 @@ public class SwordGuy extends HumanUnit {
     // soundFX
     u.takeDamage(dmg);
   }
+  public void doBashHit(Unit u) {
+    int d = 30; // ...
+    int dx = u.getX() - getX();
+    int dy = u.getY() - getY();
+    u.move(dx, dy);
+    u.setCurrentActivity("stunned_short");
+    u.clearTargets();
+    u.takeDamage(d);
+    // TODO Auto-generated method stub
+    //System.out.println(this + " hit unit " + u);
+  }
 
 }

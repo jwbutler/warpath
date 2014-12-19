@@ -1,11 +1,30 @@
+import java.util.HashMap;
+
 /* This class defines the basic set of animations that are used by basically
  * everything in the game.
  */
-
 public class AnimationTemplates {
   public static final String[] STANDING = {
     "standing_1", "standing_1",
     "standing_1", "standing_1"};
+  
+  /* 8 frames */
+  public static final String[] STUNNED_SHORT = {
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",};
+  /* 16 frames */
+  
+  public static final String[] STUNNED_LONG = {
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",
+    "standing_1", "standing_1",};
   public static final String[] WALKING = {
     "walking_1", "walking_1",
     "walking_2","walking_2"};
@@ -50,6 +69,10 @@ public class AnimationTemplates {
       return WALKING;
     } else if (activity.equals("attacking")) {
       return ATTACKING;
+    } else if (activity.equals("stunned_short")) {
+      return STUNNED_SHORT;
+    } else if (activity.equals("stunned_long")) {
+      return STUNNED_LONG;
     } else if (activity.equals("bashing")) {
       return BASHING;
     } else if (activity.equals("blocking1")) {

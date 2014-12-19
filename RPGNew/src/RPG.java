@@ -30,7 +30,7 @@ import javax.swing.Timer;
  * =====================
  */
   
-public class RPG implements ActionListener, WindowListener {
+public class RPG extends JFrame implements ActionListener, WindowListener {
   
   private Timer frameTimer;
   private int ticks;
@@ -42,7 +42,6 @@ public class RPG implements ActionListener, WindowListener {
   private ArrayList<Unit> units;
   private ArrayList<GameObject> objects; // Non-units 
   private GamePanel gamePanel;
-  private JFrame gameWindow;
   private HUDPanel hudPanel;
   
   // Unsure if we should keep this reference, he's always going to be
@@ -76,23 +75,23 @@ public class RPG implements ActionListener, WindowListener {
     RNG = new Random();
     
     // Do we need to extend the JFrame class? I'm thinking no.
-    gameWindow = new JFrame();
-    gameWindow.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    gameWindow.setVisible(true);
-    gameWindow.addWindowListener(this);
+    //gameWindow = new JFrame();
+    setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    setVisible(true);
+    addWindowListener(this);
     //gameWindow.getContentPane().setLayout(null);
-    gameWindow.getContentPane().setLayout(new BorderLayout());
-    gameWindow.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    getContentPane().setLayout(new BorderLayout());
+    setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     //gameWindow.add(gamePanel);
-    gameWindow.setResizable(false);
+    setResizable(false);
     gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    gamePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT - gameWindow.getInsets().top - gameWindow.getInsets().bottom));
+    gamePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT - getInsets().top - getInsets().bottom));
     hudPanel = new HUDPanel(this, gamePanel.getWidth(), HUD_PANEL_HEIGHT);
     hudPanel.setPreferredSize(new Dimension(gamePanel.getWidth(), HUD_PANEL_HEIGHT));
     /*gamePanel.setAlignmentX(0.0f);
     gamePanel.setAlignmentY(0.0f);*/
-    gameWindow.getContentPane().add(gamePanel, BorderLayout.NORTH);
-    gameWindow.getContentPane().add(hudPanel, BorderLayout.SOUTH);
+    getContentPane().add(gamePanel, BorderLayout.NORTH);
+    getContentPane().add(hudPanel, BorderLayout.SOUTH);
     depthTree = new DepthTree();
     cameraPosn = null;
     centerCamera();

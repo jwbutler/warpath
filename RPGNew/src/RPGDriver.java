@@ -1,17 +1,36 @@
+import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.HashMap;
+
   /* This is the file where we actually create the game parameters: adding
    * players, units, etc. to the game.  We can define different ones for
    * various levels, modes, whatever. */
 
-public class RPGDriver {
-
+public class RPGDriver extends WindowAdapter {
+  private HashMap<Color, Color> swaps;
   public static void main(String[] args) {
+    RPGDriver me = new RPGDriver();
+    me.doIt();
+  }
+  public void windowClosed(WindowEvent e) { windowClosing(e); }
+  
+  public void windowClosing(WindowEvent e) {
+    if (e.getSource() instanceof CharacterCreator) {
+      CharacterCreator cc = (CharacterCreator)e.getSource();
+      swaps = cc.exportPaletteSwaps();
+    }
+  }
+  public void doIt() {
     //CreatorPanel cc = new CreatorPanel(800, 600);
-    /*CharacterCreator cc = new CharacterCreator();
-    return;*/
+    CharacterCreator cc = new CharacterCreator();
+    cc.addWindowListener(this);
+    while (cc.isActive());
     RPG me = new RPG();
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
-    SwordGuy u = new SwordGuy(me, "u", new Posn(3,4), me.getHumanPlayer());
+    SwordGuy u = new SwordGuy(me, "u", new Posn(3,4), me.getHumanPlayer(), swaps);
     //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
     me.addUnit(u);
     

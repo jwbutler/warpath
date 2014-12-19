@@ -12,6 +12,10 @@ public class Animation {
   private String direction;
   private int index;
   
+  public Surface[] getFrames() {
+    return frames;
+  }
+
   public String getActivity() {
     return activity;
   }

@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -43,15 +44,19 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected int maxHP;
   
   private TransHealthBar healthBar;
-  protected Hashtable<String, Accessory> equipment;
+  protected HashMap<String, Accessory> equipment;
+  protected HashMap<Color, Color> paletteSwaps;
   
-  public Unit(RPG game, String name, String animationName, String[] activities, Posn posn, Player player) {
+  public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
+    Posn posn, Player player) {
     super(game, posn);
     this.name = name;
     this.animationName = animationName;
     this.activities = activities;
     this.player = player;
-    equipment = new Hashtable<String, Accessory>();
+    equipment = new HashMap<String, Accessory>();
+    this.paletteSwaps = paletteSwaps;
+    
     dx = 0;
     dy = -1;
     xOffset = 0;
@@ -59,12 +64,23 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
      * at bottom of player sprites. */
     yOffset = -32;
     loadAnimations();
+    applyPaletteSwaps();
     setCurrentActivity("standing");
     //player.getUnits().add(this); // NO, the game will do this.
     updateFloorOverlay();
     healthBar = new TransHealthBar(this, 48, 12);
   }
   
+  public void applyPaletteSwaps() {
+    // TODO Auto-generated method stub
+    for (Animation anim: animations) {
+      for (Surface s: anim.getFrames()) {
+        s.setPaletteSwaps(paletteSwaps);
+        s.applyPaletteSwaps();
+      }
+    }
+  }
+
   // Face the unit toward the specified point.
   // That is, make <dx,dy> into an integer unit vector.
   // We're using Pythagorean distance rather than Civ distance here,

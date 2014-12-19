@@ -19,8 +19,7 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class CharacterCreator implements WindowListener, ActionListener, ChangeListener {
-  private JFrame ccWindow;
+public class CharacterCreator extends JFrame implements ActionListener, ChangeListener {
   private JPanel ccPanel;
   private Timer frameTimer;
   private Surface unitSurface;
@@ -28,6 +27,7 @@ public class CharacterCreator implements WindowListener, ActionListener, ChangeL
   private SurfacePanel unitPanel;
   private JPanel sliderPanel;
   private Color savedColor;
+  private RPG game;
   
   private ArrayList<String> colorNames;
   private HashMap<String, Color> baseColors;
@@ -40,15 +40,13 @@ public class CharacterCreator implements WindowListener, ActionListener, ChangeL
   private JButton genderSelector;
   
   public CharacterCreator() {
-    ccWindow = new JFrame();
-    ccWindow.setSize(RPG.DEFAULT_WIDTH, RPG.DEFAULT_HEIGHT);
-    ccWindow.setVisible(true);
-    ccWindow.addWindowListener(this);
-    ccWindow.getContentPane().setLayout(null);
+    setSize(RPG.DEFAULT_WIDTH, RPG.DEFAULT_HEIGHT);
+    setVisible(true);
+    getContentPane().setLayout(null);
     //gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT);
-    ccWindow.setSize(RPG.DEFAULT_WIDTH, 2*RPG.DEFAULT_HEIGHT - ccWindow.getContentPane().getHeight());
+    setSize(RPG.DEFAULT_WIDTH, 2*RPG.DEFAULT_HEIGHT - getContentPane().getHeight());
     //gameWindow.add(gamePanel);
-    ccWindow.setResizable(false);
+    setResizable(false);
     ccPanel = new JPanel();
     
     ccPanel.setSize(RPG.DEFAULT_WIDTH, RPG.DEFAULT_HEIGHT);
@@ -56,7 +54,7 @@ public class CharacterCreator implements WindowListener, ActionListener, ChangeL
     ccPanel.setDoubleBuffered(true);
     ccPanel.setBackground(Color.BLACK);
     ccPanel.setLayout(null);
-    ccWindow.getContentPane().add(ccPanel);
+    getContentPane().add(ccPanel);
     
     colorNames = new ArrayList<String>();
     colorNames.add("Hair");
@@ -225,41 +223,6 @@ public class CharacterCreator implements WindowListener, ActionListener, ChangeL
     frameTimer.start();
   }
   @Override
-  public void windowActivated(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void windowClosed(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void windowClosing(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void windowDeactivated(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void windowDeiconified(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void windowIconified(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
-  public void windowOpened(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-  @Override
   public void actionPerformed(ActionEvent e) {
     // TODO Auto-generated method stub
     if (e.getActionCommand() != null) {
@@ -323,14 +286,15 @@ public class CharacterCreator implements WindowListener, ActionListener, ChangeL
       e.printStackTrace();
     }
     
+    
     /* KLUDGE, TELL WILL TO FIX ALL THESE */
-    if (genderSelector.getText().equals("Switch to Male")) {
+    /*if (genderSelector.getText().equals("Switch to Male")) {
       HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
       tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
       unitSurface.setPaletteSwaps(tmpSwaps);
       unitSurface.applyPaletteSwaps();
-    }
-    /* END KLUDGE */
+    }*/
+    /*END KLUDGE */
     
     unitSurface.setPaletteSwaps(paletteSwaps);
     unitSurface.applyPaletteSwaps();
@@ -356,12 +320,13 @@ public class CharacterCreator implements WindowListener, ActionListener, ChangeL
       e.printStackTrace();
     }
     /* KLUDGE, TELL WILL TO FIX ALL THESE */
+    /*
     if (genderSelector.getText().equals("Switch to Male")) {
       HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
       tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
       unitSurface.setPaletteSwaps(tmpSwaps);
       unitSurface.applyPaletteSwaps();
-    }
+    }*/
     /* END KLUDGE */
     
     unitSurface.setPaletteSwaps(paletteSwaps);
@@ -374,5 +339,9 @@ public class CharacterCreator implements WindowListener, ActionListener, ChangeL
     int l = (int)(ccPanel.getWidth()*0.40 - unitSurface.getWidth())/2;
     int t = (int)(ccPanel.getHeight()*0.40);
     unitPanel.setBounds(l, t, w, h);*/
+  }
+  
+  public HashMap<Color, Color> exportPaletteSwaps() {
+    return paletteSwaps;
   }
 }

@@ -1,4 +1,6 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -12,6 +14,7 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.OverlayLayout;
 import javax.swing.Timer;
 
 /* The main game engine.  Expect this one to be a few thousand lines long.
@@ -77,17 +80,19 @@ public class RPG implements ActionListener, WindowListener {
     gameWindow.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     gameWindow.setVisible(true);
     gameWindow.addWindowListener(this);
-    gameWindow.getContentPane().setLayout(null);
-    gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT);
-    gameWindow.setSize(DEFAULT_WIDTH, 2*DEFAULT_HEIGHT - gameWindow.getContentPane().getHeight());
+    //gameWindow.getContentPane().setLayout(null);
+    gameWindow.getContentPane().setLayout(new BorderLayout());
+    gameWindow.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     //gameWindow.add(gamePanel);
     gameWindow.setResizable(false);
-    gameWindow.getContentPane().add(gamePanel);
+    gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    gamePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT - gameWindow.getInsets().top - gameWindow.getInsets().bottom));
     hudPanel = new HUDPanel(this, gamePanel.getWidth(), HUD_PANEL_HEIGHT);
-    //cardPanel.setAlignmentY(gamePanel.getHeight() - CARD_PANEL_HEIGHT);
-    // gameWindow.add(cardPanel); // gamepanel or gamewindow?
-    gameWindow.getContentPane().add(hudPanel);
-    hudPanel.setBounds(0, gamePanel.getHeight(), gamePanel.getWidth(), HUD_PANEL_HEIGHT);
+    hudPanel.setPreferredSize(new Dimension(gamePanel.getWidth(), HUD_PANEL_HEIGHT));
+    /*gamePanel.setAlignmentX(0.0f);
+    gamePanel.setAlignmentY(0.0f);*/
+    gameWindow.getContentPane().add(gamePanel, BorderLayout.NORTH);
+    gameWindow.getContentPane().add(hudPanel, BorderLayout.SOUTH);
     depthTree = new DepthTree();
     cameraPosn = null;
     centerCamera();
@@ -229,7 +234,7 @@ public class RPG implements ActionListener, WindowListener {
         }
       }
     }
-    System.out.println("PTG ERROR!");
+    //System.out.println("PTG ERROR!");
     return null;
   }
   
@@ -346,11 +351,13 @@ public class RPG implements ActionListener, WindowListener {
 
     // targeting a unit
     for (Unit v: units) {
-      if (v != u) {
-        if (posn.equals(v.getPosn())) {
+      if (posn.equals(v.getPosn())) {
+        if (v != u) {
           //u.doUnitInteraction(v);
           u.setNextTargetUnit(v);
           u.setNextActivity(activity);
+          return;
+        } else {
           return;
         }
       }
@@ -592,7 +599,7 @@ public class RPG implements ActionListener, WindowListener {
       path.removeFirst();
       //System.out.println(path);
       if (path.size() == 0) {
-        System.out.println("fux");
+        //System.out.println("fux");
       }
       return path;
     } else if (openList.isEmpty()) {

@@ -157,6 +157,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       if (isHostile(targetUnit)) {
         if (game.distance(this, targetUnit) <= 1) {
           pointAt(targetUnit);
+          if (nextActivity == null) {
+            System.out.println("fix null activity idiot, current = " + currentActivity);
+            return;
+          }
           if (nextActivity.equals("attacking") || nextActivity.equals("bashing")) {
             setCurrentActivity(nextActivity);
             setNextActivity(null);
@@ -195,6 +199,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       }
     } else {
       setCurrentActivity("standing");
+      clearTargets();
     }
   }
   
@@ -238,6 +243,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           setPath(game.findPath(this, targetUnit));
           if (path != null && path.size() > 0) {
             targetPosn = targetUnit.getPosn();
+            nextTargetUnit = targetUnit;
+            nextActivity = "attacking"; 
+            targetUnit = null;
             setCurrentActivity("walking");
           } else {
             setCurrentActivity("standing");
@@ -377,6 +385,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           targetPosn = null;
           targetUnit = null;
         } else {
+          /* What's going on here? */
           setCurrentActivity("standing");
           if (targetUnit != null) {
             targetPosn = targetUnit.getPosn();
@@ -576,26 +585,26 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   
   public void draw(Graphics g) {
-  
-    if (equipment.get("offhand") != null) {
-      if (equipment.get("offhand").drawBehind() ) {
-        equipment.get("offhand").draw(g);
-      }
-    }
+
     if (equipment.get("mainhand") != null) {
       if (equipment.get("mainhand").drawBehind() ) {
         equipment.get("mainhand").draw(g);
       }
     }
-    super.draw(g);
     if (equipment.get("offhand") != null) {
-      if (!equipment.get("offhand").drawBehind() ) {
+      if (equipment.get("offhand").drawBehind() ) {
         equipment.get("offhand").draw(g);
       }
     }
+    super.draw(g);
     if (equipment.get("mainhand") != null) {
       if (!equipment.get("mainhand").drawBehind()) {
         equipment.get("mainhand").draw(g);
+      }
+    }
+    if (equipment.get("offhand") != null) {
+      if (!equipment.get("offhand").drawBehind() ) {
+        equipment.get("offhand").draw(g);
       }
     }
     

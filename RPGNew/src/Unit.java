@@ -152,14 +152,24 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       targetUnit.updateFloorOverlay();
       
     } else if (nextTargetPosn != null) {
-      targetPosn = nextTargetPosn;
-      setPath(game.findPath(getPosn(), targetPosn));
-      if (targetUnit != null) {
-        Unit u = targetUnit;
-        targetUnit = null;
-        u.updateFloorOverlay();
+      //System.out.println("<"+nextActivity+">");
+      if (nextActivity.equals("walking")) {
+        targetPosn = nextTargetPosn;
+        setPath(game.findPath(getPosn(), targetPosn));
+        if (targetUnit != null) {
+          Unit u = targetUnit;
+          targetUnit = null;
+          u.updateFloorOverlay();
+        }
+        setCurrentActivity("walking");
+        nextTargetPosn = null;
+        nextActivity = null;
+      } else if (nextActivity.equals("blocking_1")) {
+        setCurrentActivity("blocking_1");
+        targetPosn = nextTargetPosn;
+        nextTargetPosn = null;
+        nextActivity = null;
       }
-      nextTargetPosn = null;
     } else if (currentActivity.equals("attacking")) {
       setCurrentActivity("standing");
       clearTargets();
@@ -168,6 +178,20 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       setCurrentActivity("standing");
       clearTargets();
       return;
+    } else if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
+      if (game.ctrlIsDown()) {
+        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
+        pointAt(targetPosn);
+        setCurrentActivity("blocking_2");
+        clearTargets();
+        return;      
+      } else {
+        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
+        pointAt(targetPosn);
+        setCurrentActivity("blocking_3");
+        clearTargets();
+        return;
+      }
     }
     if (targetUnit != null) {
       if (isHostile(targetUnit)) {
@@ -191,31 +215,42 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
 
     if (targetPosn != null) {
-      if (path == null || path.size() == 0) {
-        setCurrentActivity("standing");
-        clearTargets();
-        return;
-      }
-      pointAt(path.peekFirst());
-      checkNextTile();
-      if (targetPosn == null) {
-      } else if (path == null || path.size() == 0) {
-        setCurrentActivity("standing");
-        clearTargets();
-      } else if (getPosn().equals(targetPosn))  {
-        setCurrentActivity("standing");
-        clearTargets();
-      } else {
-        Posn nextPosn = path.peekFirst();
-        pointAt(nextPosn);
-        setCurrentActivity("walking");
-        if (targetUnit != null) {
-          targetUnit.updateFloorOverlay();
+      if (currentActivity.equals("walking")) {
+        if (path == null || path.size() == 0) {
+          setCurrentActivity("standing");
+          clearTargets();
+          return;
         }
+        pointAt(path.peekFirst());
+        checkNextTile();
+        if (targetPosn == null) {
+        } else if (path == null || path.size() == 0) {
+          setCurrentActivity("standing");
+          clearTargets();
+        } else if (getPosn().equals(targetPosn))  {
+          setCurrentActivity("standing");
+          clearTargets();
+        } else {
+          Posn nextPosn = path.peekFirst();
+          pointAt(nextPosn);
+          setCurrentActivity("walking");
+          if (targetUnit != null) {
+            targetUnit.updateFloorOverlay();
+          }
+        }
+      } else if (currentActivity.equals("blocking_1")) {
+        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
+        pointAt(targetPosn);
       }
     } else {
-      setCurrentActivity("standing");
-      clearTargets();
+      if (game.ctrlIsDown()) {
+        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
+        pointAt(targetPosn);
+        setCurrentActivity("blocking_1");
+      } else {
+        setCurrentActivity("standing");
+        clearTargets();
+      }
     }
   }
   
@@ -243,7 +278,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
 
   public void doEvents() {
-
+    //System.out.println(getCurrentActivity() + " " + nextActivity);
     if (getCurrentActivity().equals("walking")) {
       if (getCurrentAnimation().getIndex() <= 2) {
         checkNextTile();

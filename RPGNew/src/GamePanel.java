@@ -30,6 +30,8 @@ public class GamePanel extends JPanel implements KeyListener, KeyEventDispatcher
 MouseListener, MouseMotionListener {
   private RPG game;
   private KeyboardFocusManager focusManager;
+  private boolean ctrlIsDown;
+  private Posn mousePosn;
 
   public GamePanel(RPG game, int width, int height) {
     super();
@@ -43,25 +45,34 @@ MouseListener, MouseMotionListener {
     setVisible(true);
     setDoubleBuffered(true);
     setBackground(Color.BLACK);
+    ctrlIsDown = false;
+    mousePosn = null;
   }
   
   public void keyPressed(KeyEvent e) {
-    // unused (keydown)
+    switch(e.getKeyCode()) {
+      case KeyEvent.VK_CONTROL:
+        ctrlIsDown = true;
+        break;
+    }
   }
 
   public void keyReleased(KeyEvent e) {
     // Pressing the arrow keys (up/down/left/right) moves the camera.
     switch(e.getKeyCode()) {
-      case 38: // Up
+      case KeyEvent.VK_CONTROL:
+        ctrlIsDown = false;
+        break;
+      case KeyEvent.VK_UP:
         game.moveCamera(0,-RPG.CAMERA_INCREMENT_Y);
         break;
-      case 40: // Down
+      case KeyEvent.VK_DOWN:
         game.moveCamera(0,RPG.CAMERA_INCREMENT_Y);
         break;
-      case 37: // Left
+      case KeyEvent.VK_LEFT:
         game.moveCamera(-RPG.CAMERA_INCREMENT_X, 0);
         break;
-      case 39: // Right
+      case KeyEvent.VK_RIGHT:
         game.moveCamera(RPG.CAMERA_INCREMENT_X, 0);
         break;
       case 49: // 1
@@ -131,13 +142,16 @@ MouseListener, MouseMotionListener {
     switch (e.getButton()) {
       // Left click: select units
       case MouseEvent.BUTTON1:
-        
-        game.doLeftClick(new Posn(e.getX(), e.getY()));
+        if (ctrlIsDown) {       
+          game.doBlockOrder(new Posn(e.getX(), e.getY()));
+        } else {
+          game.doLeftClick(new Posn(e.getX(), e.getY()));
+        }
         break;
       // Right click: interact with stuff.
       case MouseEvent.BUTTON3:
         // modifier precedence?
-        if (ctrlIsDown(e)) {
+        if (ctrlIsDown) {
           game.doBashOrder(new Posn(e.getX(), e.getY()));
         } else {
           game.doRightClick(new Posn(e.getX(), e.getY()));
@@ -152,12 +166,14 @@ MouseListener, MouseMotionListener {
   }
   
   @Override
-  public void mouseMoved(MouseEvent arg0) {
+  public void mouseMoved(MouseEvent e) {
+    mousePosn = new Posn(e.getX(), e.getY());
   }
   
+  /*
   public boolean ctrlIsDown(MouseEvent e) {
     return ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == MouseEvent.CTRL_DOWN_MASK);
-  }
+  }*/
   
   public boolean shiftIsDown(MouseEvent e) {
     return ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == MouseEvent.SHIFT_DOWN_MASK);
@@ -190,5 +206,12 @@ MouseListener, MouseMotionListener {
   
   public Rect getRect() {
     return new Rect(0,0,getWidth(),getHeight());  
+  }
+  
+  public boolean ctrlIsDown() { return ctrlIsDown; }
+
+  public Posn getMousePosn() {
+    // TODO Auto-generated method stub
+    return mousePosn;
   }
 }

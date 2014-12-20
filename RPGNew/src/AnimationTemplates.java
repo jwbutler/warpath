@@ -4,19 +4,19 @@ import java.util.HashMap;
  * everything in the game.
  */
 public class AnimationTemplates {
-  public static final String[] STANDING = {
+  private static final String[] STANDING = {
     "standing_1", "standing_1",
     "standing_1", "standing_1"};
   
   /* 8 frames */
-  public static final String[] STUNNED_SHORT = {
+  private static final String[] STUNNED_SHORT = {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",};
   /* 16 frames */
   
-  public static final String[] STUNNED_LONG = {
+  private static final String[] STUNNED_LONG = {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",
@@ -25,42 +25,41 @@ public class AnimationTemplates {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",};
-  public static final String[] WALKING = {
+  private static final String[] WALKING = {
     "walking_1", "walking_1",
     "walking_2","walking_2"};
-  public static final String[] ATTACKING = {
+  private static final String[] ATTACKING = {
     "attacking_1", "attacking_1",
     "attacking_2", "attacking_2",
     "attacking_2", "attacking_2",
     "attacking_1", "attacking_1",
     "standing_1", "standing_1"};
-  public static final String[] BLOCKING1 = {
+  private static final String[] BLOCKING_1 = {
     "attacking_1", "attacking_1",
     "attacking_2b", "attacking_2b"};
-  public static final String[] BLOCKING2 = {
+  private static final String[] BLOCKING_2 = {
     "attacking_2b", "attacking_2b",
     "attacking_2b", "attacking_2b"};
-  public static final String[] BLOCKING3 = {
-    "attacking_1", "attacking_1",
-    "standing_1", "standing_1"};
-  public static final String[] BASHING = {
+  private static final String[] BLOCKING_3 = {
+    "attacking_2b", "attacking_2b",
+    "attacking_1", "attacking_1"};
+  private static final String[] BASHING = {
     "attacking_1", "attacking_1",
     "attacking_2b", "attacking_2b",
     "attacking_2b", "attacking_2b",
     "attacking_1", "attacking_1",
     "standing_1", "standing_1"};
-  public static final String[] SLASHING1 = {
+  private static final String[] SLASHING_1 = {
     "attacking_1", "attacking_1",
     "attacking_2", "attacking_2",
     };
-
-  public static final String[] SLASHING3 = {
-    "attacking_2", "attacking_2",
-    "attacking_2", "attacking_2"};
-     
-  public static final String[] SLASHING2 = {
+  private static final String[] SLASHING_2 = {
     "attacking_1", "attacking_1",
     "standing_1", "standing_1"};
+  
+  private static final String[] SLASHING_3 = {
+    "attacking_2", "attacking_2",
+    "attacking_2", "attacking_2"};
      
   public static String[] getTemplate(String activity) {
     if (activity.equals("standing")) {
@@ -75,18 +74,18 @@ public class AnimationTemplates {
       return STUNNED_LONG;
     } else if (activity.equals("bashing")) {
       return BASHING;
-    } else if (activity.equals("blocking1")) {
-      return BLOCKING1;
-    } else if (activity.equals("blocking2")) {
-      return BLOCKING2;
-    } else if (activity.equals("blocking3")) {
-      return BLOCKING3;
-    } else if (activity.equals("slashing1")) {
-      return BLOCKING1;
-    } else if (activity.equals("slashing2")) {
-      return BLOCKING2;
-    } else if (activity.equals("slashing3")) {
-      return BLOCKING3;
+    } else if (activity.equals("blocking_1")) {
+      return BLOCKING_1;
+    } else if (activity.equals("blocking_2")) {
+      return BLOCKING_2;
+    } else if (activity.equals("blocking_3")) {
+      return BLOCKING_3;
+    } else if (activity.equals("slashing_1")) {
+      return BLOCKING_1;
+    } else if (activity.equals("slashing_2")) {
+      return BLOCKING_2;
+    } else if (activity.equals("slashing_3")) {
+      return BLOCKING_3;
     } else {
       return null;
     }

@@ -29,11 +29,7 @@ public class Animation {
     drawBehind = new Boolean[filenames.length];
     for (int i = 0; i < filenames.length; i++) {
       String filename = fixFilename(animName, filenames[i], direction);
-      if (filename.endsWith("_B.png")) {
-        drawBehind[i] = true;
-      } else {
-        drawBehind[i] = false;
-      }
+      drawBehind[i] = (filename.endsWith("_B.png"));
       frames[i] = new Surface(filename);
       frames[i] = frames[i].scale2x();
       frames[i].setColorkey(Color.WHITE);

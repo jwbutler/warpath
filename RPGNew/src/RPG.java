@@ -340,6 +340,7 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     Unit u = getPlayerUnit();
     u.setTargetPosnOverlay(posn);
     u.setNextTargetPosn(posn);
+    u.setNextActivity("walking");
   }
   
   // Give orders to selected units: movement, attack, etc.
@@ -378,6 +379,7 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     // targeting a floor tile
     u.setTargetPosnOverlay(posn);
     u.setNextTargetPosn(posn);
+    u.setNextActivity("walking");
   }
   public void doRightClick(Posn pixel) {
     doRightClick(pixel, "attacking");
@@ -410,7 +412,7 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     } else if (x == 1) {
       rtn+= "E";
     }
-    if (rtn == "") {
+    if (rtn.equals("")) {
       return null; 
     } else {
       return rtn;
@@ -723,5 +725,29 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
   
   public HUDPanel getHudPanel() {
     return hudPanel;
+  }
+
+  public void doBlockOrder(Posn posn) {
+    // Blocking isn't going to move the player unit.
+    // Instead, point the player in the direction of the target posn
+    // 
+    ArrayList<Posn> adjacentSquares = getAdjacentSquares(getPlayerUnit().getPosn());
+    Posn targetPosn = null;
+    for (Posn p: adjacentSquares) {
+      //if (!isObstacle(p)) {
+      if (targetPosn == null || distance(p, posn) < distance(targetPosn, posn)) {
+        targetPosn = p;
+      }
+    }
+    getPlayerUnit().setNextTargetPosn(posn);
+    getPlayerUnit().setNextActivity("blocking_1");
+  }
+  
+  public boolean ctrlIsDown() { return gamePanel.ctrlIsDown(); }
+  public boolean isObstacle(Posn p) { return getFloor().getTile(p).isObstacle(); }
+
+  public Posn getMousePosn() {
+    // TODO Auto-generated method stub
+    return gamePanel.getMousePosn();
   }
 }

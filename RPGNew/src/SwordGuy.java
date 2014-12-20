@@ -4,8 +4,8 @@ import java.util.HashMap;
 public class SwordGuy extends HumanUnit {
   private int minDamage, maxDamage;
   private static String[] activities = {
-    "walking", "standing", "attacking", "blocking1", "blocking2", "blocking3",
-    "bashing", "slashing1", "slashing2", "slashing3"};
+    "walking", "standing", "attacking", "blocking_1", "blocking_2", "blocking_3",
+    "bashing", "slashing_1", "slashing_2", "slashing_3"};
 
   public SwordGuy(RPG game, String name, Posn posn, Player player, HashMap<Color, Color> paletteSwaps) {
     /*public HumanUnit(RPG game, String name, String animationName,

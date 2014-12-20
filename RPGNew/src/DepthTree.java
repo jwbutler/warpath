@@ -120,7 +120,7 @@ public class DepthTree {
         }
       }
     }
-    System.out.println("removefail " + obj);
+    //System.out.println("removefail " + obj);
     return false;
   }
   

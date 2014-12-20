@@ -4,6 +4,10 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.HashMap;
 
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
   /* This is the file where we actually create the game parameters: adding
    * players, units, etc. to the game.  We can define different ones for
    * various levels, modes, whatever. */
@@ -23,6 +27,16 @@ public class RPGDriver extends WindowAdapter {
     }
   }
   public void doIt() {
+    try {
+      //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      JFrame.setDefaultLookAndFeelDecorated(true);
+    } catch (ClassNotFoundException | InstantiationException
+        | IllegalAccessException | UnsupportedLookAndFeelException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
     //CreatorPanel cc = new CreatorPanel(800, 600);
     CharacterCreator cc = new CharacterCreator();
     cc.addWindowListener(this);

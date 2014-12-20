@@ -16,6 +16,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.OverlayLayout;
 import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /* The main game engine.  Expect this one to be a few thousand lines long.
  * ===== CHANGELOG =====
@@ -65,6 +67,7 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
   private boolean redrawFloor;
 
   public RPG() {
+
     floor = new Floor(this, 15, 15);
     frameTimer = new Timer(1000/FPS, this);
     ticks = 0;
@@ -80,18 +83,21 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     setVisible(true);
     addWindowListener(this);
     //gameWindow.getContentPane().setLayout(null);
-    getContentPane().setLayout(new BorderLayout());
     setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     //gameWindow.add(gamePanel);
     setResizable(false);
     gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    gamePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT - getInsets().top - getInsets().bottom));
-    hudPanel = new HUDPanel(this, gamePanel.getWidth(), HUD_PANEL_HEIGHT);
-    hudPanel.setPreferredSize(new Dimension(gamePanel.getWidth(), HUD_PANEL_HEIGHT));
+    gamePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT));
+    gamePanel.setLayout(new BorderLayout());
+    hudPanel = new HUDPanel(this, DEFAULT_WIDTH, HUD_PANEL_HEIGHT);
+    hudPanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, HUD_PANEL_HEIGHT));
+    hudPanel.setBounds(0, DEFAULT_HEIGHT-HUD_PANEL_HEIGHT, DEFAULT_WIDTH, HUD_PANEL_HEIGHT);
     /*gamePanel.setAlignmentX(0.0f);
     gamePanel.setAlignmentY(0.0f);*/
-    getContentPane().add(gamePanel, BorderLayout.NORTH);
-    getContentPane().add(hudPanel, BorderLayout.SOUTH);
+    gamePanel.add(hudPanel, BorderLayout.SOUTH);
+    //getContentPane().setLayout(null);
+    getContentPane().add(gamePanel);
+    pack();
     depthTree = new DepthTree();
     cameraPosn = null;
     centerCamera();

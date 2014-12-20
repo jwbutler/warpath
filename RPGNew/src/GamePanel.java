@@ -112,7 +112,7 @@ MouseListener, MouseMotionListener {
   public void paint(Graphics g) {
     //System.out.println("paint");
     super.paint(g);
-    game.drawAll(g);
+    //game.drawAll(g);
   }
   
   public void paintComponent(Graphics g) {

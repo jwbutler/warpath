@@ -271,6 +271,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     targetUnit = null;
     nextTargetPosn = null;
     nextTargetUnit = null;
+    nextActivity = null;
     if (targetPosnOverlay != null) {
       game.getDepthTree().remove(targetPosnOverlay);
       targetPosnOverlay = null;

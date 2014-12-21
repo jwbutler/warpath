@@ -1,4 +1,6 @@
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -12,20 +14,34 @@ import javax.swing.UnsupportedLookAndFeelException;
    * players, units, etc. to the game.  We can define different ones for
    * various levels, modes, whatever. */
 
-public class RPGDriver extends WindowAdapter {
-  static HashMap<Color, Color> swaps;
-
-public static void main(String[] args) {
+public class RPGDriver extends WindowAdapter implements ActionListener {
+  private HashMap<Color, Color> swaps;
+  private final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
+  private RPG game;
+  private GameWindow window;
+  private CharacterCreator cc;
+  
+  public static void main(String[] args) {
     RPGDriver me = new RPGDriver();
     me.doIt();
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    // continue button
+    System.out.println(e.getActionCommand());
+    if (e.getActionCommand().equals("Continue...")) {
+      System.out.println("hello.");
+      CharacterCreator cc = window.getCharacterCreator();
+      swaps = cc.exportPaletteSwaps();
+      window.setCardLayout("Game");
+      startGame();
+    }
   }
   public void windowClosed(WindowEvent e) { windowClosing(e); }
   
   public void windowClosing(WindowEvent e) {
-    if (e.getSource() instanceof CharacterCreator) {
-      CharacterCreator cc = (CharacterCreator)e.getSource();
-      swaps = cc.exportPaletteSwaps();
-    }
+    System.exit(0);
   }
   
   public void doIt() {
@@ -38,40 +54,36 @@ public static void main(String[] args) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    window = new GameWindow(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    game = new RPG(window);
+    window.initCardLayout(game);
+  }
+  public void startGame() {
 
-    //CreatorPanel cc = new CreatorPanel(800, 600);
-    //CharacterCreator cc = new CharacterCreator();
-    //cc.addWindowListener(this);
-    //while (cc.isActive());
-    RPG me = new RPG(this);
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
-    SwordGuy u = new SwordGuy(me, "u", new Posn(3,4), me.getHumanPlayer(), swaps);
+    SwordGuy u = new SwordGuy(game, "u", new Posn(3,4), game.getHumanPlayer(), swaps);
     //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
-    me.addUnit(u);
+    game.addUnit(u);
     
     // Make a hostile AI player
-    me.addPlayer(2, new AIPlayer());
-    me.getHumanPlayer().setHostile(me.getPlayer(2));
-    me.getPlayer(2).setHostile(me.getPlayer(1));
+    game.addPlayer(2, new AIPlayer());
+    game.getHumanPlayer().setHostile(game.getPlayer(2));
+    game.getPlayer(2).setHostile(game.getPlayer(1));
     
     // Make an "enemy" guy
     
     //HumanUnit x = new HumanUnit(me, "x", new Posn(9,4), me.getPlayer(2));
     //WanderingUnit x = new WanderingUnit(me, "x", new Posn(9,4), me.getPlayer(2));
-    EnemySwordGuy x = new EnemySwordGuy(me, "x", new Posn(9,4), me.getPlayer(2));
-    me.addUnit(x);
+    EnemySwordGuy x = new EnemySwordGuy(game, "x", new Posn(9,4), game.getPlayer(2));
+    game.addUnit(x);
     //EnemySwordGuy y = new EnemySwordGuy(me, "y", new Posn(9,5), me.getPlayer(2));
     //me.addUnit(y);
     
-    me.addObject(new Wall(me, new Posn(9,7), "wall_48x78_1.png"));
-    me.addObject(new Wall(me, new Posn(9,8), "wall_48x78_1.png"));
-    me.addObject(new Wall(me, new Posn(9,9), "wall_48x78_1.png"));
-    me.addObject(new Wall(me, new Posn(9,10), "wall_48x78_1.png"));
-    me.start();
+    game.addObject(new Wall(game, new Posn(9,7), "wall_48x78_1.png"));
+    game.addObject(new Wall(game, new Posn(9,8), "wall_48x78_1.png"));
+    game.addObject(new Wall(game, new Posn(9,9), "wall_48x78_1.png"));
+    game.addObject(new Wall(game, new Posn(9,10), "wall_48x78_1.png"));
+    game.start();
   }
-  
-  public void setSwaps(HashMap<Color, Color> newswaps) {
-		swaps = newswaps;
-	}
 }

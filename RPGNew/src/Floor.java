@@ -1,6 +1,4 @@
-import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 
 /* Pretty much just a 2d array of Tiles. We draw all the tiles onto an
  * intermediate draw surface rather than drawing them individually.
@@ -24,7 +22,7 @@ public class Floor {
         tiles[x][y] = new Tile(game, new Posn(x,y), "tile_48x24_stone.png");
       }
     }
-    floorSurface = new Surface(RPG.DEFAULT_WIDTH, RPG.DEFAULT_HEIGHT);
+    floorSurface = new Surface(game.getGameWindow().getWidth(), game.getGameWindow().getHeight());
   }
 
   public void redraw(RPG game) {

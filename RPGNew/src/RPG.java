@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -36,7 +37,7 @@ import javax.swing.UnsupportedLookAndFeelException;
  * =====================
  */
   
-public class RPG extends JFrame implements ActionListener, WindowListener {
+public class RPG implements ActionListener {
 	
   RPGDriver driver;
   
@@ -59,33 +60,23 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
   private Posn cameraPosn;
   private Random RNG;
   
+  private GameWindow gameWindow;
+  
   // Constants
   public static final int FPS = 20; // should be 20
   public static final int TILE_WIDTH = 96;
   public static final int TILE_HEIGHT = 48;
   public static final int CAMERA_INCREMENT_X = 48;
   public static final int CAMERA_INCREMENT_Y = 24;
-  public static final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
   public static final int HUD_PANEL_HEIGHT = 100;
   public static final String[] DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
   public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
   private boolean redrawFloor;
   
-  
-  
   // Card layout stuff
-  private CardLayout cardLayout = new CardLayout();
-  private JPanel panelContainer = new JPanel();
-  private CharacterCreator ccPanel;
-  private GamePanel gamePanel;
-  private HUDPanel hudPanel;
-  private JPanel menuPanel;
 
-  
-  
-
-  public RPG(RPGDriver theDriver) {	
-	driver = theDriver;
+  public RPG(GameWindow gameWindow) {
+    this.gameWindow = gameWindow;
     floor = new Floor(this, 15, 15);
     frameTimer = new Timer(1000/FPS, this);
     ticks = 0;
@@ -97,114 +88,23 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     
     // Do we need to extend the JFrame class? I'm thinking no.
     //gameWindow = new JFrame();
-    setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    setVisible(true);
-    addWindowListener(this);
     //gameWindow.getContentPane().setLayout(null);
-    setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     //gameWindow.add(gamePanel);
-    setResizable(false);
-    
     
     // Make the Char Creator
-    ccPanel = new CharacterCreator(this,driver,DEFAULT_WIDTH,DEFAULT_HEIGHT);
-    
-    
-    // Make the Menu Panel
-    menuPanel = new JPanel();
-    menuPanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
-    menuPanel.setLayout(null);
-    //menuPanel.setLayout(new BorderLayout());
-   
-    
-    // Make the Game Panel
-    gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    gamePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT));
-    gamePanel.setLayout(new BorderLayout());
-    hudPanel = new HUDPanel(this, DEFAULT_WIDTH, HUD_PANEL_HEIGHT);
-    hudPanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, HUD_PANEL_HEIGHT));
-    hudPanel.setBounds(0, DEFAULT_HEIGHT-HUD_PANEL_HEIGHT, DEFAULT_WIDTH, HUD_PANEL_HEIGHT);
-    /*gamePanel.setAlignmentX(0.0f);
-    gamePanel.setAlignmentY(0.0f);*/
-    gamePanel.add(hudPanel, BorderLayout.SOUTH);
     //getContentPane().setLayout(null);
     //getContentPane().add(gamePanel); 
-    pack();
-    
-	// The below call deals with setting up cardlayout for switching between JPanels
-	initCardLayout();
 	
     depthTree = new DepthTree();
     cameraPosn = null;
-    centerCamera();
     redrawFloor = true;
+
   }
-
-  
-  // Sets up the Card Layout and the panelContainer.
-  private void initCardLayout() {
-	  panelContainer.setLayout(cardLayout);
-	  // To be moved to the menuPanel when I'm less lazy. 
-
-	  // Make and add buttons
-	  JButton playButton = new JButton("Play");
-	  JButton exitButton = new JButton("Exit");
-	  panelContainer.add(menuPanel,"Menu");
-	  panelContainer.add(gamePanel,"Game");
-	  panelContainer.add(ccPanel,"Creator");
-	  menuPanel.add(playButton);
-	  menuPanel.add(exitButton);
-	  
-	  // Position and Size
-	  int width = DEFAULT_WIDTH * 1/5;
-	  int height = DEFAULT_HEIGHT * 1/10;
-	  int margin = 16;
-	  
-	  // WHY WONT THESE CENTER?!?!??!?!
-	  //playButton.setMargin(new Insets(50,50,50,50));
-	  playButton.setBounds(DEFAULT_WIDTH/2,DEFAULT_HEIGHT*1/6,width,height);
-	  playButton.setHorizontalAlignment(SwingConstants.CENTER);
-	  playButton.addActionListener(this);
-	  
-	  //exitButton.setMargin(new Insets(5,5,5,5));
-	  exitButton.setBounds(DEFAULT_WIDTH/2,DEFAULT_HEIGHT*3/6,width,height);
-	  exitButton.setHorizontalAlignment(SwingConstants.CENTER);
-	  exitButton.addActionListener(this);
-
-
-	  //cardLayout.show(panelContainer,"Menu");
-	  
-	  // These are the action performed methods for the buttons.
-	  playButton.addActionListener(new ActionListener(){
-		  public void actionPerformed(ActionEvent arg0){
-			  cardLayout.show(panelContainer,"Creator");
-		  }
-	  });
-	  
-	  
-	  exitButton.addActionListener(new ActionListener(){
-		  public void actionPerformed(ActionEvent arg0){
-			  System.exit(0);
-		  }
-	  });
-	  
-	  // Add to the main panel (panelContainer) and prepare for display.
-	  this.add(panelContainer);
-	  this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-	  this.pack();
-  }
-  
-  // This will be used to set the current display from other classes. 
-  public void setCardLayout(String panel) {
-		if ( panel == "Game"){
-			cardLayout.show(panelContainer,"Game");
-		}
-		
-	}
   
   // Start the timer.  We might also use this to restart/unpause
   public void start() {
     frameTimer.start();
+    centerCamera();
   }
   
   // Called every time the frame timer fires.
@@ -227,8 +127,7 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     for (Unit u: units) {
       u.doEvents();
     }
-    gamePanel.repaint(); // this calls drawAll
-    hudPanel.repaint();
+    gameWindow.repaint();
     incrementTicks();
   }
 
@@ -258,7 +157,7 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     units.add(u);
     u.getPlayer().getUnits().add(u);
     if (u.getPlayer().equals(getHumanPlayer())) {
-      getHudPanel().addBars();
+      gameWindow.getHudPanel().addBars();
     }
     depthTree.add(u);
     floor.getTile(u.getX(),u.getY()).setUnit(u);
@@ -358,9 +257,9 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     
     // rootPane should be contentPane; make sure we've got the right replacement here.
     int cx = (floor.getWidth() * TILE_WIDTH / 2) +
-      TILE_WIDTH/2 - getGamePanel().getWidth()/2; // Subtract 
+      TILE_WIDTH/2 - gameWindow.getGamePanel().getWidth()/2; // Subtract 
     int cy = (floor.getHeight() * TILE_HEIGHT / 2) - 
-      TILE_HEIGHT/2 - getGamePanel().getHeight()/2;
+      TILE_HEIGHT/2 - gameWindow.getGamePanel().getHeight()/2;
     //int cx = (floor.getWidth() * RPGConstants.TILE_WIDTH / 2) - (floor.getHeight() * RPGConstants.TILE_WIDTH / 2);
     //int cy = (floor.getWidth() * RPGConstants.TILE_HEIGHT / 2) + (floor.getHeight() * RPGConstants.TILE_HEIGHT / 2);
     setCameraPos(cx,cy);
@@ -380,8 +279,8 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     y /= units.size();
     x += TILE_WIDTH/2;
     y += TILE_HEIGHT/2;
-    x -= getGamePanel().getHeight()/2;
-    y -= getGamePanel().getWidth()/2;
+    x -= gameWindow.getGamePanel().getHeight()/2;
+    y -= gameWindow.getGamePanel().getWidth()/2;
     setCameraPos(x,y);
   }
   
@@ -751,9 +650,6 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     return humanPlayer.getUnit(1);
   }
 
-  public GamePanel getGamePanel() {
-    return gamePanel;
-  }
   
   public int getTicks() {
     return ticks;
@@ -781,56 +677,10 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
   public void setUnits(ArrayList<Unit> units) {
     this.units = units;
   }
-
-  // ===== WINDOW LISTENER METHODS =====
-
-  @Override
-  public void windowActivated(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public void windowClosed(WindowEvent arg0) {
-  }
-
-  // If the player closes the game window, quit. (We could put a dialog here)
-  public void windowClosing(WindowEvent arg0) {
-    System.exit(0);
-  }
-
-  @Override
-  public void windowDeactivated(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    // Probably we should pause here
-  }
-
-  @Override
-  public void windowDeiconified(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public void windowIconified(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    // Probably we should pause here
-    
-  }
-
-  @Override
-  public void windowOpened(WindowEvent arg0) {
-    // TODO Auto-generated method stub
-    
-  }
   
   public Random getRNG() {
     return RNG;
   }
-  
-  public HUDPanel getHudPanel() {
-    return hudPanel;
-  }
-
   public void doBlockOrder(Posn posn) {
     // Blocking isn't going to move the player unit.
     // Instead, point the player in the direction of the target posn
@@ -847,12 +697,17 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     getPlayerUnit().setNextActivity("blocking_1");
   }
   
-  public boolean ctrlIsDown() { return gamePanel.ctrlIsDown(); }
+  public boolean ctrlIsDown() { return gameWindow.getGamePanel().ctrlIsDown(); }
   public boolean isObstacle(Posn p) { return getFloor().getTile(p).isObstacle(); }
 
   public Posn getMousePosn() {
     // TODO Auto-generated method stub
-    return gamePanel.getMousePosn();
+    return gameWindow.getGamePanel().getMousePosn();
+  }
+
+  public JFrame getGameWindow() {
+    // TODO Auto-generated method stub
+    return gameWindow;
   }
 
 }

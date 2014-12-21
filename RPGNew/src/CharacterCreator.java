@@ -31,7 +31,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private SurfacePanel unitPanel;
   private JPanel sliderPanel;
   private Color savedColor;
-  private RPG game;
   private RPGDriver driver;
   
   private ArrayList<String> colorNames;
@@ -45,8 +44,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private JButton genderSelector;
   private JButton contButton;
   
-  public CharacterCreator(RPG rpg, RPGDriver theDriver, int width, int height) {
-	game = rpg;
+  public CharacterCreator(RPGDriver theDriver, int width, int height) {
 	driver = theDriver;
     setSize(width, height);
     setPreferredSize(new Dimension(width, height));
@@ -110,28 +108,41 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     unitPanel.setLayout(null);
     int w = unitSurface.getWidth();
     int h = unitSurface.getHeight();
-    int l = (int)(getWidth()*0.32 - unitSurface.getWidth())/2;
-    int t = (int)(getHeight()*0.40);
+    int l = (int)(getWidth()*0.30 - unitSurface.getWidth())/2;
+    int t = (int)(getHeight()*0.30);
     unitPanel.setBounds(l, t, w, h);
     add(unitPanel);
     
     genderSelector = new JButton("Switch to Female");
     
     genderSelector.addActionListener(this);
-    l = (int)(getWidth()*0.32 - 150)/2;
-    t = (int)(getHeight()*0.80);
-    w = 150; h = 30;
+    w = (int)(getWidth()*.24); h = (int)(getHeight()*.09);
+    l = (int)(getWidth()*0.30 - w)/2;
+    t = (int)(getHeight()*0.65);
     genderSelector.setBounds(l,t,w,h);
     add(genderSelector);
+    
+    //Dealing with transition from CC to Game
+    contButton = new JButton("Continue...");
+    w = (int)(getWidth()*.24); h = (int)(getHeight()*.09);
+    l = (int)(getWidth()*0.30 - w)/2;
+    t = (int)(getHeight()*.80);
+    contButton.setBounds(l,t,w,h);
+    this.add(contButton);
+    
+    // When the continue button is pressed, export color swaps and move to game panel
+    contButton.addActionListener(driver);
+    
+    
     // add the surface
     sliderPanel = new JPanel();
-    sliderPanel.setLayout(new GridLayout(colorNames.size(), 1, 10, 10));
-    sliderPanel.setBounds((int)(getWidth()*0.32), 0, (int)(getWidth()*0.68), getHeight());
-    sliderPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+    sliderPanel.setLayout(new GridLayout(colorNames.size(), 1, 5, 5));
+    sliderPanel.setBounds((int)(getWidth()*0.30), 0, (int)(getWidth()*0.70), getHeight());
+    sliderPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
     int i = 0;
     for (String name : colorNames) {
       JPanel sp = new JPanel();
-      sp.setLayout(new GridLayout(1,5,10,10));
+      sp.setLayout(new GridLayout(1,5,5,5));
       sliderPanel.add(sp);
       Color c = baseColors.get(name);
       paletteSwaps.put(c, c);
@@ -147,6 +158,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       colorLabel.setText(name);
       colorLabel.setOpaque(true);
       colorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+      colorLabel.setFont(new Font("Arial",Font.PLAIN, 9));
       colorLabels.put(name, colorLabel);
       sp.add(colorLabel);
       JSlider RSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getRed());
@@ -199,11 +211,11 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       rp.setLayout(new BorderLayout());
       gp.setLayout(new BorderLayout());
       bp.setLayout(new BorderLayout());
-      rp.add(RSlider, BorderLayout.CENTER);
+      rp.add(RSlider, BorderLayout.NORTH);
       rp.add(RLabel, BorderLayout.SOUTH);
-      gp.add(GSlider, BorderLayout.CENTER);
+      gp.add(GSlider, BorderLayout.NORTH);
       gp.add(GLabel, BorderLayout.SOUTH);
-      bp.add(BSlider, BorderLayout.CENTER);
+      bp.add(BSlider, BorderLayout.NORTH);
       bp.add(BLabel, BorderLayout.SOUTH);
       sp.add(rp);
       sp.add(gp);
@@ -219,8 +231,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       w = (int)(sliderPanel.getWidth()*0.11);
       l = (int)(sliderPanel.getWidth()*0.74);
       copyButton.setBounds(l,t,w,h);*/
-      Font f = new Font("Arial",Font.PLAIN, 9);
-      copyButton.setFont(f);
+      copyButton.setFont(new Font("Arial",Font.PLAIN, 9));
       JButton pasteButton = new JButton("Paste");
       pasteButton.setActionCommand("Paste_"+name);
       pasteButton.addActionListener(this);
@@ -228,25 +239,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       sp.add(pasteButton);
       /*l = (int)(sliderPanel.getWidth()*0.86);
       pasteButton.setBounds(l,t,w,h);*/
-      pasteButton.setFont(f);
+      pasteButton.setFont(new Font("Arial",Font.PLAIN, 9));
       i++;
     }
     add(sliderPanel);
-    
-    //Dealing with transition from CC to Game
-    contButton = new JButton("Continue...");
-    this.add(contButton);
-    contButton.setBounds(100,100,100,100);
-    
-    // When the continue button is pressed, export color swaps and move to game panel
-    contButton.addActionListener(new ActionListener(){
-    	public void actionPerformed(ActionEvent arg0){
-    		// Evil Static must fix
-    		driver.setSwaps(paletteSwaps);
-    		game.setCardLayout("Game");
-    	}
-    });
-    
     
     frameTimer = new Timer(50, this);
     frameTimer.start();

@@ -27,6 +27,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private JPanel sliderPanel;
   private Color savedColor;
   private RPG game;
+  private RPGDriver driver;
   
   private ArrayList<String> colorNames;
   private HashMap<String, Color> baseColors;
@@ -37,8 +38,11 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private HashMap<String, JButton> copyButtons;
   private HashMap<String, JButton> pasteButtons;
   private JButton genderSelector;
+  private JButton contButton;
   
-  public CharacterCreator(int width, int height) {
+  public CharacterCreator(RPG rpg, RPGDriver theDriver, int width, int height) {
+	game = rpg;
+	driver = theDriver;
     setSize(width, height);
     setVisible(true);
     //gameWindow.add(gamePanel);
@@ -210,6 +214,22 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       i++;
     }
     add(sliderPanel);
+    
+    //Dealing with transition from CC to Game
+    contButton = new JButton("Continue...");
+    this.add(contButton);
+    contButton.setBounds(100,100,100,100);
+    
+    // When the continue button is pressed, export color swaps and move to game panel
+    contButton.addActionListener(new ActionListener(){
+    	public void actionPerformed(ActionEvent arg0){
+    		// Evil Static must fix
+    		driver.setSwaps(paletteSwaps);
+    		game.setCardLayout("Game");
+    	}
+    });
+    
+    
     frameTimer = new Timer(50, this);
     frameTimer.start();
   }

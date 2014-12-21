@@ -13,8 +13,9 @@ import javax.swing.UnsupportedLookAndFeelException;
    * various levels, modes, whatever. */
 
 public class RPGDriver extends WindowAdapter {
-  private HashMap<Color, Color> swaps;
-  public static void main(String[] args) {
+  static HashMap<Color, Color> swaps;
+
+public static void main(String[] args) {
     RPGDriver me = new RPGDriver();
     me.doIt();
   }
@@ -26,6 +27,7 @@ public class RPGDriver extends WindowAdapter {
       swaps = cc.exportPaletteSwaps();
     }
   }
+  
   public void doIt() {
     try {
       //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
@@ -38,10 +40,10 @@ public class RPGDriver extends WindowAdapter {
     }
 
     //CreatorPanel cc = new CreatorPanel(800, 600);
-    CharacterCreator cc = new CharacterCreator();
-    cc.addWindowListener(this);
-    while (cc.isActive());
-    RPG me = new RPG();
+    //CharacterCreator cc = new CharacterCreator();
+    //cc.addWindowListener(this);
+    //while (cc.isActive());
+    RPG me = new RPG(this);
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
     SwordGuy u = new SwordGuy(me, "u", new Posn(3,4), me.getHumanPlayer(), swaps);
@@ -68,4 +70,8 @@ public class RPGDriver extends WindowAdapter {
     me.addObject(new Wall(me, new Posn(9,10), "wall_48x78_1.png"));
     me.start();
   }
+  
+  public void setSwaps(HashMap<Color, Color> newswaps) {
+		swaps = newswaps;
+	}
 }

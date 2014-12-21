@@ -1,8 +1,10 @@
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -12,9 +14,11 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Random;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.OverlayLayout;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -33,18 +37,19 @@ import javax.swing.UnsupportedLookAndFeelException;
  */
   
 public class RPG extends JFrame implements ActionListener, WindowListener {
+	
+  RPGDriver driver;
   
   private Timer frameTimer;
   private int ticks;
   private Floor floor;
+  
   
   // Using a HashTable for this is pretty strange.  But it lets us access
   // players by number, which I think is useful.
   private Hashtable<Integer, Player> players;
   private ArrayList<Unit> units;
   private ArrayList<GameObject> objects; // Non-units 
-  private GamePanel gamePanel;
-  private HUDPanel hudPanel;
   
   // Unsure if we should keep this reference, he's always going to be
   // player 1, right?
@@ -65,9 +70,22 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
   public static final String[] DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
   public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
   private boolean redrawFloor;
+  
+  
+  
+  // Card layout stuff
+  private CardLayout cardLayout = new CardLayout();
+  private JPanel panelContainer = new JPanel();
+  private CharacterCreator ccPanel;
+  private GamePanel gamePanel;
+  private HUDPanel hudPanel;
+  private JPanel menuPanel;
 
-  public RPG() {
+  
+  
 
+  public RPG(RPGDriver theDriver) {	
+	driver = theDriver;
     floor = new Floor(this, 15, 15);
     frameTimer = new Timer(1000/FPS, this);
     ticks = 0;
@@ -86,6 +104,20 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     //gameWindow.add(gamePanel);
     setResizable(false);
+    
+    
+    // Make the Char Creator
+    ccPanel = new CharacterCreator(this,driver,DEFAULT_WIDTH,DEFAULT_HEIGHT);
+    
+    
+    // Make the Menu Panel
+    menuPanel = new JPanel();
+    menuPanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+    menuPanel.setLayout(null);
+    //menuPanel.setLayout(new BorderLayout());
+   
+    
+    // Make the Game Panel
     gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     gamePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT));
     gamePanel.setLayout(new BorderLayout());
@@ -96,14 +128,80 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     gamePanel.setAlignmentY(0.0f);*/
     gamePanel.add(hudPanel, BorderLayout.SOUTH);
     //getContentPane().setLayout(null);
-    getContentPane().add(gamePanel);
+    //getContentPane().add(gamePanel); 
     pack();
+    
+	// The below call deals with setting up cardlayout for switching between JPanels
+	initCardLayout();
+	
     depthTree = new DepthTree();
     cameraPosn = null;
     centerCamera();
     redrawFloor = true;
   }
 
+  
+  // Sets up the Card Layout and the panelContainer.
+  private void initCardLayout() {
+	  panelContainer.setLayout(cardLayout);
+	  // To be moved to the menuPanel when I'm less lazy. 
+
+	  // Make and add buttons
+	  JButton playButton = new JButton("Play");
+	  JButton exitButton = new JButton("Exit");
+	  panelContainer.add(menuPanel,"Menu");
+	  panelContainer.add(gamePanel,"Game");
+	  panelContainer.add(ccPanel,"Creator");
+	  menuPanel.add(playButton);
+	  menuPanel.add(exitButton);
+	  
+	  // Position and Size
+	  int width = DEFAULT_WIDTH * 1/5;
+	  int height = DEFAULT_HEIGHT * 1/10;
+	  int margin = 16;
+	  
+	  // WHY WONT THESE CENTER?!?!??!?!
+	  //playButton.setMargin(new Insets(50,50,50,50));
+	  playButton.setBounds(DEFAULT_WIDTH/2,DEFAULT_HEIGHT*1/6,width,height);
+	  playButton.setHorizontalAlignment(SwingConstants.CENTER);
+	  playButton.addActionListener(this);
+	  
+	  //exitButton.setMargin(new Insets(5,5,5,5));
+	  exitButton.setBounds(DEFAULT_WIDTH/2,DEFAULT_HEIGHT*3/6,width,height);
+	  exitButton.setHorizontalAlignment(SwingConstants.CENTER);
+	  exitButton.addActionListener(this);
+
+
+	  //cardLayout.show(panelContainer,"Menu");
+	  
+	  // These are the action performed methods for the buttons.
+	  playButton.addActionListener(new ActionListener(){
+		  public void actionPerformed(ActionEvent arg0){
+			  cardLayout.show(panelContainer,"Creator");
+		  }
+	  });
+	  
+	  
+	  exitButton.addActionListener(new ActionListener(){
+		  public void actionPerformed(ActionEvent arg0){
+			  System.exit(0);
+		  }
+	  });
+	  
+	  // Add to the main panel (panelContainer) and prepare for display.
+	  this.add(panelContainer);
+	  this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	  this.pack();
+  }
+  
+  // This will be used to set the current display from other classes. 
+  public void setCardLayout(String panel) {
+		if ( panel == "Game"){
+			cardLayout.show(panelContainer,"Game");
+		}
+		
+	}
+  
   // Start the timer.  We might also use this to restart/unpause
   public void start() {
     frameTimer.start();
@@ -756,4 +854,5 @@ public class RPG extends JFrame implements ActionListener, WindowListener {
     // TODO Auto-generated method stub
     return gamePanel.getMousePosn();
   }
+
 }

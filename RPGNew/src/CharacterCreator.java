@@ -19,8 +19,7 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class CharacterCreator extends JFrame implements ActionListener, ChangeListener {
-  private JPanel ccPanel;
+public class CharacterCreator extends JPanel implements ActionListener, ChangeListener {
   private Timer frameTimer;
   private Surface unitSurface;
   private Surface unitSurfaceBase;
@@ -39,22 +38,14 @@ public class CharacterCreator extends JFrame implements ActionListener, ChangeLi
   private HashMap<String, JButton> pasteButtons;
   private JButton genderSelector;
   
-  public CharacterCreator() {
-    setSize(RPG.DEFAULT_WIDTH, RPG.DEFAULT_HEIGHT);
+  public CharacterCreator(int width, int height) {
+    setSize(width, height);
     setVisible(true);
-    getContentPane().setLayout(null);
-    //gamePanel = new GamePanel(this, DEFAULT_WIDTH, DEFAULT_HEIGHT - HUD_PANEL_HEIGHT);
-    setSize(RPG.DEFAULT_WIDTH, 2*RPG.DEFAULT_HEIGHT - getContentPane().getHeight());
     //gameWindow.add(gamePanel);
-    setResizable(false);
-    ccPanel = new JPanel();
     
-    ccPanel.setSize(RPG.DEFAULT_WIDTH, RPG.DEFAULT_HEIGHT);
-    ccPanel.setVisible(true);
-    ccPanel.setDoubleBuffered(true);
-    ccPanel.setBackground(Color.BLACK);
-    ccPanel.setLayout(null);
-    getContentPane().add(ccPanel);
+    setDoubleBuffered(true);
+    setBackground(Color.BLACK);
+    setLayout(null);
     
     colorNames = new ArrayList<String>();
     colorNames.add("Hair");
@@ -109,24 +100,24 @@ public class CharacterCreator extends JFrame implements ActionListener, ChangeLi
     unitPanel.setLayout(null);
     int w = unitSurface.getWidth();
     int h = unitSurface.getHeight();
-    int l = (int)(ccPanel.getWidth()*0.32 - unitSurface.getWidth())/2;
-    int t = (int)(ccPanel.getHeight()*0.40);
+    int l = (int)(getWidth()*0.32 - unitSurface.getWidth())/2;
+    int t = (int)(getHeight()*0.40);
     unitPanel.setBounds(l, t, w, h);
-    ccPanel.add(unitPanel);
+    add(unitPanel);
     
     genderSelector = new JButton("Switch to Female");
     
     genderSelector.addActionListener(this);
-    l = (int)(ccPanel.getWidth()*0.32 - 150)/2;
-    t = (int)(ccPanel.getHeight()*0.80);
+    l = (int)(getWidth()*0.32 - 150)/2;
+    t = (int)(getHeight()*0.80);
     w = 150; h = 30;
     genderSelector.setBounds(l,t,w,h);
-    ccPanel.add(genderSelector);
+    add(genderSelector);
     // add the surface
     sliderPanel = new JPanel();
     sliderPanel.setLayout(null);
-    sliderPanel.setBounds((int)(ccPanel.getWidth()*0.32), 0, (int)(ccPanel.getWidth()*0.68),
-    ccPanel.getHeight());
+    sliderPanel.setBounds((int)(getWidth()*0.32), 0, (int)(getWidth()*0.68),
+    getHeight());
 
     int i = 0;
     for (String name : colorNames) {
@@ -218,7 +209,7 @@ public class CharacterCreator extends JFrame implements ActionListener, ChangeLi
       sliderPanel.add(BLabel);
       i++;
     }
-    ccPanel.add(sliderPanel);
+    add(sliderPanel);
     frameTimer = new Timer(50, this);
     frameTimer.start();
   }
@@ -238,9 +229,7 @@ public class CharacterCreator extends JFrame implements ActionListener, ChangeLi
         doPaste(name);
       }
     } else {
-      unitPanel.repaint();
-      sliderPanel.repaint();
-      ccPanel.repaint();
+      repaint();
     }
   }
   @Override

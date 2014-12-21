@@ -1,5 +1,8 @@
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -9,6 +12,7 @@ import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -16,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -44,6 +49,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
 	game = rpg;
 	driver = theDriver;
     setSize(width, height);
+    setPreferredSize(new Dimension(width, height));
     setVisible(true);
     //gameWindow.add(gamePanel);
     
@@ -119,27 +125,30 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     add(genderSelector);
     // add the surface
     sliderPanel = new JPanel();
-    sliderPanel.setLayout(null);
-    sliderPanel.setBounds((int)(getWidth()*0.32), 0, (int)(getWidth()*0.68),
-    getHeight());
-
+    sliderPanel.setLayout(new GridLayout(colorNames.size(), 1, 10, 10));
+    sliderPanel.setBounds((int)(getWidth()*0.32), 0, (int)(getWidth()*0.68), getHeight());
+    sliderPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
     int i = 0;
     for (String name : colorNames) {
+      JPanel sp = new JPanel();
+      sp.setLayout(new GridLayout(1,5,10,10));
+      sliderPanel.add(sp);
       Color c = baseColors.get(name);
       paletteSwaps.put(c, c);
       JLabel colorLabel = new JLabel();
+      /*
       l = (int)(sliderPanel.getWidth()*0.01);
       t = 35*i + 20;
       w = (int)(sliderPanel.getWidth()*0.12);
       h = 25;
-      colorLabel.setBounds(l,t,w,h);
+      colorLabel.setBounds(l,t,w,h);*/
       colorLabel.setForeground(Color.WHITE);
       colorLabel.setBackground(c);
       colorLabel.setText(name);
       colorLabel.setOpaque(true);
       colorLabel.setHorizontalAlignment(SwingConstants.CENTER);
       colorLabels.put(name, colorLabel);
-      sliderPanel.add(colorLabel);
+      sp.add(colorLabel);
       JSlider RSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getRed());
       JSlider GSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getGreen());
       JSlider BSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getBlue());
@@ -148,7 +157,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       sliders[1] = GSlider;
       sliders[2] = BSlider;
       colorSliders.put(name, sliders);
-      t = 35*i + 20;
+      /*t = 35*i + 20;
       h = 25;
       w = (int)(sliderPanel.getWidth()*0.19);
       l = (int)(sliderPanel.getWidth()*0.14);
@@ -156,7 +165,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       l = (int)(sliderPanel.getWidth()*0.34);
       GSlider.setBounds(l,t,w,h);
       l = (int)(sliderPanel.getWidth()*0.54);
-      BSlider.setBounds(l,t,w,h);
+      BSlider.setBounds(l,t,w,h);*/
       RSlider.setOpaque(false);
       GSlider.setOpaque(false);
       BSlider.setOpaque(false);
@@ -164,9 +173,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       RSlider.addChangeListener(this);
       GSlider.addChangeListener(this);
       BSlider.addChangeListener(this);
-      sliderPanel.add(RSlider);
-      sliderPanel.add(GSlider);
-      sliderPanel.add(BSlider);
       JLabel RLabel = new JLabel();
       RLabel.setText(Integer.toString(RSlider.getValue()));
       RLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -176,7 +182,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       JLabel BLabel = new JLabel();
       BLabel.setText(Integer.toString(BSlider.getValue()));
       BLabel.setHorizontalAlignment(SwingConstants.CENTER);
-      t = 35*i + 35;
+      /*t = 35*i + 35;
       h = 15;
       w = (int)(sliderPanel.getWidth()*0.19);
       l = (int)(sliderPanel.getWidth()*0.14);
@@ -184,33 +190,45 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       l = (int)(sliderPanel.getWidth()*0.34);
       GLabel.setBounds(l,t,w,h);
       l = (int)(sliderPanel.getWidth()*0.54);
-      BLabel.setBounds(l,t,w,h);
+      BLabel.setBounds(l,t,w,h);*/
       JLabel[] labels = {RLabel, GLabel, BLabel};
       sliderLabels.put(name, labels);
+      JPanel rp = new JPanel();
+      JPanel gp = new JPanel();
+      JPanel bp = new JPanel();
+      rp.setLayout(new BorderLayout());
+      gp.setLayout(new BorderLayout());
+      bp.setLayout(new BorderLayout());
+      rp.add(RSlider, BorderLayout.CENTER);
+      rp.add(RLabel, BorderLayout.SOUTH);
+      gp.add(GSlider, BorderLayout.CENTER);
+      gp.add(GLabel, BorderLayout.SOUTH);
+      bp.add(BSlider, BorderLayout.CENTER);
+      bp.add(BLabel, BorderLayout.SOUTH);
+      sp.add(rp);
+      sp.add(gp);
+      sp.add(bp);
       
       JButton copyButton = new JButton("Copy");
       copyButton.setActionCommand("Copy_"+name);
       copyButton.addActionListener(this);
       copyButtons.put(name, copyButton);
-      sliderPanel.add(copyButton);
-      t = 35*i + 20;
+      sp.add(copyButton);
+      /*t = 35*i + 20;
       h = 25;
       w = (int)(sliderPanel.getWidth()*0.11);
       l = (int)(sliderPanel.getWidth()*0.74);
-      copyButton.setBounds(l,t,w,h);
+      copyButton.setBounds(l,t,w,h);*/
       Font f = new Font("Arial",Font.PLAIN, 9);
       copyButton.setFont(f);
       JButton pasteButton = new JButton("Paste");
       pasteButton.setActionCommand("Paste_"+name);
       pasteButton.addActionListener(this);
       pasteButtons.put(name, pasteButton);
-      sliderPanel.add(pasteButton);
-      l = (int)(sliderPanel.getWidth()*0.86);
-      pasteButton.setBounds(l,t,w,h);
+      sp.add(pasteButton);
+      /*l = (int)(sliderPanel.getWidth()*0.86);
+      pasteButton.setBounds(l,t,w,h);*/
       pasteButton.setFont(f);
-      sliderPanel.add(RLabel);
-      sliderPanel.add(GLabel);
-      sliderPanel.add(BLabel);
       i++;
     }
     add(sliderPanel);

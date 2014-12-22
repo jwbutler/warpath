@@ -136,14 +136,11 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     // add the surface
     sliderPanel = new JPanel();
-    sliderPanel.setLayout(new GridLayout(colorNames.size(), 1, 5, 5));
-    sliderPanel.setBounds((int)(getWidth()*0.30), 0, (int)(getWidth()*0.70), getHeight());
-    sliderPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+    sliderPanel.setLayout(new GridLayout(colorNames.size(), 5, 5, 5));
+    sliderPanel.setBounds((int)(getWidth()*0.30), 0, (int)(getWidth()*0.70), (int)(getHeight()*1));
+    sliderPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
     int i = 0;
     for (String name : colorNames) {
-      JPanel sp = new JPanel();
-      sp.setLayout(new GridLayout(1,5,5,5));
-      sliderPanel.add(sp);
       Color c = baseColors.get(name);
       paletteSwaps.put(c, c);
       JLabel colorLabel = new JLabel();
@@ -160,7 +157,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       colorLabel.setHorizontalAlignment(SwingConstants.CENTER);
       colorLabel.setFont(new Font("Arial",Font.PLAIN, 9));
       colorLabels.put(name, colorLabel);
-      sp.add(colorLabel);
+      sliderPanel.add(colorLabel);
       JSlider RSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getRed());
       JSlider GSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getGreen());
       JSlider BSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getBlue());
@@ -217,15 +214,15 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       gp.add(GLabel, BorderLayout.SOUTH);
       bp.add(BSlider, BorderLayout.NORTH);
       bp.add(BLabel, BorderLayout.SOUTH);
-      sp.add(rp);
-      sp.add(gp);
-      sp.add(bp);
+      sliderPanel.add(rp);
+      sliderPanel.add(gp);
+      sliderPanel.add(bp);
       
       JButton copyButton = new JButton("Copy");
       copyButton.setActionCommand("Copy_"+name);
       copyButton.addActionListener(this);
       copyButtons.put(name, copyButton);
-      sp.add(copyButton);
+      sliderPanel.add(copyButton);
       /*t = 35*i + 20;
       h = 25;
       w = (int)(sliderPanel.getWidth()*0.11);
@@ -236,14 +233,13 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       pasteButton.setActionCommand("Paste_"+name);
       pasteButton.addActionListener(this);
       pasteButtons.put(name, pasteButton);
-      sp.add(pasteButton);
+      sliderPanel.add(pasteButton);
       /*l = (int)(sliderPanel.getWidth()*0.86);
       pasteButton.setBounds(l,t,w,h);*/
       pasteButton.setFont(new Font("Arial",Font.PLAIN, 9));
       i++;
     }
     add(sliderPanel);
-    
     frameTimer = new Timer(50, this);
     frameTimer.start();
   }

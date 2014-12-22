@@ -153,7 +153,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       
     } else if (nextTargetPosn != null) {
       //System.out.println("<"+nextActivity+">");
-      if (nextActivity.equals("walking")) {
+      if (nextActivity == null) {
+        System.out.println("next activity is null. fix this, idiot");
+      } if (nextActivity.equals("walking")) {
         targetPosn = nextTargetPosn;
         setPath(game.findPath(getPosn(), targetPosn));
         if (targetUnit != null) {

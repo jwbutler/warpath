@@ -29,8 +29,6 @@ public class GameWindow extends JFrame {
     addWindowListener(driver);
     add(panelContainer);
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    //The below call deals with setting up cardlayout for switching between JPanels
-    //pack();
   }
 
   // Sets up the Card Layout and the panelContainer.
@@ -102,6 +100,7 @@ public class GameWindow extends JFrame {
     });
     
     // Add to the main panel (panelContainer) and prepare for display.
+    pack();
   }
   
   // This will be used to set the current display from other classes. 

@@ -73,8 +73,6 @@ public class RPG implements ActionListener {
   public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
   private boolean redrawFloor;
   
-  // Card layout stuff
-
   public RPG(GameWindow gameWindow) {
     this.gameWindow = gameWindow;
     floor = new Floor(this, 15, 15);

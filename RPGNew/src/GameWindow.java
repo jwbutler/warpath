@@ -1,13 +1,8 @@
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 public class GameWindow extends JFrame {
 
@@ -18,7 +13,7 @@ public class GameWindow extends JFrame {
   private CardLayout cardLayout;
   private GamePanel gamePanel;
   private HUDPanel hudPanel;
-  private JPanel menuPanel;
+  private MenuPanel menuPanel;
   private final int HUD_PANEL_HEIGHT = 80;
   
   public GameWindow(RPGDriver driver, int width, int height) {
@@ -41,7 +36,7 @@ public class GameWindow extends JFrame {
     cc = new CharacterCreator(driver, getWidth(), getHeight());
     
     // Make the Menu Panel
-    menuPanel = new JPanel();
+    menuPanel = new MenuPanel(this,game,getWidth(),getHeight());
     menuPanel.setPreferredSize(new Dimension(getWidth(), getHeight()));
     menuPanel.setLayout(null);
     //menuPanel.setLayout(new BorderLayout());
@@ -50,72 +45,38 @@ public class GameWindow extends JFrame {
     gamePanel = new GamePanel(game, getWidth(), getHeight());
     gamePanel.setPreferredSize(new Dimension(getWidth(), getHeight()));
     gamePanel.setLayout(new BorderLayout());
-    
+
     hudPanel = new HUDPanel(game, getWidth(), HUD_PANEL_HEIGHT);
     hudPanel.setPreferredSize(new Dimension(getWidth(), HUD_PANEL_HEIGHT));
     //hudPanel.setBounds(0, getHeight()-HUD_PANEL_HEIGHT, getWidth(), HUD_PANEL_HEIGHT);
     /*gamePanel.setAlignmentX(0.0f);
     gamePanel.setAlignmentY(0.0f);*/
     gamePanel.add(hudPanel, BorderLayout.SOUTH);
-    
-    // Make and add buttons
-    JButton playButton = new JButton("Play");
-    JButton exitButton = new JButton("Exit");
+
+    // Add to the main panel (panelContainer) and prepare for display.
     panelContainer.add(menuPanel,"Menu");
     panelContainer.add(gamePanel,"Game");
     panelContainer.add(cc,"Creator");
-    menuPanel.add(playButton);
-    menuPanel.add(exitButton);
-    
-    // Position and Size
-    int width = getWidth() * 1/5;
-    int height = getHeight() * 1/10;
-    int margin = 16;
-    
-    //playButton.setMargin(new Insets(50,50,50,50));
-    playButton.setBounds((int)(getWidth()*.3),getHeight()*1/6,(int)(getWidth()*.4),height);
-    playButton.setHorizontalAlignment(SwingConstants.CENTER);
-    //playButton.addActionListener(this);
-    
-    //exitButton.setMargin(new Insets(5,5,5,5));
-    exitButton.setBounds((int)(getWidth()*.3),getHeight()*3/6,(int)(getWidth()*.4),height);
-    exitButton.setHorizontalAlignment(SwingConstants.CENTER);
-    //exitButton.addActionListener(this);
-
-
-    //cardLayout.show(panelContainer,"Menu");
-    
-    // These are the action performed methods for the buttons.
-    playButton.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
-        cardLayout.show(panelContainer,"Creator");
-      }
-    });
-    
-    
-    exitButton.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e){
-        System.exit(0);
-      }
-    });
-    
-    // Add to the main panel (panelContainer) and prepare for display.
     pack();
+
   }
-  
+
   // This will be used to set the current display from other classes. 
   public void setCardLayout(String panel) {
-    if ( panel.equals("Game")) {
-      cardLayout.show(panelContainer,"Game");
-    }
+	  if ( panel.equals("Game")) {
+		  cardLayout.show(panelContainer,"Game");
+	  }
+	  if ( panel.equals("Creator")) {
+		  cardLayout.show(panelContainer,"Creator");
+	  }
   }
 
   public HUDPanel getHudPanel() {
-    return hudPanel;
+	  return hudPanel;
   }
 
   public GamePanel getGamePanel() {
-    return gamePanel;
+	  return gamePanel;
   }
   
 

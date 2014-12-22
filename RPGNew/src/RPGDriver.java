@@ -71,19 +71,8 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
     game.getHumanPlayer().setHostile(game.getPlayer(2));
     game.getPlayer(2).setHostile(game.getPlayer(1));
     
-    // Make an "enemy" guy
-    
-    //HumanUnit x = new HumanUnit(me, "x", new Posn(9,4), me.getPlayer(2));
-    //WanderingUnit x = new WanderingUnit(me, "x", new Posn(9,4), me.getPlayer(2));
-    EnemySwordGuy x = new EnemySwordGuy(game, "x", new Posn(9,4), game.getPlayer(2));
-    game.addUnit(x);
-    //EnemySwordGuy y = new EnemySwordGuy(me, "y", new Posn(9,5), me.getPlayer(2));
-    //me.addUnit(y);
-    
-    game.addObject(new Wall(game, new Posn(9,7), "wall_48x78_1.png"));
-    game.addObject(new Wall(game, new Posn(9,8), "wall_48x78_1.png"));
-    game.addObject(new Wall(game, new Posn(9,9), "wall_48x78_1.png"));
-    game.addObject(new Wall(game, new Posn(9,10), "wall_48x78_1.png"));
+    Level testLevel = new TestLevel(game);
+    game.openLevel(testLevel);
     game.start();
   }
 }

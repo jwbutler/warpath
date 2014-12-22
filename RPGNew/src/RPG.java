@@ -73,6 +73,8 @@ public class RPG implements ActionListener {
   public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
   private boolean redrawFloor;
   
+  // Card layout stuff
+
   public RPG(GameWindow gameWindow) {
     this.gameWindow = gameWindow;
     floor = new Floor(this, 15, 15);
@@ -691,7 +693,7 @@ public class RPG implements ActionListener {
         targetPosn = p;
       }
     }
-    getPlayerUnit().setNextTargetPosn(posn);
+    getPlayerUnit().setNextTargetPosn(targetPosn);
     getPlayerUnit().setNextActivity("blocking_1");
   }
   
@@ -699,13 +701,27 @@ public class RPG implements ActionListener {
   public boolean isObstacle(Posn p) { return getFloor().getTile(p).isObstacle(); }
 
   public Posn getMousePosn() {
-    // TODO Auto-generated method stub
     return gameWindow.getGamePanel().getMousePosn();
   }
 
   public JFrame getGameWindow() {
-    // TODO Auto-generated method stub
     return gameWindow;
+  }
+  
+  public void openLevel(Level level) {
+    System.out.println("HI");
+    floor = level.getFloor();
+    depthTree = new DepthTree();
+    Unit playerUnit = getPlayerUnit();
+    units = new ArrayList<Unit>();
+    addUnit(playerUnit);
+    for (Unit u: level.getUnits()) {
+      addUnit(u);
+    }
+    objects = new ArrayList<GameObject>();
+    for (GameObject o: level.getObjects()) {
+      addObject(o);
+    }
   }
 
 }

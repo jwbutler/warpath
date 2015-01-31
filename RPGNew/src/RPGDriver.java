@@ -15,7 +15,6 @@ import javax.swing.UnsupportedLookAndFeelException;
    * various levels, modes, whatever. */
 
 public class RPGDriver extends WindowAdapter implements ActionListener {
-  private HashMap<Color, Color> swaps;
   private final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
   private RPG game;
   private GameWindow window;
@@ -29,15 +28,13 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     // continue button
-    System.out.println(e.getActionCommand());
     if (e.getActionCommand().equals("Continue...")) {
-      System.out.println("hello.");
       CharacterCreator cc = window.getCharacterCreator();
-      swaps = cc.exportPaletteSwaps();
       window.setCardLayout("Game");
-      startGame();
+      startGame(cc.exportPaletteSwaps());
     }
   }
+  
   public void windowClosed(WindowEvent e) { windowClosing(e); }
   
   public void windowClosing(WindowEvent e) {
@@ -58,7 +55,7 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
     game = new RPG(window);
     window.initCardLayout(game);
   }
-  public void startGame() {
+  public void startGame(HashMap<Color, Color> swaps) {
 
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());

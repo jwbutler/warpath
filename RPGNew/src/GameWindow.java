@@ -38,7 +38,7 @@ public class GameWindow extends JFrame {
     // Make the Menu Panel
     menuPanel = new MenuPanel(this,game,getWidth(),getHeight());
     menuPanel.setPreferredSize(new Dimension(getWidth(), getHeight()));
-    menuPanel.setLayout(null);
+    //menuPanel.setLayout(null);
     //menuPanel.setLayout(new BorderLayout());
 
     // Make the Game Panel
@@ -63,12 +63,14 @@ public class GameWindow extends JFrame {
 
   // This will be used to set the current display from other classes. 
   public void setCardLayout(String panel) {
-	  if ( panel.equals("Game")) {
+
+    cardLayout.show(panelContainer, panel);
+	  /*if ( panel.equals("Game")) {
 		  cardLayout.show(panelContainer,"Game");
 	  }
 	  if ( panel.equals("Creator")) {
 		  cardLayout.show(panelContainer,"Creator");
-	  }
+	  }*/
   }
 
   public HUDPanel getHudPanel() {

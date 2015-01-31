@@ -1,10 +1,15 @@
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Graphics;
+
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 /* The panel for the menu
  * ===== CHANGELOG =====
@@ -23,28 +28,31 @@ public class MenuPanel extends JPanel {
 		window = theWindow;
 		game = theGame;
 		setSize(width, height);
-		setVisible(true);
-		//setBackground(Color.CYAN);
-		this.setLayout(null);
+		setPreferredSize(new Dimension(width, height));
+		//setBackground(Color.DARK_GRAY);
+    setVisible(true);
+		this.setLayout(new GridLayout(3,1,0,25));
+		this.setBorder(new EmptyBorder(300,250,50,250));
 		
 		// Make and add buttons
 	    JButton playButton = new JButton("Play");
+	    JButton editButton = new JButton("Level Editor");
 	    JButton exitButton = new JButton("Exit");
 	    this.add(playButton);
+	    this.add(editButton);
 	    this.add(exitButton);
 	    
 	    // Position and Size
 	    int bHeight = getHeight() * 1/10;
 	    
-
 	    //playButton.setMargin(new Insets(50,50,50,50));
-	    playButton.setBounds((int)(getWidth()*.3),getHeight()*1/6,(int)(getWidth()*.4),bHeight);
-	    playButton.setHorizontalAlignment(SwingConstants.CENTER);
+	    //playButton.setBounds((int)(getWidth()*.3),getHeight()*1/6,(int)(getWidth()*.4),bHeight);
+	    //playButton.setHorizontalAlignment(SwingConstants.CENTER);
 	    //playButton.addActionListener(this);
 	    
 	    //exitButton.setMargin(new Insets(5,5,5,5));
-	    exitButton.setBounds((int)(getWidth()*.3),getHeight()*3/6,(int)(getWidth()*.4),bHeight);
-	    exitButton.setHorizontalAlignment(SwingConstants.CENTER);
+	    //exitButton.setBounds((int)(getWidth()*.3),getHeight()*3/6,(int)(getWidth()*.4),bHeight);
+	    //exitButton.setHorizontalAlignment(SwingConstants.CENTER);
 	    //exitButton.addActionListener(this);
 		
 	    
@@ -55,6 +63,11 @@ public class MenuPanel extends JPanel {
 	      }
 	    });
 	    
+      editButton.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e){
+          window.setCardLayout("Game");
+        }
+      });	    
 	    
 	    exitButton.addActionListener(new ActionListener(){
 	      public void actionPerformed(ActionEvent e){
@@ -72,7 +85,7 @@ public class MenuPanel extends JPanel {
 	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		game.getFloor().draw(g);
+		//game.getFloor().draw(g);
 	}
 
 }

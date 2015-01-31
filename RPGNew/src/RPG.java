@@ -25,6 +25,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 /* The main game engine.  Expect this one to be a few thousand lines long.
+ * 
  * ===== CHANGELOG =====
  * 8/16 - New version! Rewriting for single character combat.
  * 5/30 - lots of comments.
@@ -34,6 +35,7 @@ import javax.swing.UnsupportedLookAndFeelException;
  *      - Started unit interaction stuff
  * 5/23 - findPath() added
  *      - getAdjacentSquares() added
+ * 1/29 - Commented stuffs.
  * =====================
  */
   
@@ -72,8 +74,6 @@ public class RPG implements ActionListener {
   public static final String[] DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
   public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
   private boolean redrawFloor;
-  
-  // Card layout stuff
 
   public RPG(GameWindow gameWindow) {
     this.gameWindow = gameWindow;
@@ -112,6 +112,7 @@ public class RPG implements ActionListener {
   // IS THIS THE RIGHT ORDER OF OPERATIONS?
   public void actionPerformed(ActionEvent e) {
 
+    // Check if any units are dead; if so, kill them.
     for (int i = 0; i < units.size(); i++) {
       Unit u = units.get(i);
       if (u.getCurrentHP() <= 0) {
@@ -127,6 +128,7 @@ public class RPG implements ActionListener {
     for (Unit u: units) {
       u.doEvents();
     }
+    // Repaint() includes a call to drawAll().
     gameWindow.repaint();
     incrementTicks();
   }
@@ -163,8 +165,12 @@ public class RPG implements ActionListener {
     floor.getTile(u.getX(),u.getY()).setUnit(u);
   }
   
-  // Removes the specified unit from all relevant lists.
-  // I don't think we need to check contains(), but it feels wrong...
+  /* Removes the specified unit from all relevant lists.
+     Specifically, each floor tile's list of units, and the RPG's units list,
+     as well as the RPG's depth tree.
+     Also removes its floor overlay from all relevant lists.
+     I don't think we need to check contains(), but it feels wrong...
+  */
   public void removeUnit(Unit u) {
     units.remove(u);
     depthTree.remove(u);
@@ -187,11 +193,14 @@ public class RPG implements ActionListener {
     }
   }
   
+  /** 
+   * This returns the upper left corner of the grid tile.  Note that the
+   * origin (0,0) is actually inside the menu bar; the playable area is
+   * smaller than it "should" be
+   * @param posn - the x and y coordinates of the grid tile
+
+   */
   public Posn gridToPixel(Posn posn) {
-    /* This returns the upper left corner of the grid tile.  Note that the
-     * origin (0,0) is actually inside the menu bar; the playable area is
-     * smaller than it "should" be
-     */
     
     int left, top;
     // Offsets are to make it so that pixel (0,0) is at the very top left of the floor
@@ -209,11 +218,15 @@ public class RPG implements ActionListener {
     return gridToPixel(new Posn(x,y));
   }
   
-  // Given (x,y) in pixels, return the matching grid tile.
-  // Returns null if it's outside the map.
+  /** Finds the nearest tile to a given pixel.  Returns null if it's outside
+   * the map.
+   * It works by checking EVERY floor tile, finding the coordinates at which
+   * it's being drawn, and checking the transparency at the given point.
+     @param pixel
+     The (x,y) coordinates of the pixel */
+  /* TODO If the coordinates are off the grid, find the closest valid grid
+   * tile instead of returning null. */
   public Posn pixelToGrid(Posn pixel) {
-    //System.out.println("PTG("+pixel.getX()+","+pixel.getY()+")");
-    
     // We need to restrict the range of X and Y, but... later
     for (int y = 0; y <= floor.getHeight(); y++) {
       for (int x = 0; x <= floor.getWidth(); x++) {
@@ -222,21 +235,16 @@ public class RPG implements ActionListener {
         int top = tilePixel.getY();
         Rect tileRect = new Rect(left, top, TILE_WIDTH, TILE_HEIGHT);
         if (tileRect.collidePoint(pixel.getX(), pixel.getY())) {
-          //System.out.println("Possible match: " + x + " " + y + " " + tileRect);
           int tileX = pixel.getX() - left;
           int tileY = pixel.getY() - top;
           int rgba = floor.getTile(x, y).getSurface().getRGB(tileX, tileY);
           Color c = new Color(rgba, true);
-          //System.out.println("RGBA: " + c + " " + c.getAlpha());
           if (c.getAlpha() == 255) {
             return new Posn(x,y);
-          } else {
-            //System.out.println("Transparency @ " + x + " " + y);
           }
         }
       }
     }
-    //System.out.println("PTG ERROR!");
     return null;
   }
   
@@ -244,15 +252,8 @@ public class RPG implements ActionListener {
     return pixelToGrid(new Posn(x,y));
   }
 
-  // for testing only
-  public void printCameraPos() {
-    Posn pixel = gridToPixel(0,0);
-    System.out.println("Camera position: ("+getCameraX()+","+getCameraY()+")");
-    System.out.println("Origin: " + pixel);
-    System.out.println("=====");
-  }
-
   // Centers to the middle of the floor
+  // Frankly I have no idea what's going on here and it doesn't really matter.
   public void centerCamera() {
     
     // rootPane should be contentPane; make sure we've got the right replacement here.
@@ -267,6 +268,8 @@ public class RPG implements ActionListener {
   }
 
   // Centers to the average position of player's SELECTED units
+  // Should probably rewrite this for the single-unit game,
+  // but I guess it still works...
   public void centerCamera2() {
     System.out.println("cntr");
     ArrayList<Unit> units = getHumanPlayer().getSelectedUnits();
@@ -284,7 +287,10 @@ public class RPG implements ActionListener {
     setCameraPos(x,y);
   }
   
-  //
+  /** Draw everything! Start with the floor, then draw all of the objects and
+   * units in the order in which they appear in the DepthTree.
+   * @param g the graphics object.
+   */
   public void drawAll(Graphics g) {
     if (redrawFloor) {
       floor.redraw(this);
@@ -295,9 +301,12 @@ public class RPG implements ActionListener {
     
   }
   
-  // IMPORTANT: not Pythagorean formula-derived distance (dx^2+dy^2)^0.5, but
-  // Civ-style (I think) distance.  Returns the larger of the y-distance and
-  // the x-distance.
+  /** Calculate the distance between two points.
+   * IMPORTANT: not Pythagorean distance, but Civ-style (I think) distance.
+   * Returns the larger of the x-distance and the y-distance.
+   * @param p the first point
+   * @param q the second point
+   */
   public int distance(Posn p, Posn q) {
     int dx = Math.abs(q.getX() - p.getX());
     int dy = Math.abs(q.getY() - p.getY());
@@ -308,7 +317,8 @@ public class RPG implements ActionListener {
     return distance(x.getPosn(), y.getPosn());
   }
   
-  // Left click stuff - just movement for now
+  /** Left click stuff - just movement for now (Doesn't include modifiers)
+   * @param pixel The (x,y) coordinates of the pixel */
   public void doLeftClick(Posn pixel) {
     Posn posn = pixelToGrid(pixel);
     if (posn == null) return;
@@ -346,7 +356,12 @@ public class RPG implements ActionListener {
     u.setNextActivity("walking");
   }
   
-  // Give orders to selected units: movement, attack, etc.
+  /** Give an order to the player unit (usually attack).
+   * If the targeted tile is not adjacent to the player unit, some kind of
+   * pathing stuff will be initiated.
+   * @param pixel The mouse coordinates
+   * @param activity The ordered activity 
+   *  */
   public void doRightClick(Posn pixel, String activity) {
     Posn posn = pixelToGrid(pixel);
     Unit u = getPlayerUnit();
@@ -356,7 +371,6 @@ public class RPG implements ActionListener {
     for (Unit v: units) {
       if (posn.equals(v.getPosn())) {
         if (v != u) {
-          //u.doUnitInteraction(v);
           u.setNextTargetUnit(v);
           u.setNextActivity(activity);
           return;
@@ -365,7 +379,9 @@ public class RPG implements ActionListener {
         }
       }
     }
-    // targeting an object
+    // Targeting an object - at present there are no interactable objects
+    // in game, but eventually there will be things like doors, powerups,
+    // etc.
     for (GameObject obj: objects) {
       if (posn.equals(obj.getPosn())) {
         if (obj.isInteractable()) {
@@ -384,6 +400,8 @@ public class RPG implements ActionListener {
     u.setNextTargetPosn(posn);
     u.setNextActivity("walking");
   }
+  
+  
   public void doRightClick(Posn pixel) {
     doRightClick(pixel, "attacking");
   }
@@ -392,7 +410,7 @@ public class RPG implements ActionListener {
     doRightClick(pixel, "bashing");
     
   }
-  // Moves the camera posn; x and y are offsets in pixels.
+  // Moves the camera posn; x and y are offsets in pixels (not coords).
   public void moveCamera(int x, int y) {
     setCameraPos(getCameraX() + x, getCameraY() + y);
     redrawFloor = true;

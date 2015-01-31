@@ -1,6 +1,7 @@
 import java.awt.Graphics;
 
-
+/* An Accessory generally represents armor objects.  Could also be things like
+ * beards. */
 public abstract class Accessory {
   // we should make a generic class to subclass. there's a lot of copying and pasting
   // going on here - BUT i can't think of a way to do this without multiple

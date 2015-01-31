@@ -24,7 +24,7 @@ public class SwordGuy extends HumanUnit {
   public void doAttackHit(Unit u) {
     int dmg = game.getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
     // soundFX
-    u.takeDamage(dmg);
+    u.takeHit(this, dmg);
   }
   public void doBashHit(Unit u) {
     int d = 30; // ...
@@ -33,8 +33,7 @@ public class SwordGuy extends HumanUnit {
     u.move(dx, dy);
     u.setCurrentActivity("stunned_short");
     u.clearTargets();
-    u.takeDamage(d);
-    // TODO Auto-generated method stub
+    u.takeHit(this, d);
     //System.out.println(this + " hit unit " + u);
   }
 

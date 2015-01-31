@@ -194,6 +194,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         clearTargets();
         return;
       }
+    } else if (currentActivity == "stunned_short") {
+      System.out.println("end stun");
+      setCurrentActivity("standing");
+      clearTargets();
+      return;
     }
     if (targetUnit != null) {
       if (isHostile(targetUnit)) {
@@ -594,14 +599,14 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   // Overridden by damage mechanics?
   public void doAttackHit(Unit u) {
     int d = 1; // ...
-    u.takeDamage(d);
+    u.takeHit(this, d);
     // TODO Auto-generated method stub
     //System.out.println(this + " hit unit " + u);
   }
   
   public void doBashHit(Unit u) {
     int d = 1; // ...
-    u.takeDamage(d);
+    u.takeHit(this, d);
   }
   public void setNextTargetUnit(Unit u) {
     nextTargetUnit = u;
@@ -614,10 +619,28 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void takeDamage(int dmg) {
     if (dmg >= currentHP) {
       currentHP = 0;
+      // where do we check for death?
     } else {
       currentHP -= dmg;
     }
     // sound FX, blood, etc will go here too
+  }
+  
+  public void takeHit(GameObject src, int dmg) {
+    Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
+    if (isBlocking() && src.getPosn().equals(blockedPosn)) {
+      
+    } else {
+      takeDamage(dmg);
+    }
+  }
+
+  public boolean isBlocking() {
+    // TODO Auto-generated method stub
+    if (getCurrentActivity().equals("blocking_1")) return true;
+    else if (getCurrentActivity().equals("blocking_2")) return true;
+    else if (getCurrentActivity().equals("blocking_3")) return true;
+    else return false;
   }
 
   public int getCurrentHP() {

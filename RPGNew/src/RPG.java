@@ -709,7 +709,6 @@ public class RPG implements ActionListener {
   }
   
   public void openLevel(Level level) {
-    System.out.println("HI");
     floor = level.getFloor();
     depthTree = new DepthTree();
     Unit playerUnit = getPlayerUnit();

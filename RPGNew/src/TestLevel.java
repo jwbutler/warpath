@@ -14,8 +14,10 @@ public class TestLevel extends Level {
     //WanderingUnit x = new WanderingUnit(me, "x", new Posn(9,4), me.getPlayer(2));
     EnemySwordGuy x = new EnemySwordGuy(game, "x", new Posn(9,4), game.getPlayer(2));
     units.add(x);
-    //EnemySwordGuy y = new EnemySwordGuy(me, "y", new Posn(9,5), me.getPlayer(2));
-    //me.addUnit(y);
+    EnemySwordGuy y = new EnemySwordGuy(game, "y", new Posn(9,6), game.getPlayer(2));
+    units.add(y);
+    EnemySwordGuy z = new EnemySwordGuy(game, "z", new Posn(9,8), game.getPlayer(2));
+    units.add(z);
     
     objects.add(new Wall(game, new Posn(9,7), "wall_48x78_1.png"));
     objects.add(new Wall(game, new Posn(9,8), "wall_48x78_1.png"));

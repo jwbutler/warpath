@@ -1,5 +1,5 @@
 import java.awt.Color;
-
+import jwbgl.*;
 public class Wall extends BasicObject {
   private Surface surface;
   public Wall(RPG game, Posn posn, String imgPath) {

@@ -1,5 +1,5 @@
 import java.util.Random;
-
+import jwbgl.*;
 /* Just a "fun" little AI unit that picks a random (non-blocked) floor tile
  * and paths to it. */
 

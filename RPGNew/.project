@@ -3,6 +3,7 @@
 	<name>RPGNew</name>
 	<comment></comment>
 	<projects>
+		<project>JWBGL</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

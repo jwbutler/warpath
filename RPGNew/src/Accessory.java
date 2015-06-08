@@ -1,4 +1,5 @@
 import java.awt.Graphics;
+import jwbgl.*;
 
 /* An Accessory generally represents armor objects.  Could also be things like
  * beards. */
@@ -37,6 +38,7 @@ public abstract class Accessory {
     }
   }
   
+  /* Why are we subtracting 20 here? */
   public void draw(Graphics g) {
     Posn pixel = game.gridToPixel(unit.getPosn()); // returns top left
     int left = pixel.getX() + RPG.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;

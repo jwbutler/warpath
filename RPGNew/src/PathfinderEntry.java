@@ -1,3 +1,4 @@
+import jwbgl.*;
 // Just a key-value pair object.
 
 public class PathfinderEntry {

@@ -1,7 +1,7 @@
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.HashMap;
-
+import jwbgl.*;
 /* This class is used to represent humanoid units.  Particularly the ones
  * that use Will's original "player" sprite.  It'll be subclassed lots. */
 

@@ -1,6 +1,6 @@
 import java.awt.Color;
 import java.util.ArrayList;
-
+import jwbgl.*;
 /* Used to represent a single floor tile.  Contains a surface, as well as a
  * unit reference and a list of other objects that are on it. */
  

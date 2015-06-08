@@ -1,7 +1,7 @@
 import java.awt.Graphics;
 
 import javax.swing.JPanel;
-
+import jwbgl.*;
 public class SurfacePanel extends JPanel {
   private Surface surface;
   private static final int DEFAULT_PADDING = 3;

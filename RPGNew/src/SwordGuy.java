@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.util.HashMap;
+import jwbgl.*;
 /* Warrior-type player unit class.  Sword/shield.*/
 public class SwordGuy extends HumanUnit {
   private int minDamage, maxDamage;

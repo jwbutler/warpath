@@ -1,5 +1,5 @@
 import java.util.Random;
-
+import jwbgl.*;
 /* A basic enemy unit for testing! */
 
 public class EnemySwordGuy extends HumanUnit {

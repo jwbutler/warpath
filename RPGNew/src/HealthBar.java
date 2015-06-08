@@ -1,6 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
-
+import jwbgl.*;
 
 public class HealthBar extends Surface {
   protected Unit unit;

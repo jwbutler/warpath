@@ -1,4 +1,4 @@
-
+import jwbgl.*;
 public class TestLevel extends Level {
   public TestLevel(RPG game) {
     super(game, 15, 15);

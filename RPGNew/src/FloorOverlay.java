@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import jwbgl.*;
 // Represents a glowy spot on the floor.
 // Can be tied either to a Tile or to an object/unit.
 

@@ -1,4 +1,5 @@
 import java.awt.Graphics;
+import jwbgl.*;
 
 /* This class contains basic methods to be used by all sorts of game objects,
  * units or otherwise.  We'll be subclassing it a lot. */

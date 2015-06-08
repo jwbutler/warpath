@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.io.File;
+import jwbgl.*;
 
 /* Represents a single animation of a unit.  Corresponds to a particular
  * activity and direction.  It's basically just a collection of Surface

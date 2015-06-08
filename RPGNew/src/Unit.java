@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
+import jwbgl.*;
+
 /* Class representing any type of unit.  This class should be extended by any
  * subsequent unit classes we define.  Not to be used by itself (abstract). */
  

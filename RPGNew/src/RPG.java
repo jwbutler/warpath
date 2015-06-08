@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -23,6 +24,8 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import jwbgl.*;
 
 /* The main game engine.  Expect this one to be a few thousand lines long.
  * 

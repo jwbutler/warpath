@@ -6,7 +6,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
-
+import jwbgl.*;
 public class HUDPanel extends JPanel {
   private RPG game;
   private static final int MARGIN = 16;

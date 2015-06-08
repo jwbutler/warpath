@@ -1,5 +1,5 @@
 import java.awt.Graphics;
-
+import jwbgl.*;
 /* Pretty much just a 2d array of Tiles. We draw all the tiles onto an
  * intermediate draw surface rather than drawing them individually.
  * We don't redraw the floor every frame, just when stuff moves basically.

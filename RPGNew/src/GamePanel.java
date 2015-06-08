@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
+import jwbgl.*;
 /* This class represents the game window.  It extends the JPanel class
  * and contains some painting methods.
  * It also handles input (mouse & keyboard), is this good design? */

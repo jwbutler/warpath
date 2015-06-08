@@ -1,7 +1,7 @@
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.PriorityQueue;
-
+import jwbgl.*;
 /* A modified Priority Queue that stores entries in the form
  * <weight, (x,y), parent>.  Used by the pathfinding algorithm.
  * Includes a custom comparator for handling the entries - it's just a simple

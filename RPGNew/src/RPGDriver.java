@@ -1,4 +1,5 @@
 import java.awt.Color;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -9,6 +10,8 @@ import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import jwbgl.*;
 
   /* This is the file where we actually create the game parameters: adding
    * players, units, etc. to the game.  We can define different ones for

@@ -141,11 +141,71 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
+  public void nextActivity() {
+    if (nextActivity != null) {
+      if (targetUnit != null) {
+        targetUnit.updateFloorOverlay();
+      }
+      setTargetPosn(nextTargetPosn);
+      setTargetUnit(nextTargetUnit);
+      /* If next activity is walking, do pathfinding. */
+      if (nextActivity.equals("walking")) {
+        setPath(game.findPath(getPosn(), targetPosn));
+        pointAt(path.peekFirst());
+        setCurrentActivity(nextActivity);
+        nextActivity = null;
+        nextTargetPosn = null; 
+        nextTargetUnit = null;
+      /* If next activity is attacking, we might have to path to the unit first. */
+      } else if (nextActivity.equals("attacking")) {
+        if (game.distance(this, targetUnit) == 1) {
+          pointAt(targetUnit);
+          setCurrentActivity("attacking");
+          nextActivity = null;
+          nextTargetPosn = null;
+          nextTargetUnit = null;
+        } else {
+          setTargetPosn(targetUnit.getPosn());
+          setPath(game.findPath(getPosn(), targetPosn));
+          pointAt(path.peekFirst());
+          setCurrentActivity("walking");
+          /* Don't clear nextActivity/nextTargetUnit */ 
+        }
+      } else if (nextActivity.equals("bashing")) {
+        if (game.distance(this, targetUnit) == 1) {
+          pointAt(targetUnit);
+          setCurrentActivity("bashing");
+          nextActivity = null;
+          nextTargetPosn = null;
+          nextTargetUnit = null;
+        } else {
+          setTargetPosn(targetUnit.getPosn());
+          setPath(game.findPath(getPosn(), targetPosn));
+          pointAt(path.peekFirst());
+          setCurrentActivity("walking");
+          /* Don't clear nextActivity/nextTargetUnit */ 
+        }
+      }
+      if (targetUnit != null) {
+        targetUnit.updateFloorOverlay();
+      }
+    /* no nextactivity */
+    } else if (nextActivity == null) {
+      if (currentActivity.equals("walking")) {
+        refreshWalk();
+      } else {
+        setCurrentActivity("standing");
+      }
+    }
+  }
+  
   // Load the next activity; for example, in the case of walking along a path,
   // we'll be issuing a walk order after each movement.
   // I'm not sure this is the right place to issue repeated attack orders.
-  public void nextActivity() {
+  public void nextActivityOLD() {
+    //System.out.printf("<%s - %s %s %s %s %s %s>\n", getClass(), currentActivity, nextActivity, targetPosn, nextTargetPosn, targetUnit, nextTargetUnit);
     if (nextTargetUnit != null) {
+      if (targetUnit != null) targetUnit.updateFloorOverlay();
       targetUnit = nextTargetUnit;
       targetPosn = targetUnit.getPosn();
       setTargetPosnOverlay(null); // check this
@@ -154,10 +214,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       targetUnit.updateFloorOverlay();
       
     } else if (nextTargetPosn != null) {
-      //System.out.println("<"+nextActivity+">");
       if (nextActivity == null) {
-        System.out.println("next activity is null. fix this, idiot");
-      } if (nextActivity.equals("walking")) {
+        System.out.println("next activity is null. fix this, idiot (current="+currentActivity+")");
+      } else if (nextActivity.equals("walking")) {
         targetPosn = nextTargetPosn;
         setPath(game.findPath(getPosn(), targetPosn));
         if (targetUnit != null) {
@@ -208,6 +267,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           pointAt(targetUnit);
           if (nextActivity == null) {
             System.out.println("fix null activity idiot, current = " + currentActivity);
+            System.out.println("instanceof enemyunit? "+(this instanceof EnemySwordGuy));
             return;
           }
           if (nextActivity.equals("attacking") || nextActivity.equals("bashing")) {
@@ -225,28 +285,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
 
     if (targetPosn != null) {
       if (currentActivity.equals("walking")) {
-        if (path == null || path.size() == 0) {
-          setCurrentActivity("standing");
-          clearTargets();
-          return;
-        }
-        pointAt(path.peekFirst());
-        checkNextTile();
-        if (targetPosn == null) {
-        } else if (path == null || path.size() == 0) {
-          setCurrentActivity("standing");
-          clearTargets();
-        } else if (getPosn().equals(targetPosn))  {
-          setCurrentActivity("standing");
-          clearTargets();
-        } else {
-          Posn nextPosn = path.peekFirst();
-          pointAt(nextPosn);
-          setCurrentActivity("walking");
-          if (targetUnit != null) {
-            targetUnit.updateFloorOverlay();
-          }
-        }
+        /* Queue up another walking animation.  Includes checks for
+         * whether we've reached destination, etc. */
+        refreshWalk();
       } else if (currentActivity.equals("blocking_1")) {
         setTargetPosn(game.pixelToGrid(game.getMousePosn()));
         pointAt(targetPosn);
@@ -257,12 +298,38 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         pointAt(targetPosn);
         setCurrentActivity("blocking_1");
       } else {
+        System.out.println("hmm.");
         setCurrentActivity("standing");
         clearTargets();
       }
     }
   }
-  
+
+  /* This is the code that loops the walking! */
+  private void refreshWalk() {
+    /* This is the case where the next tile is non-empty but we're only
+     * pausing for one turn. */ 
+    if (targetPosn == null) {
+      // System.out.println("Fuck!!!");
+      //clearTargets();
+      
+    /* These two cases basically represent the same thing: we've arrived, or
+     * we're otherwise out of path for some reason. */ 
+    } else if (path == null || path.size() == 0) {
+      setCurrentActivity("standing");
+      clearTargets();
+    } else if (getPosn().equals(targetPosn)) {
+      setCurrentActivity("standing");
+      clearTargets();
+    /* Proceed. */
+    } else {
+      /* We're NOT calling checkNextTile here. It's OK, we'll check it before doing anything else
+       * in doEvents() or something. */
+      pointAt(path.peekFirst());
+      setCurrentActivity("walking");
+    }
+  }
+
   public boolean isHostile(Unit u) {
     return getPlayer().isHostile(u.getPlayer());
   }
@@ -299,26 +366,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         path.removeFirst();
       }
     } else if (getCurrentActivity().equals("attacking")) {
-      if (getCurrentAnimation().getIndex() == 0) {
-        if (game.distance(this, targetUnit) > 1) {
-          setPath(game.findPath(this, targetUnit));
-          if (path != null && path.size() > 0) {
-            targetPosn = targetUnit.getPosn();
-            nextTargetUnit = targetUnit;
-            nextActivity = "attacking"; 
-            targetUnit = null;
-            setCurrentActivity("walking");
-          } else {
-            setCurrentActivity("standing");
-            clearTargets();
-            System.out.println("uh oh");
-          }
-        }
-      } else if (getCurrentAnimation().getIndex() == 2) {
+      if (getCurrentAnimation().getIndex() == 2) {
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
         
-        // Why are we sometimes losing targetUnit?
+        /* Why are we sometimes losing targetUnit?
+         * Haven't seen this one in a while thankfully. */
         if (targetUnit == null) {
           System.out.println("FIX TARGETING PROBLEM IDIOT");
           return;
@@ -348,7 +401,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
         
-        // Why are we sometimes losing targetUnit?
+        /* Why are we sometimes losing targetUnit?
+         * Haven't seen this one in a while thankfully. */
         if (targetUnit == null) {
           System.out.println("FIX TARGETING PROBLEM IDIOT");
           return;
@@ -395,6 +449,21 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return "<Unit("+getName()+")>";
   }
   
+  /* Possibly poorly named.  This function will look at the tile directly in front of the unit,
+   * and do one of three things:
+   * 1) Nothing, if the tile is open;
+   *    - currentActivity = walking
+   *    - nextActivity = null or attacking
+   * 2) Cancel our movement, if there is something blocking us in the tile;
+   *    - currentActivity = standing
+   *    - nextActivity = null
+   * 3) Wait for a turn, if there is something temporarily blocking us.
+   *    - currentActivity = standing
+   *    - nextActivity = walking or attacking
+   *    
+   * Note that it does NOT set currentActivity to walking directly.
+   * 
+   * There should always be a targetPosn, right? */ 
   public void checkNextTile() {
     Tile nextTile = game.getFloor().getTile(getX()+dx, getY()+dy); // should match path.first
     if (nextTile == null) {
@@ -404,7 +473,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       // If our target posn is next in the path and it's blocked, cancel the movement.
       // Is this good?
       Unit blockingUnit = nextTile.getUnit();
-      if (nextTile.getPosn().equals(targetPosn)) { // equals or ==?
+      if (targetPosn != null && nextTile.getPosn().equals(targetPosn)) {
         // note that we're using setCurrentActivity, not setNextActivity
         
         // If there's a unit at the target position:
@@ -412,46 +481,69 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         // otherwise, cancel pathing.
         if (nextTile.getUnit() != null) {
           if (targetUnit != null && blockingUnit.equals(targetUnit)) {
-            setCurrentActivity("standing");
             nextTargetUnit = targetUnit;
-            targetUnit = null;
-            targetPosn = null;
-            nextTargetPosn = null;
-          } else if (blockingUnit.isMoving()) {
             setCurrentActivity("standing");
-            nextTargetPosn = targetPosn;
-            nextTargetUnit = targetUnit; // could be null
-            targetPosn = null;
-            targetUnit = null;
-          } else {
+            setNextActivity("attacking");
+            System.out.println("moved onto target unit.");
+          } else if (blockingUnit.isMoving()) {
+            /* Nothing queued up, just moving to a spot. */
+            if (nextActivity == null) {
+              setCurrentActivity("standing");
+              setNextActivity("walking");
+              setNextTargetPosn(targetPosn);
+              setTargetPosn(null);
+            /* Attacking is queued up; keep it queued. */
+            } else if (nextActivity.equals("attacking")) { 
+              setCurrentActivity("standing");
+            }
+            System.out.println("waiting.");
+          } else { 
             setCurrentActivity("standing");
             clearTargets();
+            System.out.println("blocked else case");
           }
         // If the target posn is blocked by an object - maybe this would
         // happen with fog of war - stop pathing.
         } else {
           setCurrentActivity("standing");
           clearTargets();
+          System.out.println("other block?");
         }
-      // If we're not next to the target posn and our next tile is
-      // blocked, compute a new path.  This fails if the target tile is
-      // perma-blocked - what do we do?
+      /* If we're not next to the target posn and our next tile is
+       * blocked, compute a new path.  This fails if the target tile is
+       * perma-blocked - what do we do? */
       
       } else { // blocked and nextposn != targetposn
         blockingUnit = nextTile.getUnit();
         if (blockingUnit != null && blockingUnit.isMoving()) {
-          setCurrentActivity("standing");
-          nextTargetPosn = targetPosn;
-          nextTargetUnit = targetUnit;
-          targetPosn = null;
-          targetUnit = null;
-        } else {
-          /* What's going on here? */
-          setCurrentActivity("standing");
-          if (targetUnit != null) {
-            targetPosn = targetUnit.getPosn();
+          /* Just walking, no unit target */
+          if (nextActivity == null) {
+            setCurrentActivity("standing");
+            nextTargetPosn = targetPosn;
+            targetPosn = null;
+            setNextActivity("walking");
+            System.out.println("wat1a");
+          } else if (nextActivity.equals("attacking")) {
+            setCurrentActivity("standing");
+            System.out.println("wat1b");
           }
-          setPath(game.findPath(this.getPosn(), targetPosn));
+        } else {
+          /* If the path is blocked by an object or a non-moving unit, better re-path around it. */
+          
+          /* Just walking, no unit target */
+          if (nextActivity == null) {
+            setCurrentActivity("standing");
+            nextTargetPosn = targetPosn;
+            targetPosn = null;
+            setNextActivity("walking");
+            setPath(game.findPath(getPosn(), nextTargetPosn));
+            System.out.println("wat2a");
+          } else if (nextActivity.equals("attacking")) {
+            setCurrentActivity("standing");
+            targetPosn = null;
+            setPath(game.findPath(this, nextTargetUnit));
+            System.out.println("wat2b");
+          }
         }
       }
     }
@@ -602,10 +694,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void doAttackHit(Unit u) {
     int d = 1; // ...
     u.takeHit(this, d);
+    playHitSound();
     // TODO Auto-generated method stub
     //System.out.println(this + " hit unit " + u);
   }
   
+  public abstract void playHitSound();
+
   public void doBashHit(Unit u) {
     int d = 1; // ...
     u.takeHit(this, d);

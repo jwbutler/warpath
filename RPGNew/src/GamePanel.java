@@ -30,7 +30,7 @@ public class GamePanel extends JPanel implements KeyListener, KeyEventDispatcher
 MouseListener, MouseMotionListener {
   private RPG game;
   private KeyboardFocusManager focusManager;
-  private boolean ctrlIsDown;
+  public boolean ctrlIsDown, shiftIsDown;
   private Posn mousePosn;
 
   public GamePanel(RPG game, int width, int height) {
@@ -45,15 +45,16 @@ MouseListener, MouseMotionListener {
     setVisible(true);
     setDoubleBuffered(true);
     setBackground(Color.BLACK);
-    ctrlIsDown = false;
+    ctrlIsDown = shiftIsDown = false;
     mousePosn = null;
   }
   
   public void keyPressed(KeyEvent e) {
-    switch(e.getKeyCode()) {
-      case KeyEvent.VK_CONTROL:
-        ctrlIsDown = true;
-        break;
+    int c = e.getKeyCode(); 
+    if (c == KeyEvent.VK_CONTROL) {
+      ctrlIsDown = true;
+    } else if (c == KeyEvent.VK_SHIFT) {
+      shiftIsDown = true;
     }
   }
 
@@ -62,6 +63,9 @@ MouseListener, MouseMotionListener {
     switch(e.getKeyCode()) {
       case KeyEvent.VK_CONTROL:
         ctrlIsDown = false;
+        break;
+      case KeyEvent.VK_SHIFT:
+        shiftIsDown = false;
         break;
       case KeyEvent.VK_UP:
         game.moveCamera(0,-RPG.CAMERA_INCREMENT_Y);
@@ -153,6 +157,7 @@ MouseListener, MouseMotionListener {
         // modifier precedence?
         if (ctrlIsDown) {
           game.doBashOrder(new Posn(e.getX(), e.getY()));
+        //} else if (shiftIsDown) {
         } else {
           game.doRightClick(new Posn(e.getX(), e.getY()));
         }
@@ -208,8 +213,6 @@ MouseListener, MouseMotionListener {
     return new Rect(0,0,getWidth(),getHeight());  
   }
   
-  public boolean ctrlIsDown() { return ctrlIsDown; }
-
   public Posn getMousePosn() {
     // TODO Auto-generated method stub
     return mousePosn;

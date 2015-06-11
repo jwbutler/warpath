@@ -12,16 +12,18 @@ public class TestLevel extends Level {
     
     //HumanUnit x = new HumanUnit(me, "x", new Posn(9,4), me.getPlayer(2));
     //WanderingUnit x = new WanderingUnit(me, "x", new Posn(9,4), me.getPlayer(2));
-    EnemySwordGuy x = new EnemySwordGuy(game, "x", new Posn(9,4), game.getPlayer(2));
-    units.add(x);
-    EnemySwordGuy y = new EnemySwordGuy(game, "y", new Posn(9,6), game.getPlayer(2));
-    units.add(y);
-    EnemySwordGuy z = new EnemySwordGuy(game, "z", new Posn(9,8), game.getPlayer(2));
-    units.add(z);
     
-    objects.add(new Wall(game, new Posn(9,7), "wall_48x78_1.png"));
-    objects.add(new Wall(game, new Posn(9,8), "wall_48x78_1.png"));
-    objects.add(new Wall(game, new Posn(9,9), "wall_48x78_1.png"));
+    /* These were EnemySwordGuys */
+    Unit x = new EnemySwordGuy(game, "x", new Posn(6,4), game.getPlayer(2));
+    units.add(x);
+    /*Unit y = new EnemySwordGuy(game, "y", new Posn(9,6), game.getPlayer(2));
+    units.add(y);
+    Unit z = new EnemySwordGuy(game, "z", new Posn(9,8), game.getPlayer(2));
+    units.add(z);*/
+    
+    objects.add(new Wall(game, new Posn(8,10), "wall_48x78_1.png"));
     objects.add(new Wall(game, new Posn(9,10), "wall_48x78_1.png"));
+    objects.add(new Wall(game, new Posn(10,10), "wall_48x78_1.png"));
+    objects.add(new Wall(game, new Posn(11,10), "wall_48x78_1.png"));
   }
 }

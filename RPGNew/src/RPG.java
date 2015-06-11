@@ -368,7 +368,7 @@ public class RPG implements ActionListener {
   public void doRightClick(Posn pixel, String activity) {
     Posn posn = pixelToGrid(pixel);
     Unit u = getPlayerUnit();
-    if (pixel == null) return;
+    if (pixel == null || posn == null) return;
 
     // targeting a unit
     for (Unit v: units) {
@@ -718,8 +718,17 @@ public class RPG implements ActionListener {
     getPlayerUnit().setNextActivity("blocking_1");
   }
   
-  public boolean ctrlIsDown() { return gameWindow.getGamePanel().ctrlIsDown(); }
-  public boolean isObstacle(Posn p) { return getFloor().getTile(p).isObstacle(); }
+  public boolean ctrlIsDown() {
+    return gameWindow.getGamePanel().ctrlIsDown;
+  }
+  
+  public boolean shiftIsDown() {
+    return gameWindow.getGamePanel().shiftIsDown;
+  }
+  
+  public boolean isObstacle(Posn p) {
+    return getFloor().getTile(p).isObstacle();
+  }
 
   public Posn getMousePosn() {
     return gameWindow.getGamePanel().getMousePosn();

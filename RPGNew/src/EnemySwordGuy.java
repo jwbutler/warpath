@@ -17,13 +17,13 @@ public class EnemySwordGuy extends HumanUnit {
     if (currentActivity.equals("standing")) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
-          if (targetUnit == null || game.distance(this,u) < game.distance(this,targetUnit)) {
+          if (nextTargetUnit == null || game.distance(this,u) < game.distance(this,nextTargetUnit)) {
             nextTargetUnit = u;
-            nextActivity = "attacking";
+            setNextActivity("attacking");
           }
         }
       }
-      if (targetUnit != null) {
+      if (nextTargetUnit != null) {
         super.nextActivity();
       }
     }

@@ -522,10 +522,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             nextTargetPosn = targetPosn;
             targetPosn = null;
             setNextActivity("walking");
-            System.out.println("wat1a");
           } else if (nextActivity.equals("attacking")) {
             setCurrentActivity("standing");
-            System.out.println("wat1b");
           }
         } else {
           /* If the path is blocked by an object or a non-moving unit, better re-path around it. */
@@ -537,12 +535,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             targetPosn = null;
             setNextActivity("walking");
             setPath(game.findPath(getPosn(), nextTargetPosn));
-            System.out.println("wat2a");
           } else if (nextActivity.equals("attacking")) {
             setCurrentActivity("standing");
             targetPosn = null;
             setPath(game.findPath(this, nextTargetUnit));
-            System.out.println("wat2b");
           }
         }
       }

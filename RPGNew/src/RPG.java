@@ -1,5 +1,4 @@
 import java.awt.BorderLayout;
-
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -66,6 +65,7 @@ public class RPG implements ActionListener {
   private Random RNG;
   
   private GameWindow gameWindow;
+  private SoundPlayer soundPlayer;
   
   // Constants
   public static final int FPS = 20; // should be 20
@@ -88,6 +88,8 @@ public class RPG implements ActionListener {
     units = new ArrayList<Unit>();
     objects = new ArrayList<GameObject>();
     RNG = new Random();
+    soundPlayer = new SoundPlayer();
+    //playSound("crystal.wav");
     
     // Do we need to extend the JFrame class? I'm thinking no.
     //gameWindow = new JFrame();
@@ -155,9 +157,9 @@ public class RPG implements ActionListener {
     players.put(playerNumber, player);
   }
   
-  // Add the specified unit to all relevant lists.
-  // Note that the unit is initialized with its controller established.
-  // (I forget why :( )
+  /* Add the specified unit to all relevant lists.
+   * Note that the unit is initialized with its controller established.
+   * (I forget why :( ) */
   public void addUnit(Unit u) {
     units.add(u);
     u.getPlayer().getUnits().add(u);
@@ -751,6 +753,10 @@ public class RPG implements ActionListener {
     for (GameObject o: level.getObjects()) {
       addObject(o);
     }
+  }
+
+  public void playSound(String string) {
+    soundPlayer.playSoundThread(string);
   }
 
 }

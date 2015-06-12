@@ -696,6 +696,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   
   public abstract void playHitSound();
+  public abstract void playBashSound();
 
   public void doBashHit(Unit u) {
     int d = 1; // ...

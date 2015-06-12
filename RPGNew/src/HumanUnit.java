@@ -45,36 +45,12 @@ public class HumanUnit extends Unit implements Serializable {
 
   @Override
   public void playHitSound() {
-    // TODO Auto-generated method stub
-    try {
-      AudioInputStream stream = javax.sound.sampled.AudioSystem.getAudioInputStream(new File("sounds/hit1.wav"));
-      DataLine.Info info  = new DataLine.Info(Clip.class, stream.getFormat());
-      final Clip clip = (Clip)javax.sound.sampled.AudioSystem.getLine(info);
-      clip.addLineListener(new LineListener() {
-
-        @Override
-        public void update(LineEvent e) {
-          // TODO Auto-generated method stub
-          if (e.getType().equals(LineEvent.Type.STOP))
-          {
-            clip.close();
-          }
-          else if (e.getType().equals(LineEvent.Type.CLOSE))
-          {
-            System.exit(0);
-          }
-        }
-      });
-      clip.loop(1);
-      
-    } catch (UnsupportedAudioFileException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (LineUnavailableException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    
+    game.playSound("hit1.wav");
+  }
+  
+  @Override
+  public void playBashSound() {
+    game.playSound("hit1.wav");
   }
   @Override
   public void setCurrentActivity(String newActivity) {

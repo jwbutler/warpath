@@ -105,12 +105,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     pointAt(target.getX(), target.getY());
   }
 
-  public void endAttack() {
-    // TODO Auto-generated method stub
-    
-  }
- 
-  // 
   public void loadAnimations() {
     // we could easily rewrite this without k
 
@@ -120,7 +114,17 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       for (int j = 0; j < RPG.DIRECTIONS.length; j++) {
         String activity = activities[i];
         String[] filenames = AnimationTemplates.getTemplate(activity);
-        animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j]);
+        if (activity.equals("falling")) {
+          String dir = RPG.DIRECTIONS[j];
+          /* Using the special Animation constructor I made just for falling. */
+          if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
+            animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j], "NE");
+          } else {
+            animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j], "S");
+          }
+        } else {
+          animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j]);
+        }
       }
     }
     
@@ -129,7 +133,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
-  //
   public void nextFrame() {
     if (currentAnimation.hasNextFrame()) {
       currentAnimation.nextFrame();
@@ -190,7 +193,15 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         targetUnit.updateFloorOverlay();
       }
     /* no nextactivity */
-    } else if (nextActivity == null) {
+    } else if (currentActivity.equals("falling")) {
+      game.queueRemoveUnit(this);
+      String dir = getCurrentDirection();
+      if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
+        game.addObject(new Corpse(game, getPosn(), "player_falling_NE_4.png"));
+      } else {
+        game.addObject(new Corpse(game, getPosn(), "player_falling_S_4.png"));
+      }
+    } else { // if (nextActivity == null) {
       if (currentActivity.equals("walking")) {
         refreshWalk();
       } else {
@@ -467,7 +478,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void checkNextTile() {
     Tile nextTile = game.getFloor().getTile(getX()+dx, getY()+dy); // should match path.first
     if (nextTile == null) {
-      System.out.println("Fuck. " + (getX()+dx) + (getY()+dy));
+      //System.out.println("Fuck. " + (getX()+dx) + (getY()+dy));
     }
     if (nextTile.isBlocked()) {
       // If our target posn is next in the path and it's blocked, cancel the movement.
@@ -484,7 +495,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             nextTargetUnit = targetUnit;
             setCurrentActivity("standing");
             setNextActivity("attacking");
-            System.out.println("moved onto target unit.");
+            //System.out.println("moved onto target unit.");
           } else if (blockingUnit.isMoving()) {
             /* Nothing queued up, just moving to a spot. */
             if (nextActivity == null) {
@@ -496,18 +507,18 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             } else if (nextActivity.equals("attacking")) { 
               setCurrentActivity("standing");
             }
-            System.out.println("waiting.");
+            //System.out.println("waiting.");
           } else { 
             setCurrentActivity("standing");
             clearTargets();
-            System.out.println("blocked else case");
+            //System.out.println("blocked else case");
           }
         // If the target posn is blocked by an object - maybe this would
         // happen with fog of war - stop pathing.
         } else {
           setCurrentActivity("standing");
           clearTargets();
-          System.out.println("other block?");
+          //System.out.println("other block?");
         }
       /* If we're not next to the target posn and our next tile is
        * blocked, compute a new path.  This fails if the target tile is
@@ -657,7 +668,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       }
     }
     if (currentAnimation == null) {
-      //System.out.println("fuck, couldn't find animation");
+      System.out.printf("fuck, couldn't find animation: %s %s\n", activity, direction);
       currentAnimation = oldAnimation;
     }
     for (Accessory e : equipment.values()) {
@@ -713,7 +724,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void takeDamage(int dmg) {
     if (dmg >= currentHP) {
       currentHP = 0;
-      // where do we check for death?
+      setCurrentActivity("falling");
     } else {
       currentHP -= dmg;
     }

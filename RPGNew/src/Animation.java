@@ -40,6 +40,24 @@ public class Animation {
     index = 0;
   }
   
+  /* This is a dumb hack for e.g. the falling animation.
+   * Basically only two directions are animated, so we want the other six to
+   * use copies of them. */
+  public Animation(String animName, String[] filenames, String activity, String direction, String apparentDirection) {
+    frames = new Surface[filenames.length];
+    drawBehind = new Boolean[filenames.length];
+    for (int i = 0; i < filenames.length; i++) {
+      String filename = fixFilename(animName, filenames[i], apparentDirection);
+      drawBehind[i] = (filename.endsWith("_B.png"));
+      frames[i] = new Surface(filename);
+      frames[i] = frames[i].scale2x();
+      frames[i].setColorkey(Color.WHITE);
+    }
+    this.activity = activity;
+    this.direction = direction;
+    index = 0;
+  }
+  
   public Animation(Surface[] frames, String activity, String direction) {
     this.frames = frames;
     this.activity = activity;

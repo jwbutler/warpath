@@ -4,7 +4,7 @@ import jwbgl.*;
 
 public class EnemySwordGuy extends HumanUnit {
   private int minDamage, maxDamage;
-  private static String[] activities = {"walking", "standing", "attacking", "stunned_short"};
+  private static String[] activities = {"walking", "standing", "attacking", "stunned_short", "falling"};
   public EnemySwordGuy(RPG game, String name, Posn posn, Player player) {
     super(game, name, activities, posn, player);
     currentHP = maxHP = 100;

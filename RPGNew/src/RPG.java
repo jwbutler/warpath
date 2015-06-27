@@ -54,7 +54,8 @@ public class RPG implements ActionListener {
   // players by number, which I think is useful.
   private Hashtable<Integer, Player> players;
   private ArrayList<Unit> units;
-  private ArrayList<GameObject> objects; // Non-units 
+  private ArrayList<GameObject> objects; // Non-units
+  private ArrayList<Unit> deadUnits;
   
   // Unsure if we should keep this reference, he's always going to be
   // player 1, right?
@@ -87,6 +88,7 @@ public class RPG implements ActionListener {
     addHumanPlayer();
     units = new ArrayList<Unit>();
     objects = new ArrayList<GameObject>();
+    deadUnits = new ArrayList<Unit>();
     RNG = new Random();
     soundPlayer = new SoundPlayer();
     //playSound("crystal.wav");
@@ -116,15 +118,6 @@ public class RPG implements ActionListener {
   // Redraws everything, then increments the tick counter.
   // IS THIS THE RIGHT ORDER OF OPERATIONS?
   public void actionPerformed(ActionEvent e) {
-
-    // Check if any units are dead; if so, kill them.
-    for (int i = 0; i < units.size(); i++) {
-      Unit u = units.get(i);
-      if (u.getCurrentHP() <= 0) {
-        removeUnit(u);
-        u.die();
-      }
-    }
   
     for (Unit u: units) {
       u.doUpkeep();
@@ -133,6 +126,13 @@ public class RPG implements ActionListener {
     for (Unit u: units) {
       u.doEvents();
     }
+    
+    /* Kill units that have been queued for death. (This happens during
+     * nextActivity(), which happens during doUpkeep()... */
+    for (Unit u : deadUnits) {
+      removeUnit(u);
+    }
+    deadUnits.clear();
     // Repaint() includes a call to drawAll().
     gameWindow.repaint();
     incrementTicks();
@@ -272,24 +272,13 @@ public class RPG implements ActionListener {
     //System.out.println("CENTER AT " + cx + " " + cy);
   }
 
-  // Centers to the average position of player's SELECTED units
-  // Should probably rewrite this for the single-unit game,
-  // but I guess it still works...
   public void centerCamera2() {
-    System.out.println("cntr");
-    ArrayList<Unit> units = getHumanPlayer().getSelectedUnits();
-    int x = 0, y = 0;
-    for (int i = 0; i < units.size(); i++) {
-      x += units.get(i).getX();
-      y += units.get(i).getY();
-    }
-    x /= units.size();
-    y /= units.size();
-    x += TILE_WIDTH/2;
-    y += TILE_HEIGHT/2;
-    x -= gameWindow.getGamePanel().getHeight()/2;
-    y -= gameWindow.getGamePanel().getWidth()/2;
-    setCameraPos(x,y);
+    int x = getPlayerUnit().getX();
+    int y = getPlayerUnit().getY();
+    int xx = x*TILE_WIDTH + y*TILE_WIDTH/2;
+    int yy = y*TILE_HEIGHT + x*TILE_HEIGHT/2;
+    setCameraPos(xx, yy);
+    System.out.println(cameraPosn);
   }
   
   /** Draw everything! Start with the floor, then draw all of the objects and
@@ -457,7 +446,7 @@ public class RPG implements ActionListener {
     floor.getTile(obj.getPosn()).getObjects().add(obj);
   }
   
-  // Add a non-unit object to all relevant lists. 
+  // Remove non-unit object from all relevant lists. 
   public void removeObject(GameObject obj) {
     objects.remove(obj);
     depthTree.remove(obj);
@@ -659,6 +648,7 @@ public class RPG implements ActionListener {
 
   public void setCameraPos(Posn posn) {
     cameraPosn = posn;
+    redrawFloor = true;
   }
   
   public void setCameraPos(int x, int y) {
@@ -757,6 +747,14 @@ public class RPG implements ActionListener {
 
   public void playSound(String string) {
     soundPlayer.playSoundThread(string);
+  }
+
+  /* I'm not crazy about this solution, but there was a concurrent modification
+   * exception thing happening.  Basically we add the unit to the deadUnits
+   * array list now, and then after we finish iterating through we'll remove it
+   * from both. */
+  public void queueRemoveUnit(Unit unit) {
+    deadUnits.add(unit);
   }
 
 }

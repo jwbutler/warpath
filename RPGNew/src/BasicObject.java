@@ -10,7 +10,7 @@ public abstract class BasicObject implements GameObject {
   protected int depthOffset;
   private int depth;
   private Rect rect;
-  private Surface surface;
+  protected Surface surface;
   protected RPG game;
   
   public BasicObject(RPG game, Posn posn) {

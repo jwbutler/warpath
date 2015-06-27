@@ -17,7 +17,7 @@ import jwbgl.*;
  * that use Will's original "player" sprite.  It'll be subclassed lots. */
 
 public class HumanUnit extends Unit implements Serializable {
-  private static String[] defaultActivities = {"walking", "standing", "attacking"};
+  private static String[] defaultActivities = {"walking", "standing", "attacking", "falling"};
   
   public HumanUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
@@ -52,9 +52,15 @@ public class HumanUnit extends Unit implements Serializable {
   public void playBashSound() {
     game.playSound("hit1.wav");
   }
+  
   @Override
   public void setCurrentActivity(String newActivity) {
     currentActivity = newActivity;
     setCurrentAnimation(newActivity, getCurrentDirection());
+  }
+  
+  @Override
+  public void die() {
+    game.addObject(new Corpse(game, getPosn(), "player_falling_NE_4.png"));
   }
 }

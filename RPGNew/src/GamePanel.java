@@ -79,6 +79,9 @@ MouseListener, MouseMotionListener {
       case KeyEvent.VK_RIGHT:
         game.moveCamera(RPG.CAMERA_INCREMENT_X, 0);
         break;
+      case KeyEvent.VK_SPACE:
+        game.centerCamera2();
+        break;
       case 49: // 1
         break;
       case 50: // 2

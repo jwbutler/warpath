@@ -6,16 +6,18 @@ import java.util.HashMap;
 public class AnimationTemplates {
   private static final String[] STANDING = {
     "standing_1", "standing_1",
-    "standing_1", "standing_1"};
+    "standing_1", "standing_1"
+  };
   
   /* 8 frames */
   private static final String[] STUNNED_SHORT = {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",
-    "standing_1", "standing_1",};
-  /* 16 frames */
+    "standing_1", "standing_1"
+  };
   
+  /* 16 frames */
   private static final String[] STUNNED_LONG = {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
@@ -24,43 +26,65 @@ public class AnimationTemplates {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",
-    "standing_1", "standing_1",};
+    "standing_1", "standing_1"
+  };
+  
   private static final String[] WALKING = {
     "walking_1", "walking_1",
-    "walking_2","walking_2"};
+    "walking_2","walking_2"
+  };
+  
   private static final String[] ATTACKING = {
     "attacking_1", "attacking_1",
     "attacking_2", "attacking_2",
     "attacking_2", "attacking_2",
     "attacking_1", "attacking_1",
-    "standing_1", "standing_1"};
+    "standing_1", "standing_1"
+  };
+  
   private static final String[] BLOCKING_1 = {
     "attacking_1", "attacking_1",
-    "attacking_2b", "attacking_2b"};
+    "attacking_2b", "attacking_2b"
+  };
+  
   private static final String[] BLOCKING_2 = {
     "attacking_2b", "attacking_2b",
-    "attacking_2b", "attacking_2b"};
+    "attacking_2b", "attacking_2b"
+  };
+  
   private static final String[] BLOCKING_3 = {
     "attacking_2b", "attacking_2b",
-    "attacking_1", "attacking_1"};
+    "attacking_1", "attacking_1"
+  };
+  
   private static final String[] BASHING = {
     "attacking_1", "attacking_1",
     "attacking_2b", "attacking_2b",
     "attacking_2b", "attacking_2b",
     "attacking_1", "attacking_1",
-    "standing_1", "standing_1"};
+    "standing_1", "standing_1"
+  };
+  
   private static final String[] SLASHING_1 = {
     "attacking_1", "attacking_1",
     "attacking_2", "attacking_2",
-    };
+  };
+  
   private static final String[] SLASHING_2 = {
     "attacking_1", "attacking_1",
-    "standing_1", "standing_1"};
+    "standing_1", "standing_1"
+  };
   
   private static final String[] SLASHING_3 = {
     "attacking_2", "attacking_2",
-    "attacking_2", "attacking_2"};
-     
+    "attacking_2", "attacking_2"
+  };
+  
+  private static final String[] FALLING = {
+    "falling_1", "falling_2",
+    "falling_3", "falling_4"
+  };
+  
   public static String[] getTemplate(String activity) {
     if (activity.equals("standing")) {
       return STANDING;
@@ -86,6 +110,8 @@ public class AnimationTemplates {
       return BLOCKING_2;
     } else if (activity.equals("slashing_3")) {
       return BLOCKING_3;
+    } else if (activity.equals("falling")) {
+      return FALLING;
     } else {
       return null;
     }

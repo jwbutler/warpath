@@ -42,8 +42,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private FloorOverlay floorOverlay;
 
   private FloorOverlay targetPosnOverlay;
-  protected int currentHP;
-  protected int maxHP;
+  
+  protected int currentHP, maxHP;
+  protected int currentEP, maxEP;
   
   private TransHealthBar healthBar;
   protected HashMap<String, Accessory> equipment;
@@ -792,6 +793,14 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public int getMaxHP() {
     return maxHP;
+  }
+  
+  public int getCurrentEP() {
+    return currentEP;
+  }
+  
+  public int getMaxEP() {
+    return maxEP;
   }
   
   public FloorOverlay getFloorOverlay() {

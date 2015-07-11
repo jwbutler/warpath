@@ -3,9 +3,11 @@ import java.awt.Graphics;
 import java.awt.Insets;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+
 import jwbgl.*;
 public class HUDPanel extends JPanel {
   private RPG game;
@@ -13,37 +15,48 @@ public class HUDPanel extends JPanel {
   private HealthBar healthBar;
   private int healthBarX, healthBarY;
   private int healthBarWidth, healthBarHeight;
+  private EnergyBar energyBar;
+  private int energyBarX, energyBarY;
+  private int energyBarWidth, energyBarHeight;
   
   public HUDPanel(RPG game, int width, int height) {
     super();
     this.game = game;
     setSize(width, height);
-    setBackground(RPG.TRANSPARENT_WHITE);
+    //setBackground(RPG.TRANSPARENT_WHITE);
     setBackground(new Color(128, 128, 128,128));//Color.DARK_GRAY);
     //setBackground(Color.DARK_GRAY);
-    setLayout(null);
-    setBorder(BorderFactory.createRaisedBevelBorder());
+    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    setBorder(BorderFactory.createCompoundBorder(
+      BorderFactory.createRaisedBevelBorder(),
+      BorderFactory.createEmptyBorder(5,5,5,5)));
+    validate();
   }
-  
-  public void addBars() {
-
-    healthBarX = MARGIN;
-    healthBarY = getHeight()*2/5;
-    healthBarWidth = getWidth()*2/3 - MARGIN*2;
-    healthBarHeight = getHeight()*3/5 - 3/2*MARGIN;
+  public void init() {
+    removeAll();
+    JPanel hpPanel = new JPanel();
+    hpPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    hpPanel.setOpaque(false);
+    JPanel epPanel = new JPanel();
+    epPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    epPanel.setOpaque(false);
+    add(hpPanel);
+    add(epPanel);
+    validate();
+    healthBarWidth = hpPanel.getWidth();
+    healthBarHeight = hpPanel.getHeight();
     healthBar = new HealthBar(game.getPlayerUnit(), healthBarWidth, healthBarHeight);
-    for (int i = 0; i < 5; i++) {
-      JButton jb = new JButton();
-      jb.setMargin(new Insets(2,2,2,2));
-      jb.setText(Integer.toString(i));
-      int width = (getWidth()*1/3 - 5*MARGIN)/5;
-      int left = getWidth()*2/3 + (width+MARGIN)*i;
-      jb.setBounds(left, healthBarY, width, healthBarHeight);
-      add(jb);
-    }
+    SurfacePanel hpbPanel = new SurfacePanel(healthBar);
+    hpPanel.add(hpbPanel);
+    energyBarWidth = epPanel.getWidth();
+    energyBarHeight = epPanel.getHeight();
+    energyBar = new EnergyBar(game.getPlayerUnit(), energyBarWidth, energyBarHeight);
+    SurfacePanel epbPanel = new SurfacePanel(energyBar);
+    epPanel.add(epbPanel);
+    validate();
+    System.out.println("hi");
   }
-  
-  public void paint(Graphics g) {
+  /* public void paint(Graphics g) {
     super.paint(g);
     if (healthBar != null) {
       healthBar.draw(g, new Posn(healthBarX, healthBarY));
@@ -55,6 +68,6 @@ public class HUDPanel extends JPanel {
     if (healthBar != null) {
       healthBar.draw(g, new Posn(healthBarX, healthBarY));
     }
-  }
+  }*/
  
 }

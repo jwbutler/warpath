@@ -13,6 +13,7 @@ public class SwordGuy extends HumanUnit {
         String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {*/
     super(game, name, activities, paletteSwaps, posn, player);
     currentHP = maxHP = 100;
+    currentEP = maxEP = 100;
     minDamage = 5;
     maxDamage = 10;
     addAccessory(new Sword(game, this, "sword"));

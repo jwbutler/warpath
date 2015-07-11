@@ -60,12 +60,6 @@ public class HumanPlayer implements Player {
   public ArrayList<Unit> getUnits() {
     return units;
   }
-  
-  // DIFFERENT from getUnits().get(index) because it's 1-indexed for hotkey
-  // usage
-  public Unit getUnit(int index) {
-    return units.get(index-1);
-  }
 
   public int getPlayerNumber() {
     return playerNumber;

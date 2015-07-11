@@ -1,6 +1,8 @@
+import java.awt.Dimension;
 import java.awt.Graphics;
 
 import javax.swing.JPanel;
+
 import jwbgl.*;
 public class SurfacePanel extends JPanel {
   private Surface surface;
@@ -10,7 +12,9 @@ public class SurfacePanel extends JPanel {
     this.surface = surface;
     this.hpad = hpad;
     this.vpad = vpad;
-    this.setSize(surface.getWidth()+2*hpad, surface.getHeight()+2*vpad);
+    this.setPreferredSize(new Dimension(surface.getWidth()+2*hpad, surface.getHeight()+2*vpad));
+    //this.setPreferredSize(getSize());
+    System.out.printf("%s - %s, %s\n", this.getSize(), surface.getWidth(), surface.getHeight());
   }
   public SurfacePanel(Surface surface) {
     this(surface, DEFAULT_PADDING, DEFAULT_PADDING);

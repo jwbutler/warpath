@@ -69,7 +69,7 @@ public class RPG implements ActionListener {
   private SoundPlayer soundPlayer;
   
   // Constants
-  public static final int FPS = 10; // should be 20
+  public static final int FPS = 15; // should be 20
   public static final int TILE_WIDTH = 96;
   public static final int TILE_HEIGHT = 48;
   public static final int CAMERA_INCREMENT_X = 48;
@@ -198,7 +198,7 @@ public class RPG implements ActionListener {
     units.add(u);
     u.getPlayer().getUnits().add(u);
     if (u.getPlayer().equals(getHumanPlayer())) {
-      gameWindow.getHudPanel().addBars();
+      gameWindow.getHudPanel().init();
     }
     depthTree.add(u);
     floor.getTile(u.getX(),u.getY()).setUnit(u);
@@ -310,12 +310,12 @@ public class RPG implements ActionListener {
    * @param g the Graphics object of the game panel.
    */
   public void drawAll(Graphics g) {
-    Unit u = getPlayerUnit();
+    /*Unit u = getPlayerUnit();
     System.out.printf("%s %s %s, %s\n",
         u.getCurrentActivity(),
         coordsToDir(u.dx, u.dy),
         u.getCurrentAnimation().getIndex(),
-        u.getNextActivity());
+        u.getNextActivity());*/
     if (redrawFloor) {
       floor.redraw(this);
       redrawFloor = false;
@@ -701,7 +701,7 @@ public class RPG implements ActionListener {
   }
   
   public Unit getPlayerUnit() {
-    return humanPlayer.getUnit(1);
+    return humanPlayer.getUnits().get(0);
   }
 
   

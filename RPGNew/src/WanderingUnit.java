@@ -24,11 +24,11 @@ public class WanderingUnit extends HumanUnit {
     } else if (getCurrentActivity().equals("standing")) {
       if (RNG.nextInt(30) == 0) {
         int x,y;
-        x = RNG.nextInt(game.getFloor().getWidth());
-        y = RNG.nextInt(game.getFloor().getHeight());
+        x = RNG.nextInt(game.getFloor().width);
+        y = RNG.nextInt(game.getFloor().height);
         while (game.getFloor().getTile(x,y).isBlocked()) {
-          x = RNG.nextInt(game.getFloor().getWidth());
-          y = RNG.nextInt(game.getFloor().getHeight());
+          x = RNG.nextInt(game.getFloor().width);
+          y = RNG.nextInt(game.getFloor().height);
         }
         setNextTargetPosn(new Posn(x,y));
       }

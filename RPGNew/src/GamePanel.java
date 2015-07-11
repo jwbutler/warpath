@@ -80,7 +80,7 @@ MouseListener, MouseMotionListener {
         game.moveCamera(RPG.CAMERA_INCREMENT_X, 0);
         break;
       case KeyEvent.VK_SPACE:
-        game.centerCamera2();
+        game.centerCamera();
         break;
       case 49: // 1
         break;
@@ -149,8 +149,7 @@ MouseListener, MouseMotionListener {
     switch (e.getButton()) {
       // Left click: select units
       case MouseEvent.BUTTON1:
-        if (ctrlIsDown) {       
-          game.doBlockOrder(new Posn(e.getX(), e.getY()));
+        if (ctrlIsDown) {
         } else {
           game.doLeftClick(new Posn(e.getX(), e.getY()));
         }
@@ -217,7 +216,6 @@ MouseListener, MouseMotionListener {
   }
   
   public Posn getMousePosn() {
-    // TODO Auto-generated method stub
     return mousePosn;
   }
 }

@@ -51,7 +51,6 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
       JFrame.setDefaultLookAndFeelDecorated(true);
     } catch (ClassNotFoundException | InstantiationException
         | IllegalAccessException | UnsupportedLookAndFeelException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     window = new GameWindow(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -62,7 +61,11 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
 
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
-    SwordGuy u = new SwordGuy(game, "u", new Posn(3,4), game.getHumanPlayer(), swaps);
+    
+    // This is a dumb workaround.
+    game.setFloor(new Floor(game, 1,1));
+    game.getFloor().setTile(0,0, new Tile(game, new Posn(0,0), "tile_96x48_grass.png"));
+    SwordGuy u = new SwordGuy(game, "u", new Posn(0,0), game.getHumanPlayer(), swaps);
     //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
     game.addUnit(u);
     

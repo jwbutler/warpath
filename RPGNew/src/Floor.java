@@ -10,18 +10,19 @@ public class Floor {
   private RPG game;
   private Tile[][] tiles;
   private Surface floorSurface;
-  private int width, height; // number of grid tiles, NOT pixels
+  public int width, height; // number of grid tiles, NOT pixels
   
   public Floor(RPG game, int width, int height) {
     this.game = game;
     this.width = width;
     this.height = height;
     tiles = new Tile[this.width][this.height];
-    for (int y = 0; y < this.height; y++) {
+    /* We're going to set these manually now. */
+    /*for (int y = 0; y < this.height; y++) {
       for (int x = 0; x < this.width; x++) {
         tiles[x][y] = new Tile(game, new Posn(x,y), "tile_48x24_stone.png");
       }
-    }
+    }*/
     floorSurface = new Surface(game.getGameWindow().getWidth(), game.getGameWindow().getHeight());
   }
 
@@ -36,22 +37,6 @@ public class Floor {
         //Rect screenRect = game.getScreenRect();
       }
     }
-  }
-
-  public int getWidth() {
-    return width;
-  }
-
-  public void setWidth(int width) {
-    this.width = width;
-  }
-
-  public int getHeight() {
-    return height;
-  }
-
-  public void setHeight(int height) {
-    this.height = height;
   }
 
   public void draw(Graphics g) {
@@ -69,6 +54,9 @@ public class Floor {
   
   public Tile getTile(Posn p) {
     return getTile(p.getX(), p.getY());
+  }
+  public void setTile(int x, int y, Tile tile) {
+    tiles[x][y] = tile;
   }
   
 }

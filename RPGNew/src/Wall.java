@@ -5,6 +5,6 @@ public class Wall extends BasicObject {
     super(game, posn);
     surface = new Surface(imgPath).scale2x();
     surface.setColorkey(Color.WHITE);
-    setyOffset(-56); // trial and error...
+    setyOffset(-54); // trial and error...
   }
 }

@@ -17,7 +17,7 @@ public class EnemySwordGuy extends HumanUnit {
     if (currentActivity.equals("standing")) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
-          if (nextTargetUnit == null || game.distance(this,u) < game.distance(this,nextTargetUnit)) {
+          if (nextTargetUnit == null || game.distance2(this,u) < game.distance2(this,nextTargetUnit)) {
             nextTargetUnit = u;
             setNextActivity("attacking");
           }

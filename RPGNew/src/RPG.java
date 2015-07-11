@@ -47,8 +47,8 @@ public class RPG implements ActionListener {
   
   private Timer frameTimer;
   private int ticks;
+  private int nextEnemyID;
   private Floor floor;
-  
   
   // Using a HashTable for this is pretty strange.  But it lets us access
   // players by number, which I think is useful.
@@ -69,7 +69,7 @@ public class RPG implements ActionListener {
   private SoundPlayer soundPlayer;
   
   // Constants
-  public static final int FPS = 20; // should be 20
+  public static final int FPS = 10; // should be 20
   public static final int TILE_WIDTH = 96;
   public static final int TILE_HEIGHT = 48;
   public static final int CAMERA_INCREMENT_X = 48;
@@ -84,6 +84,7 @@ public class RPG implements ActionListener {
     floor = new Floor(this, 15, 15);
     frameTimer = new Timer(1000/FPS, this);
     ticks = 0;
+    nextEnemyID = 1;
     players = new Hashtable<Integer, Player>();
     addHumanPlayer();
     units = new ArrayList<Unit>();
@@ -119,6 +120,39 @@ public class RPG implements ActionListener {
   // IS THIS THE RIGHT ORDER OF OPERATIONS?
   public void actionPerformed(ActionEvent e) {
   
+    /* Do blocking event code. */
+    String currentActivity = getPlayerUnit().getCurrentActivity();
+    String nextActivity = getPlayerUnit().getNextActivity();
+    if (ctrlIsDown()) {
+      if (currentActivity.equals("standing")) {
+        if (nextActivity != null && nextActivity.equals("bashing")) {
+          /* Bash */
+        } else {
+          if (pixelToGrid(getMousePosn()) != null) {
+            getPlayerUnit().setNextActivity("blocking_1");
+            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+          }
+        }
+      } else if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
+        if (pixelToGrid(getMousePosn()) != null) {
+          getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+        }
+      } else if (currentActivity.equals("bashing") || currentActivity.equals("attacking")) {
+        if (pixelToGrid(getMousePosn()) != null) {
+          getPlayerUnit().setNextActivity("blocking_1");
+          getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+        }
+      }
+    } else {
+      if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
+        if (getPlayerUnit().getNextActivity().equals("bashing")) {
+          System.out.println("bash?");
+        } else {
+          getPlayerUnit().setNextActivity("blocking_3");
+        }
+      }
+    }
+    
     for (Unit u: units) {
       u.doUpkeep();
     }
@@ -168,6 +202,7 @@ public class RPG implements ActionListener {
     }
     depthTree.add(u);
     floor.getTile(u.getX(),u.getY()).setUnit(u);
+    u.updateFloorOverlay();
   }
   
   /* Removes the specified unit from all relevant lists.
@@ -209,7 +244,7 @@ public class RPG implements ActionListener {
     
     int left, top;
     // Offsets are to make it so that pixel (0,0) is at the very top left of the floor
-    int xOffset = floor.getHeight() * TILE_WIDTH / 2;
+    int xOffset = floor.height * TILE_WIDTH / 2;
     int yOffset = 0;
     //System.out.println("offsets " + xOffset + " " + yOffset);
     int x = posn.getX();
@@ -233,8 +268,8 @@ public class RPG implements ActionListener {
    * tile instead of returning null. */
   public Posn pixelToGrid(Posn pixel) {
     // We need to restrict the range of X and Y, but... later
-    for (int y = 0; y <= floor.getHeight(); y++) {
-      for (int x = 0; x <= floor.getWidth(); x++) {
+    for (int y = 0; y <= floor.height; y++) {
+      for (int x = 0; x <= floor.width; x++) {
         Posn tilePixel = gridToPixel(x, y);
         int left = tilePixel.getX();
         int top = tilePixel.getY();
@@ -256,43 +291,49 @@ public class RPG implements ActionListener {
   public Posn pixelToGrid(int x, int y) {
     return pixelToGrid(new Posn(x,y));
   }
-
-  // Centers to the middle of the floor
-  // Frankly I have no idea what's going on here and it doesn't really matter.
-  public void centerCamera() {
-    
-    // rootPane should be contentPane; make sure we've got the right replacement here.
-    int cx = (floor.getWidth() * TILE_WIDTH / 2) +
-      TILE_WIDTH/2 - gameWindow.getGamePanel().getWidth()/2; // Subtract 
-    int cy = (floor.getHeight() * TILE_HEIGHT / 2) - 
-      TILE_HEIGHT/2 - gameWindow.getGamePanel().getHeight()/2;
-    //int cx = (floor.getWidth() * RPGConstants.TILE_WIDTH / 2) - (floor.getHeight() * RPGConstants.TILE_WIDTH / 2);
-    //int cy = (floor.getWidth() * RPGConstants.TILE_HEIGHT / 2) + (floor.getHeight() * RPGConstants.TILE_HEIGHT / 2);
-    setCameraPos(cx,cy);
-    //System.out.println("CENTER AT " + cx + " " + cy);
+  
+  //Centers the camera on a given posn.
+  public void centerCamera(Posn p) {
+    int x = p.getX();
+    int y = p.getY();
+    int xx = TILE_WIDTH/2 * (x + (floor.height-y)) - gameWindow.getGamePanel().getWidth()/2;
+    int yy = TILE_HEIGHT/2 * (x+y) - gameWindow.getGamePanel().getHeight()/2;
+    setCameraPos(xx, yy);
   }
 
-  public void centerCamera2() {
-    int x = getPlayerUnit().getX();
-    int y = getPlayerUnit().getY();
-    int xx = x*TILE_WIDTH + y*TILE_WIDTH/2;
-    int yy = y*TILE_HEIGHT + x*TILE_HEIGHT/2;
-    setCameraPos(xx, yy);
-    System.out.println(cameraPosn);
+  public void centerCamera() {
+    centerCamera(getPlayerUnit().getPosn());
   }
   
   /** Draw everything! Start with the floor, then draw all of the objects and
    * units in the order in which they appear in the DepthTree.
-   * @param g the graphics object.
+   * @param g the Graphics object of the game panel.
    */
   public void drawAll(Graphics g) {
+    Unit u = getPlayerUnit();
+    System.out.printf("%s %s %s, %s\n",
+        u.getCurrentActivity(),
+        coordsToDir(u.dx, u.dy),
+        u.getCurrentAnimation().getIndex(),
+        u.getNextActivity());
     if (redrawFloor) {
       floor.redraw(this);
       redrawFloor = false;
     }
     floor.draw(g);
     depthTree.drawAll(g);
-    
+  }
+  
+  public double distance(Posn p, Posn q) { 
+    int dx = Math.abs(q.getX() - p.getX());
+    int dy = Math.abs(q.getY() - p.getY());
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  
+  public double distance(GameObject p, GameObject q) { 
+    double dx = Math.abs(q.getX() - p.getX());
+    double dy = Math.abs(q.getY() - p.getY());
+    return Math.sqrt(dx*dx + dy*dy);
   }
   
   /** Calculate the distance between two points.
@@ -301,14 +342,14 @@ public class RPG implements ActionListener {
    * @param p the first point
    * @param q the second point
    */
-  public int distance(Posn p, Posn q) {
+  public int distance2(Posn p, Posn q) {
     int dx = Math.abs(q.getX() - p.getX());
     int dy = Math.abs(q.getY() - p.getY());
     return Math.max(dx, dy);
   }
   
-  public int distance(GameObject x, GameObject y) {
-    return distance(x.getPosn(), y.getPosn());
+  public int distance2(GameObject x, GameObject y) {
+    return distance2(x.getPosn(), y.getPosn());
   }
   
   /** Left click stuff - just movement for now (Doesn't include modifiers)
@@ -706,6 +747,7 @@ public class RPG implements ActionListener {
         targetPosn = p;
       }
     }
+    System.out.printf("%s %s\n", posn, targetPosn);
     getPlayerUnit().setNextTargetPosn(targetPosn);
     getPlayerUnit().setNextActivity("blocking_1");
   }
@@ -733,9 +775,7 @@ public class RPG implements ActionListener {
   public void openLevel(Level level) {
     floor = level.getFloor();
     depthTree = new DepthTree();
-    Unit playerUnit = getPlayerUnit();
     units = new ArrayList<Unit>();
-    addUnit(playerUnit);
     for (Unit u: level.getUnits()) {
       addUnit(u);
     }
@@ -755,6 +795,11 @@ public class RPG implements ActionListener {
    * from both. */
   public void queueRemoveUnit(Unit unit) {
     deadUnits.add(unit);
+  }
+
+  public int nextEnemyID() {
+    // how does ++ work
+    return nextEnemyID++;
   }
 
 }

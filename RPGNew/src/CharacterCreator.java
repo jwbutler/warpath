@@ -23,6 +23,9 @@ import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicSliderUI;
+import javax.swing.plaf.metal.MetalSliderUI;
+
 import jwbgl.*;
 public class CharacterCreator extends JPanel implements ActionListener, ChangeListener {
   private Timer frameTimer;

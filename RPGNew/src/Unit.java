@@ -145,23 +145,52 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   
   public void nextActivity() {
-    if (nextActivity != null) {
+    if (currentActivity.equals("blocking_1")) {
+      if (nextActivity.equals("blocking_2")) {
+        pointAt(nextTargetPosn);
+        setCurrentActivity("blocking_2");
+      } else {
+        setCurrentActivity("blocking_3");
+      }
+    } else if (currentActivity.equals("blocking_2")) {
+      if (nextActivity.equals("blocking_2")) {
+        pointAt(nextTargetPosn);
+        setCurrentActivity("blocking_2");
+      } else {
+        setCurrentActivity("blocking_3");
+        if (nextActivity.equals("blocking_3")) {
+          setNextActivity(null);
+        }
+      }
+    
+    /*} else if (currentActivity.equals("blocking_3")) {
+      setCurrentActivity("standing"); */
+    /* If next activity is walking, do pathfinding. */
+    } else if (nextActivity != null) {
+      Unit lastTargetUnit = null;
       if (targetUnit != null) {
-        targetUnit.updateFloorOverlay();
+        lastTargetUnit = targetUnit;
       }
       setTargetPosn(nextTargetPosn);
       setTargetUnit(nextTargetUnit);
-      /* If next activity is walking, do pathfinding. */
+      if (lastTargetUnit != null) lastTargetUnit.updateFloorOverlay();
       if (nextActivity.equals("walking")) {
-        setPath(game.findPath(getPosn(), targetPosn));
-        pointAt(path.peekFirst());
-        setCurrentActivity(nextActivity);
-        nextActivity = null;
-        nextTargetPosn = null; 
-        nextTargetUnit = null;
+        if (getPosn().equals(targetPosn)) {
+          setCurrentActivity("standing");
+          targetPosn = null;
+          nextActivity = null;
+          nextTargetPosn = null;
+        } else {
+          setPath(game.findPath(getPosn(), targetPosn));
+          pointAt(path.peekFirst());
+          setCurrentActivity(nextActivity);
+          nextActivity = null;
+          nextTargetPosn = null; 
+          nextTargetUnit = null;
+        }
       /* If next activity is attacking, we might have to path to the unit first. */
       } else if (nextActivity.equals("attacking")) {
-        if (game.distance(this, targetUnit) == 1) {
+        if (game.distance2(this, targetUnit) == 1) {
           pointAt(targetUnit);
           setCurrentActivity("attacking");
           nextActivity = null;
@@ -175,7 +204,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           /* Don't clear nextActivity/nextTargetUnit */ 
         }
       } else if (nextActivity.equals("bashing")) {
-        if (game.distance(this, targetUnit) == 1) {
+        if (game.distance2(this, targetUnit) == 1) {
           pointAt(targetUnit);
           setCurrentActivity("bashing");
           nextActivity = null;
@@ -188,6 +217,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           setCurrentActivity("walking");
           /* Don't clear nextActivity/nextTargetUnit */ 
         }
+      } else if (nextActivity.equals("blocking_1")) {
+        targetPosn = nextTargetPosn;
+        pointAt(targetPosn);
+        setCurrentActivity("blocking_1");
+        System.out.printf("startblock - %s - %s\n", getPosn(), targetPosn);
+        setNextActivity("blocking_2");
       }
       if (targetUnit != null) {
         targetUnit.updateFloorOverlay();
@@ -258,7 +293,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         pointAt(targetPosn);
         setCurrentActivity("blocking_2");
         clearTargets();
-        return;      
+        return;
       } else {
         setTargetPosn(game.pixelToGrid(game.getMousePosn()));
         pointAt(targetPosn);
@@ -274,7 +309,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
     if (targetUnit != null) {
       if (isHostile(targetUnit)) {
-        if (game.distance(this, targetUnit) <= 1) {
+        if (game.distance2(this, targetUnit) <= 1) {
           pointAt(targetUnit);
           if (nextActivity == null) {
             System.out.println("fix null activity idiot, current = " + currentActivity);
@@ -397,7 +432,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       }
     } else if (getCurrentActivity().equals("bashing")) {
       if (getCurrentAnimation().getIndex() == 0) {
-        if (game.distance(this, targetUnit) > 1) {
+        if (game.distance2(this, targetUnit) > 1) {
           setPath(game.findPath(this, targetUnit));
           if (path != null && path.size() > 0) {
             targetPosn = targetUnit.getPosn();
@@ -454,6 +489,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public String getName() {
     return name;
+  }
+  public String getNextActivity() {
+    return nextActivity;
   }
   
   public String toString() {
@@ -798,7 +836,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
 
   public void setNextActivity(String activity) {
-    // TODO Auto-generated method stub
     nextActivity = activity;
   }
 

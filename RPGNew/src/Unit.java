@@ -29,6 +29,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected int dy;
   private int xOffset;
   private int yOffset;
+
   protected Unit targetUnit;
   protected Unit nextTargetUnit;
   protected Posn targetPosn;
@@ -49,9 +50,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private TransHealthBar healthBar;
   protected HashMap<String, Accessory> equipment;
   protected HashMap<Color, Color> paletteSwaps;
-  public static final int BLOCK_COST = 8; // per second
+  public static final int BLOCK_COST = 8; // costs 1 EP per N ticks
   public static final int ATTACK_COST = 25;
   public static final int BASH_COST = 40;
+  public static final int HP_REGEN = 40; // regen 1 HP per N ticks
+  public static final int EP_REGEN = 1; // regen 1 EP per N ticks
   
   public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
@@ -183,23 +186,32 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           setCurrentActivity("standing");
           targetPosn = null;
           nextActivity = null;
-          nextTargetPosn = null;
+          setNextTargetPosn(null);
         } else {
           setPath(game.findPath(getPosn(), targetPosn));
           pointAt(path.peekFirst());
           setCurrentActivity(nextActivity);
           nextActivity = null;
-          nextTargetPosn = null; 
-          nextTargetUnit = null;
+          setNextTargetPosn(null);
+          setNextTargetUnit(null);
         }
       /* If next activity is attacking, we might have to path to the unit first. */
       } else if (nextActivity.equals("attacking")) {
         if (game.distance2(this, targetUnit) == 1) {
-          pointAt(targetUnit);
-          setCurrentActivity("attacking");
-          nextActivity = null;
-          nextTargetPosn = null;
-          nextTargetUnit = null;
+          if (currentEP >= ATTACK_COST) {
+            pointAt(targetUnit);
+            setCurrentActivity("attacking");
+            nextActivity = null;
+            setNextTargetPosn(null);
+            setNextTargetUnit(null);
+            currentEP -= ATTACK_COST;
+          } else {
+            System.out.println(this + "Not enough EP for attack.");
+            setCurrentActivity("standing");
+            targetPosn = null;
+            nextActivity = null;
+            setNextTargetPosn(null);
+          }
         } else {
           setTargetPosn(targetUnit.getPosn());
           setPath(game.findPath(getPosn(), targetPosn));
@@ -209,11 +221,19 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         }
       } else if (nextActivity.equals("bashing")) {
         if (game.distance2(this, targetUnit) == 1) {
-          pointAt(targetUnit);
-          setCurrentActivity("bashing");
-          nextActivity = null;
-          nextTargetPosn = null;
-          nextTargetUnit = null;
+          if (currentEP >= BASH_COST) {
+            pointAt(targetUnit);
+            setCurrentActivity("bashing");
+            nextActivity = null;
+            setNextTargetPosn(null);
+            setNextTargetUnit(null);
+          } else {
+            System.out.println("Not enough EP for bash.");
+            setCurrentActivity("standing");
+            targetPosn = null;
+            nextActivity = null;
+            setNextTargetPosn(null);
+          }
         } else {
           setTargetPosn(targetUnit.getPosn());
           setPath(game.findPath(getPosn(), targetPosn));
@@ -228,9 +248,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         //System.out.printf("startblock - %s - %s\n", getPosn(), targetPosn);
         setNextActivity("blocking_2");
       }
+      /* Shouldn't need to do this anymore now that setters do it for us automatically. 
       if (targetUnit != null) {
         targetUnit.updateFloorOverlay();
-      }
+      }*/
     /* no nextactivity */
     } else if (currentActivity.equals("falling")) {
       game.queueRemoveUnit(this);
@@ -253,7 +274,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   // we'll be issuing a walk order after each movement.
   // I'm not sure this is the right place to issue repeated attack orders.
   public void nextActivityOLD() {
-    //System.out.printf("<%s - %s %s %s %s %s %s>\n", getClass(), currentActivity, nextActivity, targetPosn, nextTargetPosn, targetUnit, nextTargetUnit);
     if (nextTargetUnit != null) {
       if (targetUnit != null) targetUnit.updateFloorOverlay();
       targetUnit = nextTargetUnit;
@@ -387,6 +407,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void doUpkeep() {
     // somewhat confusingly, this is executed AFTER drawing
     // ... or is it? not anymore I don't think
+    if ((game.getTicks() % HP_REGEN == 0) && (currentHP < maxHP)) {
+      currentHP++;
+    }
+    if ((game.getTicks() % EP_REGEN == 0) && (currentEP < maxEP)) {
+      currentEP++;
+    }
     this.nextFrame();
     //this.doManaRegen();
     //this.doHealthRegen();
@@ -657,6 +683,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
 
   // Important: this takes a Posn as an argument, not a FloorOverlay
   public void setTargetPosnOverlay(Posn posn) {
+    System.out.println(posn);
     if (targetPosnOverlay != null) {
       game.getDepthTree().remove(targetPosnOverlay);
     }
@@ -757,6 +784,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   public void setNextTargetUnit(Unit u) {
     nextTargetUnit = u;
+    if (u != null) {
+      setTargetPosnOverlay(null);
+    }
   }
   
   public void setNextTargetPosn(Posn p) {
@@ -851,4 +881,15 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     nextActivity = activity;
   }
 
+  public Unit getNextTargetUnit() {
+    return nextTargetUnit;
+  }
+
+  public Posn getNextTargetPosn() {
+    return nextTargetPosn;
+  }
+  
+  public void printDebug() {
+    System.out.printf("<%s - %s %s %s %s %s %s>\n", getClass(), currentActivity, nextActivity, targetPosn, nextTargetPosn, targetUnit, nextTargetUnit);
+  }
 }

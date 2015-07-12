@@ -54,7 +54,6 @@ public class HUDPanel extends JPanel {
     SurfacePanel epbPanel = new SurfacePanel(energyBar);
     epPanel.add(epbPanel);
     validate();
-    System.out.println("hi");
   }
   /* public void paint(Graphics g) {
     super.paint(g);

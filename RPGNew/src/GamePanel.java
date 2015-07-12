@@ -161,7 +161,7 @@ MouseListener, MouseMotionListener {
           game.doBashOrder(new Posn(e.getX(), e.getY()));
         //} else if (shiftIsDown) {
         } else {
-          game.doRightClick(new Posn(e.getX(), e.getY()));
+          game.doAttackOrder(new Posn(e.getX(), e.getY()));
         }
         break;
     }

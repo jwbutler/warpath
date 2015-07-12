@@ -393,8 +393,8 @@ public class RPG implements ActionListener {
     }
     // targeting a floor tile
     Unit u = getPlayerUnit();
-    u.setTargetPosnOverlay(posn);
     u.setNextTargetPosn(posn);
+    u.setTargetPosnOverlay(posn);
     u.setNextActivity("walking");
   }
   
@@ -438,13 +438,13 @@ public class RPG implements ActionListener {
       }
     }
     // targeting a floor tile
-    u.setTargetPosnOverlay(posn);
     u.setNextTargetPosn(posn);
+    u.setTargetPosnOverlay(posn);
     u.setNextActivity("walking");
   }
   
   
-  public void doRightClick(Posn pixel) {
+  public void doAttackOrder(Posn pixel) {
     doRightClick(pixel, "attacking");
   }
 

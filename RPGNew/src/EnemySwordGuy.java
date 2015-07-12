@@ -8,22 +8,26 @@ public class EnemySwordGuy extends HumanUnit {
   public EnemySwordGuy(RPG game, String name, Posn posn, Player player) {
     super(game, name, activities, posn, player);
     currentHP = maxHP = 100;
+    currentEP = maxEP = 40;
     minDamage = 5;
     maxDamage = 10;
   }
 
   public void nextActivity() {
     super.nextActivity();
+    Unit targetUnit = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
-          if (nextTargetUnit == null || game.distance2(this,u) < game.distance2(this,nextTargetUnit)) {
-            nextTargetUnit = u;
-            setNextActivity("attacking");
+          if (targetUnit == null || game.distance2(this,u) < game.distance2(this,targetUnit)) {
+            setNextTargetUnit(u);
           }
         }
       }
-      if (nextTargetUnit != null) {
+      if (getNextTargetUnit() != null) {
+        setNextActivity("attacking");
+      }
+      if (targetUnit != null) {
         super.nextActivity();
       }
     }

@@ -34,7 +34,7 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
     if (e.getActionCommand().equals("Continue...")) {
       CharacterCreator cc = window.getCharacterCreator();
       window.setCardLayout("Game");
-      startGame(cc.exportPaletteSwaps());
+      game.start(cc.exportPaletteSwaps());
     }
   }
   
@@ -57,9 +57,8 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
     game = new RPG(window);
     window.initCardLayout(game);
   }
+  /*
   public void startGame(HashMap<Color, Color> swaps) {
-
-
     game.start();
-  }
+  }*/
 }

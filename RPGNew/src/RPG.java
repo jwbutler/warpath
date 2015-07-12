@@ -1,28 +1,15 @@
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Random;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.OverlayLayout;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import jwbgl.*;
 
@@ -110,9 +97,29 @@ public class RPG implements ActionListener {
   }
   
   // Start the timer.  We might also use this to restart/unpause
-  public void start() {
+  public void start(HashMap<Color, Color> swaps) {
+    // Add some player units.
+    //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
+    
+    // This is a dumb workaround.
+    setFloor(new Floor(this, 1,1));
+    getFloor().setTile(0,0, new Tile(this, new Posn(0,0), "tile_96x48_grass.png"));
+    SwordGuy u = new SwordGuy(this, "u", new Posn(0,0), getHumanPlayer(), swaps);
+    //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
+    addUnit(u);
+    
+    // Make a hostile AI player
+    addPlayer(2, new AIPlayer());
+    getHumanPlayer().setHostile(getPlayer(2));
+    getPlayer(2).setHostile(getPlayer(1));
+    
+    Level testLevel = new TestLevel(this);
+    openLevel(testLevel);
     frameTimer.start();
     centerCamera();
+  }
+  public void start() {
+    start(new HashMap<Color, Color>());
   }
   
   // Called every time the frame timer fires.

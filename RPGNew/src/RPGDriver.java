@@ -59,23 +59,7 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
   }
   public void startGame(HashMap<Color, Color> swaps) {
 
-    // Add some player units.
-    //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
-    
-    // This is a dumb workaround.
-    game.setFloor(new Floor(game, 1,1));
-    game.getFloor().setTile(0,0, new Tile(game, new Posn(0,0), "tile_96x48_grass.png"));
-    SwordGuy u = new SwordGuy(game, "u", new Posn(0,0), game.getHumanPlayer(), swaps);
-    //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
-    game.addUnit(u);
-    
-    // Make a hostile AI player
-    game.addPlayer(2, new AIPlayer());
-    game.getHumanPlayer().setHostile(game.getPlayer(2));
-    game.getPlayer(2).setHostile(game.getPlayer(1));
-    
-    Level testLevel = new TestLevel(game);
-    game.openLevel(testLevel);
+
     game.start();
   }
 }

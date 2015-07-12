@@ -49,6 +49,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private TransHealthBar healthBar;
   protected HashMap<String, Accessory> equipment;
   protected HashMap<Color, Color> paletteSwaps;
+  public static final int BLOCK_COST = 8; // per second
+  public static final int ATTACK_COST = 25;
+  public static final int BASH_COST = 40;
   
   public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
@@ -222,7 +225,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         targetPosn = nextTargetPosn;
         pointAt(targetPosn);
         setCurrentActivity("blocking_1");
-        System.out.printf("startblock - %s - %s\n", getPosn(), targetPosn);
+        //System.out.printf("startblock - %s - %s\n", getPosn(), targetPosn);
         setNextActivity("blocking_2");
       }
       if (targetUnit != null) {
@@ -303,7 +306,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         return;
       }
     } else if (currentActivity == "stunned_short") {
-      System.out.println("end stun");
+      //System.out.println("end stun");
       setCurrentActivity("standing");
       clearTargets();
       return;

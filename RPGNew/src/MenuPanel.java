@@ -35,11 +35,11 @@ public class MenuPanel extends JPanel {
 		this.setBorder(new EmptyBorder(300,250,50,250));
 		
 		// Make and add buttons
-	    JButton playButton = new JButton("Play");
-	    JButton editButton = new JButton("Level Editor");
+	    JButton playButton = new JButton("Character Creator");
+	    JButton quickPlayButton = new JButton("Quick Start");
 	    JButton exitButton = new JButton("Exit");
 	    this.add(playButton);
-	    this.add(editButton);
+	    this.add(quickPlayButton);
 	    this.add(exitButton);
 	    
 	    // Position and Size
@@ -63,11 +63,12 @@ public class MenuPanel extends JPanel {
 	      }
 	    });
 	    
-      editButton.addActionListener(new ActionListener(){
+      quickPlayButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e){
           window.setCardLayout("Game");
+          game.start();
         }
-      });	    
+      });
 	    
 	    exitButton.addActionListener(new ActionListener(){
 	      public void actionPerformed(ActionEvent e){

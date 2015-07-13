@@ -145,14 +145,22 @@ public class RPG implements ActionListener {
         }
       } else if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
         if (pixelToGrid(getMousePosn()) != null) {
-          getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
-          getPlayerUnit().setTargetPosnOverlay(null);
+          if (nextActivity != null && nextActivity.equals("bashing")) {
+            System.out.println("bash1");
+          } else {
+            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+            getPlayerUnit().setTargetPosnOverlay(null);
+          }
         }
       } else if (currentActivity.equals("bashing") || currentActivity.equals("attacking")) {
         if (pixelToGrid(getMousePosn()) != null) {
-          getPlayerUnit().setNextActivity("blocking_1");
-          getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
-          getPlayerUnit().setTargetPosnOverlay(null);
+          if (nextActivity != null && nextActivity.equals("bashing")) {
+            System.out.println("bash2");
+          } else {
+            getPlayerUnit().setNextActivity("blocking_1");
+            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+            getPlayerUnit().setTargetPosnOverlay(null);
+          }
         }
       }
     } else {

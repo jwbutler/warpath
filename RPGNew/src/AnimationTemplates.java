@@ -4,13 +4,13 @@ import java.util.HashMap;
  * everything in the game.
  */
 public class AnimationTemplates {
-  private static final String[] STANDING = {
+  public static final String[] STANDING = {
     "standing_1", "standing_1",
     "standing_1", "standing_1"
   };
   
   /* 8 frames */
-  private static final String[] STUNNED_SHORT = {
+  public static final String[] STUNNED_SHORT = {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",
@@ -18,7 +18,7 @@ public class AnimationTemplates {
   };
   
   /* 16 frames */
-  private static final String[] STUNNED_LONG = {
+  public static final String[] STUNNED_LONG = {
     "standing_1", "standing_1",
     "standing_1", "standing_1",
     "standing_1", "standing_1",
@@ -29,31 +29,31 @@ public class AnimationTemplates {
     "standing_1", "standing_1"
   };
   
-  private static final String[] WALKING = {
+  public static final String[] WALKING = {
     "walking_1", "walking_1",
     "walking_2","walking_2"
   };
   
-  private static final String[] ATTACKING = {
+  public static final String[] ATTACKING = {
     "attacking_1", "attacking_1",
     "attacking_2", "attacking_2",
     "attacking_2", "attacking_2",
     "attacking_1", "attacking_1",
   };
   
-  private static final String[] BLOCKING_1 = {
+  public static final String[] BLOCKING_1 = {
     "attacking_1", "attacking_1"
   };
   
-  private static final String[] BLOCKING_2 = {
+  public static final String[] BLOCKING_2 = {
     "attacking_2b", "attacking_2b"
   };
   
-  private static final String[] BLOCKING_3 = {
+  public static final String[] BLOCKING_3 = {
     "attacking_1", "attacking_1"
   };
   
-  private static final String[] BASHING = {
+  public static final String[] BASHING = {
     "attacking_1", "attacking_1",
     "attacking_2b", "attacking_2b",
     "attacking_2b", "attacking_2b",
@@ -61,24 +61,31 @@ public class AnimationTemplates {
     "standing_1", "standing_1"
   };
   
-  private static final String[] SLASHING_1 = {
+  public static final String[] SLASHING_1 = {
     "attacking_1", "attacking_1",
   };
   
-  private static final String[] SLASHING_2 = {
+  public static final String[] SLASHING_2 = {
     "attacking_2", "attacking_2",
     "attacking_2", "attacking_2"
   };
   
-  private static final String[] SLASHING_3 = {
+  public static final String[] SLASHING_3 = {
     "attacking_1", "attacking_1",
     "standing_1", "standing_1"
   };
   
+  public static final String[] FALLING = {
+    "falling_1", "falling_1",
+    "falling_2", "falling_2",
+    "falling_3", "falling_3",
+    "falling_4", "falling_4"
+  };
   
-  private static final String[] FALLING = {
-    "falling_1", "falling_2",
-    "falling_3", "falling_4"
+  public static final String[] ZOMBIE_FALLING = {
+    "falling_1", "falling_1",
+    "falling_2", "falling_2",
+    "falling_3", "falling_3"
   };
   
   public static String[] getTemplate(String activity) {

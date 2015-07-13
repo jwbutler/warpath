@@ -46,7 +46,6 @@ public class SwordGuy extends HumanUnit {
   @Override
   public void draw(Graphics g) {
     super.draw(g);
-    printDebug();
   }
 
 }

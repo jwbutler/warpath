@@ -33,7 +33,7 @@ public abstract class Accessory {
       for (int j = 0; j < RPG.DIRECTIONS.length; j++) {
         String activity = activities[i];
         String[] filenames = AnimationTemplates.getTemplate(activity);
-        animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j]);
+        animations[k++] = Animation.createFixed(animationName, filenames, activity, RPG.DIRECTIONS[j]);
       }
     }
   }

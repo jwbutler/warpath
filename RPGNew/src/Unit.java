@@ -24,7 +24,7 @@ import jwbgl.*;
 public abstract class Unit extends BasicObject implements GameObject, Serializable {
   private String name;
   protected String animationName;
-  private Animation[] animations;
+  protected ArrayList<Animation> animations;
   protected int dx;
   protected int dy;
   private int xOffset;
@@ -115,24 +115,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void loadAnimations() {
     // we could easily rewrite this without k
 
-    animations = new Animation[activities.length * RPG.DIRECTIONS.length];
-    int k = 0;
+    animations = new ArrayList<Animation>();
     for (int i = 0; i < activities.length; i++) {
-      for (int j = 0; j < RPG.DIRECTIONS.length; j++) {
-        String activity = activities[i];
-        String[] filenames = AnimationTemplates.getTemplate(activity);
-        if (activity.equals("falling")) {
-          String dir = RPG.DIRECTIONS[j];
-          /* Using the special Animation constructor I made just for falling. */
-          if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
-            animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j], "NE");
-          } else {
-            animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j], "S");
-          }
-        } else {
-          animations[k++] = new Animation(animationName, filenames, activity, RPG.DIRECTIONS[j]);
-        }
-      }
+      loadActivityAnimations(activities[i]);
     }
     
     for (Accessory e: equipment.values()) {
@@ -140,6 +125,41 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
+  /* Extend this as needed for animations that have different versions for
+   * different units. Eventually that will likely be all of them. */
+  private void loadActivityAnimations(String activity) {
+    if (activity.equals("falling")) {
+      loadFallingAnimations();
+    } else {
+      for (int j = 0; j < RPG.DIRECTIONS.length; j++) {
+        String[] filenames = AnimationTemplates.getTemplate(activity);
+        animations.add(Animation.createFixed(animationName, filenames, activity, RPG.DIRECTIONS[j]));
+      }
+    }
+  }
+  
+  /* Falling has a few variations; this is for human units I think.
+   * Two directions, NE or S. */
+  public void loadFallingAnimations() {
+    String[] filenames = AnimationTemplates.getTemplate("falling");
+    for (int j=0; j<RPG.DIRECTIONS.length; j++) {
+      String dir = RPG.DIRECTIONS[j];
+      String[] filenames2 = new String[filenames.length];
+      /* Using the special Animation constructor I made just for falling. */
+      if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
+        for (int i=0; i<filenames2.length; i++) {
+          filenames2[i] = Animation.fixFilename(animationName, filenames[i], "NE");
+        }
+        animations.add(new Animation(animationName, filenames2, "falling", "NE"));
+      } else {
+        for (int i=0; i<filenames2.length; i++) {
+          filenames2[i] = Animation.fixFilename(animationName, filenames[i], "S");
+        }
+        animations.add(new Animation(animationName, filenames2, "falling", "S"));
+      }
+    }
+  }
+
   public void nextFrame() {
     if (currentAnimation.hasNextFrame()) {
       currentAnimation.nextFrame();
@@ -167,7 +187,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         setCurrentActivity("blocking_2");
       } else {
         setCurrentActivity("blocking_3");
-        setNextActivity(null);
+        //setNextActivity(null);
       }
     
     /*} else if (currentActivity.equals("blocking_3")) {
@@ -693,7 +713,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
 
   // Important: this takes a Posn as an argument, not a FloorOverlay
   public void setTargetPosnOverlay(Posn posn) {
-    System.out.println(posn);
     if (targetPosnOverlay != null) {
       game.getDepthTree().remove(targetPosnOverlay);
     }
@@ -734,14 +753,14 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     int i = 0;
     Animation oldAnimation = currentAnimation;
     currentAnimation = null;
-    while (i < animations.length) {
-      if (!animations[i].getActivity().equals(activity)) {
+    while (i < animations.size()) {
+      if (!animations.get(i).getActivity().equals(activity)) {
         i += 8;
-      } else if (!animations[i].getDirection().equals(direction)) {
+      } else if (!animations.get(i).getDirection().equals(direction)) {
         i++;
       } else {
         // It's a match!
-        currentAnimation = animations[i];
+        currentAnimation = animations.get(i);
         currentAnimation.setIndex(0);
         break;
       }

@@ -131,31 +131,42 @@ public class RPG implements ActionListener {
     String currentActivity = getPlayerUnit().getCurrentActivity();
     String nextActivity = getPlayerUnit().getNextActivity();
     if (ctrlIsDown()) {
-      if (currentActivity.equals("standing")) {
+      if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
         if (nextActivity != null && nextActivity.equals("bashing")) {
           /* Bash */
         } else {
           if (pixelToGrid(getMousePosn()) != null) {
-            getPlayerUnit().setNextActivity("blocking_1");
-            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+            if (getPlayerUnit().currentEP > 0) {
+              getPlayerUnit().setNextActivity("blocking_1");
+              getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+              getPlayerUnit().setTargetPosnOverlay(null);
+            }
           }
         }
       } else if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
         if (pixelToGrid(getMousePosn()) != null) {
           getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+          getPlayerUnit().setTargetPosnOverlay(null);
         }
       } else if (currentActivity.equals("bashing") || currentActivity.equals("attacking")) {
         if (pixelToGrid(getMousePosn()) != null) {
           getPlayerUnit().setNextActivity("blocking_1");
           getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+          getPlayerUnit().setTargetPosnOverlay(null);
         }
       }
     } else {
-      if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
-        if (getPlayerUnit().getNextActivity().equals("bashing")) {
+      /*if (currentActivity.equals("blocking_2")) {
+        if (getPlayerUnit().getNextActivity() != null && getPlayerUnit().getNextActivity().equals("bashing")) {
           System.out.println("bash?");
         } else {
-          getPlayerUnit().setNextActivity("blocking_3");
+          //getPlayerUnit().setNextActivity("blocking_3");
+          getPlayerUnit().setNextActivity(null);
+        }
+      } else */
+      if (getPlayerUnit().getNextActivity() != null) {
+        if (getPlayerUnit().getNextActivity().equals("blocking_1") || getPlayerUnit().getNextActivity().equals("blocking_2")) {
+          getPlayerUnit().setNextActivity(null);
         }
       }
     }

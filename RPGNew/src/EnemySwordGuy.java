@@ -1,4 +1,5 @@
 import java.util.Random;
+
 import jwbgl.*;
 /* A basic enemy unit for testing! */
 
@@ -31,5 +32,12 @@ public class EnemySwordGuy extends HumanUnit {
         super.nextActivity();
       }
     }
+  }
+  
+  public void doAttackHit(Unit u) {
+    int dmg = game.getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
+    // soundFX
+    u.takeHit(this, dmg);
+    playHitSound();
   }
 }

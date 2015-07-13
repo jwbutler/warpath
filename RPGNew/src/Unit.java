@@ -50,10 +50,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private TransHealthBar healthBar;
   protected HashMap<String, Accessory> equipment;
   protected HashMap<Color, Color> paletteSwaps;
-  public static final int BLOCK_COST = 8; // costs 1 EP per N ticks
-  public static final int ATTACK_COST = 15;
-  public static final int BASH_COST = 50;
-  public static final int HP_REGEN = 40; // regen 1 HP per N ticks
+  public static final int BLOCK_COST = 2; // costs N EP per tick
+  public static final int ATTACK_COST = 25;
+  public static final int BASH_COST = 40;
+  public static final int HP_REGEN = 20; // regen 1 HP per N ticks
   public static final int EP_REGEN = 1; // regen 1 EP per N ticks
   
   public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
@@ -153,21 +153,21 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public void nextActivity() {
     if (currentActivity.equals("blocking_1")) {
-      if (nextActivity.equals("blocking_2")) {
+      if (nextActivity != null && nextActivity.equals("blocking_2")) {
         pointAt(nextTargetPosn);
         setCurrentActivity("blocking_2");
       } else {
         setCurrentActivity("blocking_3");
       }
     } else if (currentActivity.equals("blocking_2")) {
-      if (nextActivity.equals("blocking_2")) {
+      if (nextActivity == null) {
+        setCurrentActivity("blocking_3");
+      } else if (nextActivity.equals("blocking_2") && currentEP > 0) {
         pointAt(nextTargetPosn);
         setCurrentActivity("blocking_2");
       } else {
         setCurrentActivity("blocking_3");
-        if (nextActivity.equals("blocking_3")) {
-          setNextActivity(null);
-        }
+        setNextActivity(null);
       }
     
     /*} else if (currentActivity.equals("blocking_3")) {
@@ -313,7 +313,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       clearTargets();
       return;
     } else if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
-      if (game.ctrlIsDown()) {
+      if (game.ctrlIsDown() && currentEP > 0) {
         setTargetPosn(game.pixelToGrid(game.getMousePosn()));
         pointAt(targetPosn);
         setCurrentActivity("blocking_2");
@@ -408,6 +408,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void doUpkeep() {
     // somewhat confusingly, this is executed AFTER drawing
     // ... or is it? not anymore I don't think
+    if (getCurrentActivity().equals("blocking_2")) {
+      currentEP -= BLOCK_COST;
+    }
     if ((game.getTicks() % HP_REGEN == 0) && (currentHP < maxHP)) {
       currentHP++;
     }
@@ -474,7 +477,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             System.out.println("uh oh");
           }
         }
+      } else if (getCurrentActivity().equals("blocking_2")) {
+        if (currentHP == 0) {
+          setNextActivity(null);
+          setNextTargetPosn(null);
+        }
       } else if (getCurrentAnimation().getIndex() == 2) {
+        
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
         

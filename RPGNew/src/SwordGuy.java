@@ -30,6 +30,7 @@ public class SwordGuy extends HumanUnit {
     int dmg = game.getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
     // soundFX
     u.takeHit(this, dmg);
+    playHitSound();
   }
   public void doBashHit(Unit u) {
     int dx = u.getX() - getX();
@@ -38,6 +39,7 @@ public class SwordGuy extends HumanUnit {
     u.setCurrentActivity("stunned_short");
     u.clearTargets();
     u.takeHit(this, bashDamage);
+    playHitSound();
     //System.out.println(this + " hit unit " + u);
   }
   

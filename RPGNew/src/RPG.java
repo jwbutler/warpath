@@ -754,7 +754,7 @@ public class RPG implements ActionListener {
         targetPosn = p;
       }
     }
-    System.out.printf("%s %s\n", posn, targetPosn);
+    //System.out.printf("%s %s\n", posn, targetPosn);
     getPlayerUnit().setNextTargetPosn(targetPosn);
     getPlayerUnit().setNextActivity("blocking_1");
   }

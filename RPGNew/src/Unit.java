@@ -51,8 +51,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected HashMap<String, Accessory> equipment;
   protected HashMap<Color, Color> paletteSwaps;
   public static final int BLOCK_COST = 8; // costs 1 EP per N ticks
-  public static final int ATTACK_COST = 25;
-  public static final int BASH_COST = 40;
+  public static final int ATTACK_COST = 15;
+  public static final int BASH_COST = 50;
   public static final int HP_REGEN = 40; // regen 1 HP per N ticks
   public static final int EP_REGEN = 1; // regen 1 EP per N ticks
   
@@ -227,6 +227,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
+            currentEP -= BASH_COST;
           } else {
             System.out.println("Not enough EP for bash.");
             setCurrentActivity("standing");

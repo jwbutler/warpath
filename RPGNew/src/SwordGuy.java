@@ -1,9 +1,11 @@
 import java.awt.Color;
+import java.awt.Graphics;
 import java.util.HashMap;
+
 import jwbgl.*;
 /* Warrior-type player unit class.  Sword/shield.*/
 public class SwordGuy extends HumanUnit {
-  private int minDamage, maxDamage;
+  private int minDamage, maxDamage, bashDamage;
   private static String[] activities = {
     "walking", "standing", "attacking", "blocking_1", "blocking_2", "blocking_3",
     "bashing", "slashing_1", "slashing_2", "slashing_3", "falling"};
@@ -16,6 +18,7 @@ public class SwordGuy extends HumanUnit {
     currentEP = maxEP = 100;
     minDamage = 5;
     maxDamage = 10;
+    bashDamage = 20;
     addAccessory(new Sword(game, this, "sword"));
     addAccessory(new Shield(game, this, "Shield of Suck"));
   }
@@ -29,14 +32,19 @@ public class SwordGuy extends HumanUnit {
     u.takeHit(this, dmg);
   }
   public void doBashHit(Unit u) {
-    int d = 30; // ...
     int dx = u.getX() - getX();
     int dy = u.getY() - getY();
     u.move(dx, dy);
     u.setCurrentActivity("stunned_short");
     u.clearTargets();
-    u.takeHit(this, d);
+    u.takeHit(this, bashDamage);
     //System.out.println(this + " hit unit " + u);
+  }
+  
+  @Override
+  public void draw(Graphics g) {
+    super.draw(g);
+    printDebug();
   }
 
 }

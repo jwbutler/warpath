@@ -75,10 +75,13 @@ public class AnimationTemplates {
     "standing_1", "standing_1"
   };
   
+  /* HACK - this is really only 8 frames but the game tries to draw the unit
+   * before removing it. So we're going to give it an extra pair of frames. */
   public static final String[] FALLING = {
     "falling_1", "falling_1",
     "falling_2", "falling_2",
     "falling_3", "falling_3",
+    "falling_4", "falling_4",
     "falling_4", "falling_4"
   };
   

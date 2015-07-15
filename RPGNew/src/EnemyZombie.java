@@ -13,11 +13,11 @@ public class EnemyZombie extends ZombieUnit {
     super(game, name, activities, posn, player);
     currentHP = maxHP = 100;
     currentEP = maxEP = 40;
-    minDamage = 5;
-    maxDamage = 10;
+    minDamage = 3;
+    maxDamage = 4;
     slowMoveSpeed = 0.3;
     fastMoveSpeed = 0.6;
-    attackChance = 0.7;
+    attackChance = 0.8;
     visionRadius = 10;
     smellRadius = 20;
     RNG = new Random();
@@ -25,14 +25,17 @@ public class EnemyZombie extends ZombieUnit {
 
   public void nextActivity() {
     super.nextActivity();
-    Unit targetUnit = getNextTargetUnit();
+    Unit tu = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
           if (game.distance2(this,u) <= smellRadius) {
-            if (targetUnit == null) {
+            /* This should be where the "smell" sound is played, but we're losing the target
+             * due to endAttack() [maybe]. Work on this later */
+            if (tu == null) {
               setNextTargetUnit(u);
-            } else if (game.distance2(this,u) < game.distance2(this,targetUnit)) {
+              //System.out.println("smell");
+            } else if (game.distance2(this,u) < game.distance2(this,tu)) {
               setNextTargetUnit(u);
             }
           }
@@ -46,11 +49,19 @@ public class EnemyZombie extends ZombieUnit {
       }
     }
     if (currentActivity.equals("walking")) {
-      if (RNG.nextDouble() > fastMoveSpeed) {
+      double cancelChance = 1-slowMoveSpeed;
+      tu = getTargetUnit();
+      if (tu != null) {
+        if (game.distance2(this, tu) <= visionRadius) {
+          cancelChance = 1-fastMoveSpeed;
+        } else {
+          cancelChance = 1-slowMoveSpeed;
+        }
+      }
+      if (RNG.nextDouble() < cancelChance) {
         setCurrentActivity("standing");
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);
-        setNextTargetPosn(null);
         //setTargetUnit(null);
         //setNextTargetUnit(null);
         //setNextActivity(null);
@@ -58,15 +69,15 @@ public class EnemyZombie extends ZombieUnit {
     } else if (currentActivity.equals("attacking")) {
       if (RNG.nextDouble() > attackChance) {
         setCurrentActivity("standing");
+        currentEP += ATTACK_COST;
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);
-        setNextTargetPosn(null);
       }
     }
   }
   
   public void doAttackHit(Unit u) {
-    int dmg = game.getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
+    int dmg = game.getRNG().nextInt(maxDamage - minDamage + 1) + minDamage;
     // soundFX
     u.takeHit(this, dmg);
     playHitSound();

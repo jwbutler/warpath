@@ -51,8 +51,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected HashMap<String, Accessory> equipment;
   protected HashMap<Color, Color> paletteSwaps;
   public static final int BLOCK_COST = 2; // costs N EP per tick
-  public static final int ATTACK_COST = 25;
-  public static final int BASH_COST = 40;
+  public static final int ATTACK_COST = 20;
+  public static final int BASH_COST = 35;
   public static final int HP_REGEN = 20; // regen 1 HP per N ticks
   public static final int EP_REGEN = 1; // regen 1 EP per N ticks
   
@@ -150,12 +150,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         for (int i=0; i<filenames2.length; i++) {
           filenames2[i] = Animation.fixFilename(animationName, filenames[i], "NE");
         }
-        animations.add(new Animation(animationName, filenames2, "falling", "NE"));
+        animations.add(new Animation(animationName, filenames2, "falling", dir));
       } else {
         for (int i=0; i<filenames2.length; i++) {
           filenames2[i] = Animation.fixFilename(animationName, filenames[i], "S");
         }
-        animations.add(new Animation(animationName, filenames2, "falling", "S"));
+        animations.add(new Animation(animationName, filenames2, "falling", dir));
       }
     }
   }
@@ -226,7 +226,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             setNextTargetUnit(null);
             currentEP -= ATTACK_COST;
           } else {
-            System.out.println(this + "Not enough EP for attack.");
             setCurrentActivity("standing");
             targetPosn = null;
             nextActivity = null;
@@ -249,7 +248,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             setNextTargetUnit(null);
             currentEP -= BASH_COST;
           } else {
-            System.out.println("Not enough EP for bash.");
             setCurrentActivity("standing");
             targetPosn = null;
             nextActivity = null;
@@ -276,12 +274,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     /* no nextactivity */
     } else if (currentActivity.equals("falling")) {
       game.queueRemoveUnit(this);
-      String dir = getCurrentDirection();
+      die();
+      /* String dir = getCurrentDirection();
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
         game.addObject(new Corpse(game, getPosn(), "player_falling_NE_4.png"));
       } else {
         game.addObject(new Corpse(game, getPosn(), "player_falling_S_4.png"));
-      }
+      } */
     } else { // if (nextActivity == null) {
       if (currentActivity.equals("walking")) {
         refreshWalk();
@@ -460,7 +459,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       if (getCurrentAnimation().getIndex() <= 2) {
         checkNextTile();
       }
-      
+    }
+    /* This SEEMS redundant but checkNextTile() can change our activity to standing. */
+    if (getCurrentActivity().equals("walking")) {  
       if (getCurrentAnimation().getIndex() == 2) {
         move(dx, dy); // this is problematic for depth reasons.
         path.removeFirst();
@@ -523,22 +524,29 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       }
     }
   }
-  
-  public void die() {
-    // deal with falling animations, sfx, etc later.
-    
-  }
 
+  // deal with falling animations, sfx, etc later.
+  public abstract void die();
+  
+  /* Does NOT validate the tile we're moving to. You have to do that yourself!
+   * checkNextTile() was supposed to do that but it kind of grew in scope. */
   public void move(int dx, int dy) {
-    
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
+    if (t.getUnit() == null) {
+      System.out.println("Move fail 1");
+    } else if (t.getUnit() != this) {
+      System.out.println("Move fail 2");
+    }
     t.setUnit(null);
     
     setPosn(new Posn(getX() + dx, getY() + dy));
     updateDepth();
     game.getDepthTree().add(this);
     t = game.getFloor().getTile(getX(), getY());
+    if (t.getUnit() != null) {
+      System.out.println("Move fail 3");
+    }
     t.setUnit(this);
     updateFloorOverlay();
   }
@@ -602,7 +610,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
               setNextTargetPosn(targetPosn);
               setTargetPosn(null);
             /* Attacking is queued up; keep it queued. */
-            } else if (nextActivity.equals("attacking")) { 
+            } else if (nextActivity.equals("attacking") || nextActivity.equals("blocking")) { 
               setCurrentActivity("standing");
             }
             //System.out.println("waiting.");
@@ -628,10 +636,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           /* Just walking, no unit target */
           if (nextActivity == null) {
             setCurrentActivity("standing");
-            nextTargetPosn = targetPosn;
-            targetPosn = null;
+
+            setNextTargetPosn(targetPosn);
+            setTargetPosn(null);
             setNextActivity("walking");
-          } else if (nextActivity.equals("attacking")) {
+          } else if (nextActivity.equals("attacking") || nextActivity.equals("bashing")) {
             setCurrentActivity("standing");
           }
         } else {
@@ -644,7 +653,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             targetPosn = null;
             setNextActivity("walking");
             setPath(game.findPath(getPosn(), nextTargetPosn));
-          } else if (nextActivity.equals("attacking")) {
+          } else if (nextActivity.equals("attacking") || nextActivity.equals("bashing")) {
             setCurrentActivity("standing");
             targetPosn = null;
             setPath(game.findPath(this, nextTargetUnit));

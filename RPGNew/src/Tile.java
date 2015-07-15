@@ -53,4 +53,8 @@ public class Tile extends BasicObject {
     }
     unit = u;
   }
+  
+  public String toString() {
+    return String.format("Tile<%s, %s>", getPosn(), unit);
+  }
 }

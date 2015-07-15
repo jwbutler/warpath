@@ -35,7 +35,11 @@ public class SwordGuy extends HumanUnit {
   public void doBashHit(Unit u) {
     int dx = u.getX() - getX();
     int dy = u.getY() - getY();
-    u.move(dx, dy);
+    int x = u.getX()+dx;
+    int y = u.getY()+dy;
+    if (!game.isObstacle(new Posn(x,y))) {
+      u.move(dx, dy);
+    }
     u.setCurrentActivity("stunned_short");
     u.clearTargets();
     u.takeHit(this, bashDamage);

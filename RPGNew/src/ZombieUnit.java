@@ -52,7 +52,7 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   @Override
   public void die() {
     /* This should be direction-dependent! */
-    game.addObject(new Corpse(game, getPosn(), "player_falling_NE_4.png"));
+    game.addObject(new Corpse(game, getPosn(), "zombie_falling_3.png"));
   }
   
   @Override
@@ -60,16 +60,17 @@ public abstract class ZombieUnit extends Unit implements Serializable {
    * Two directions, NE or S. */
   public void loadFallingAnimations() {
     String[] filenames = AnimationTemplates.ZOMBIE_FALLING;
+    String[] filenames2 = new String[filenames.length];
     for (int i=0; i<filenames.length; i++) {
-      filenames[i] = Animation.fixFilename(animationName, filenames[i]);
+      filenames2[i] = Animation.fixFilename(animationName, filenames[i]);
     }
     for (int j=0; j<RPG.DIRECTIONS.length; j++) {
       String dir = RPG.DIRECTIONS[j];
       /* Using the special Animation constructor I made just for falling. */
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
-        animations.add(new Animation(animationName, filenames, "falling", "NE"));
+        animations.add(new Animation(animationName, filenames2, "falling", dir));
       } else {
-        animations.add(new Animation(animationName, filenames, "falling", "S"));
+        animations.add(new Animation(animationName, filenames2, "fallingB", dir));
       }
     }
   }

@@ -9,7 +9,7 @@ public abstract class Accessory {
   // inheritance. fuck java
   private String slot;
   private Animation[] animations;
-  private String[] activities = {"walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3"};
+  private String[] activities = {"walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3", "falling"};
   protected String animationName;
   protected RPG game;
   protected Unit unit;

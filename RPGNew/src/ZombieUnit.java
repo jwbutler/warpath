@@ -56,22 +56,26 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   }
   
   @Override
-  /* Falling has a few variations; this is for human units I think.
-   * Two directions, NE or S. */
+  /* Zombies have two directions for falling, denoted "falling" and "fallingB" rather
+   * than with directions. Not sure which directions they specifically should correspond to.
+   * (FU will) */
   public void loadFallingAnimations() {
-    String[] filenames = AnimationTemplates.ZOMBIE_FALLING;
-    String[] filenames2 = new String[filenames.length];
-    for (int i=0; i<filenames.length; i++) {
-      filenames2[i] = Animation.fixFilename(animationName, filenames[i]);
-    }
-    for (int j=0; j<RPG.DIRECTIONS.length; j++) {
-      String dir = RPG.DIRECTIONS[j];
-      /* Using the special Animation constructor I made just for falling. */
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.ZOMBIE_FALLING;
+      String[] filenames2 = new String[filenames.length];
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
-        animations.add(new Animation(animationName, filenames2, "falling", dir));
+        for (int j=0; j<filenames.length; j++) {
+          String animIndex = filenames[j].split("_")[1];
+          filenames2[j] = String.format("%s_%s_%s.png", animationName, "falling", animIndex);
+        }
       } else {
-        animations.add(new Animation(animationName, filenames2, "fallingB", dir));
+        for (int j=0; j<filenames.length; j++) {
+          String animIndex = filenames[j].split("_")[1];
+          filenames2[j] = String.format("%s_%s_%s.png", animationName, "fallingB", animIndex);
+        }
       }
+      animations.add(new Animation(animationName, filenames2, "falling", dir));
     }
   }
 }

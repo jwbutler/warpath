@@ -34,7 +34,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected Unit nextTargetUnit;
   protected Posn targetPosn;
   protected Posn nextTargetPosn;
-  private String[] activities;
+  protected String[] activities;
   protected String currentActivity;
   protected String nextActivity;
   private Animation currentAnimation;
@@ -127,36 +127,46 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   /* Extend this as needed for animations that have different versions for
    * different units. Eventually that will likely be all of them. */
-  private void loadActivityAnimations(String activity) {
+  public void loadActivityAnimations(String activity) {
     if (activity.equals("falling")) {
       loadFallingAnimations();
     } else {
-      for (int j = 0; j < RPG.DIRECTIONS.length; j++) {
-        String[] filenames = AnimationTemplates.getTemplate(activity);
-        animations.add(Animation.createFixed(animationName, filenames, activity, RPG.DIRECTIONS[j]));
-      }
+      loadGenericAnimations(activity);
+    }
+  }
+  
+  public void loadGenericAnimations(String activity) {
+    String[] filenames = AnimationTemplates.getTemplate(activity);
+    for (int i = 0; i < RPG.DIRECTIONS.length; i++) {
+      String[] filenames2 = new String[filenames.length];
+      for (int j=0; j<filenames.length; j++) {
+        String activityName = filenames[j].split("_")[0];
+        String frameNum = filenames[j].split("_")[1];
+        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, activityName, RPG.DIRECTIONS[i], frameNum); 
+      }        
+      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i]));
     }
   }
   
   /* Falling has a few variations; this is for human units I think.
    * Two directions, NE or S. */
   public void loadFallingAnimations() {
-    String[] filenames = AnimationTemplates.getTemplate("falling");
-    for (int j=0; j<RPG.DIRECTIONS.length; j++) {
-      String dir = RPG.DIRECTIONS[j];
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.FALLING;
       String[] filenames2 = new String[filenames.length];
-      /* Using the special Animation constructor I made just for falling. */
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
-        for (int i=0; i<filenames2.length; i++) {
-          filenames2[i] = Animation.fixFilename(animationName, filenames[i], "NE");
+        for (int j=0; j<filenames.length; j++) {
+          String animIndex = filenames[j].split("_")[1];
+          filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "falling", "NE", animIndex);
         }
-        animations.add(new Animation(animationName, filenames2, "falling", dir));
       } else {
-        for (int i=0; i<filenames2.length; i++) {
-          filenames2[i] = Animation.fixFilename(animationName, filenames[i], "S");
+        for (int j=0; j<filenames.length; j++) {
+          String animIndex = filenames[j].split("_")[1];
+          filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "falling", "S", animIndex);
         }
-        animations.add(new Animation(animationName, filenames2, "falling", dir));
       }
+      animations.add(new Animation(animationName, filenames2, "falling", dir));
     }
   }
 

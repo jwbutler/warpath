@@ -88,9 +88,12 @@ public class AnimationTemplates {
   public static final String[] ZOMBIE_FALLING = {
     "falling_1", "falling_1",
     "falling_2", "falling_2",
+    "falling_3", "falling_3",
     "falling_3", "falling_3"
   };
   
+  /* This is a convenience method to load the default Player animations
+   * semi-automatically. */
   public static String[] getTemplate(String activity) {
     if (activity.equals("standing")) {
       return STANDING;

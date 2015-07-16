@@ -1,4 +1,6 @@
 import java.awt.Graphics;
+import java.util.ArrayList;
+
 import jwbgl.*;
 
 /* An Accessory generally represents armor objects.  Could also be things like
@@ -8,8 +10,8 @@ public abstract class Accessory {
   // going on here - BUT i can't think of a way to do this without multiple
   // inheritance. fuck java
   private String slot;
-  private Animation[] animations;
-  private String[] activities = {"walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3", "falling"};
+  protected ArrayList<Animation> animations;
+  protected String[] activities = {"walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3", "falling"};
   protected String animationName;
   protected RPG game;
   protected Unit unit;
@@ -26,15 +28,19 @@ public abstract class Accessory {
   }
   
   public void loadAnimations() {
-    // copy/pasted from Unit.
-    animations = new Animation[activities.length * RPG.DIRECTIONS.length];
-    int k = 0;
+    // c/p from Unit
+
+    animations = new ArrayList<Animation>();
     for (int i = 0; i < activities.length; i++) {
-      for (int j = 0; j < RPG.DIRECTIONS.length; j++) {
-        String activity = activities[i];
-        String[] filenames = AnimationTemplates.getTemplate(activity);
-        animations[k++] = Animation.createFixed(animationName, filenames, activity, RPG.DIRECTIONS[j]);
-      }
+      loadActivityAnimations(activities[i]);
+    }
+  }
+  
+  public void loadActivityAnimations(String activity) {
+    if (activity.equals("falling")) {
+      loadFallingAnimations();
+    } else {
+      loadGenericAnimations(activity);
     }
   }
   
@@ -57,19 +63,18 @@ public abstract class Accessory {
 
   public void setCurrentAnimation(String activity, String direction) {
     int i = 0;
-    while (i < animations.length) {
-      if (!animations[i].getActivity().equals(activity)) {
+    while (i < animations.size()) {
+      if (!animations.get(i).getActivity().equals(activity)) {
         i += 8;
-      } else if (!animations[i].getDirection().equals(direction)) {
+      } else if (!animations.get(i).getDirection().equals(direction)) {
         i++;
       } else {
         // It's a match!
-        currentAnimation = animations[i];
+        currentAnimation = animations.get(i);
         currentAnimation.setIndex(0);
         return;
       }
     }
-    //System.out.println("fuxxx");
   }
 
   public void nextFrame() {
@@ -82,6 +87,43 @@ public abstract class Accessory {
   
   public boolean drawBehind() {
     return getCurrentAnimation().drawBehind(getCurrentAnimation().getIndex());
+  }
+  
+  /* C&P from Unit! */
+  public void loadGenericAnimations(String activity) {
+    String[] filenames = AnimationTemplates.getTemplate(activity);
+    for (int i = 0; i < RPG.DIRECTIONS.length; i++) {
+      String[] filenames2 = new String[filenames.length];
+      for (int j=0; j<filenames.length; j++) {
+        String activityName = filenames[j].split("_")[0];
+        String frameNum = filenames[j].split("_")[1];
+        filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, activityName, RPG.DIRECTIONS[i], frameNum));
+      }
+      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i]));
+    }
+  }
+  /* C&P from Unit.
+   * IMPORTANT: Some of the equipment will have its own falling animations.
+   * Need to override this. */
+  public void loadFallingAnimations() {
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.FALLING;
+      String[] filenames2 = new String[filenames.length];
+      if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
+        for (int j=0; j<filenames.length; j++) {
+          String animIndex = filenames[j].split("_")[1];
+          filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, "falling", "NE", animIndex));
+
+        }
+      } else {
+        for (int j=0; j<filenames.length; j++) {
+          String animIndex = filenames[j].split("_")[1];
+          filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, "falling", "S", animIndex));
+        }
+      }
+      animations.add(new Animation(animationName, filenames2, "falling", dir));
+    }
   }
 
 }

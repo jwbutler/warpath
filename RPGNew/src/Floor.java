@@ -10,7 +10,7 @@ public class Floor {
   private RPG game;
   private Tile[][] tiles;
   private Surface floorSurface;
-  public int width, height; // number of grid tiles, NOT pixels
+  private int width, height; // number of grid tiles, NOT pixels
   
   public Floor(RPG game, int width, int height) {
     this.game = game;
@@ -57,6 +57,13 @@ public class Floor {
   }
   public void setTile(int x, int y, Tile tile) {
     tiles[x][y] = tile;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+  public int getHeight() {
+    return height;
   }
   
 }

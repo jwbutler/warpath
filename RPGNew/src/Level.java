@@ -59,7 +59,8 @@ public class Level {
           objects.add(new Wall(game, new Posn(x,y), "wall_48x78_1.png"));
         } else if (c.equals(ENEMY_COLOR)) {
           //units.add(new EnemySwordGuy(game, "", new Posn(x,y), game.getPlayer(2)));
-          units.add(new EnemyZombie(game, "", new Posn(x,y), game.getPlayer(2)));
+          //units.add(new EnemyZombie(game, "", new Posn(x,y), game.getPlayer(2)));
+          units.add(new EnemyRobedWizard(game, "", new Posn(x,y), game.getPlayer(2)));
         } else if (c.equals(PLAYER_COLOR)) {
           game.getPlayerUnit().setPosn(new Posn(x,y));
           units.add(game.getPlayerUnit());

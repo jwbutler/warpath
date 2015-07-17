@@ -103,7 +103,7 @@ public class RPG implements ActionListener {
     
     // This is a dumb workaround.
     setFloor(new Floor(this, 1,1));
-    getFloor().setTile(0,0, new Tile(this, new Posn(0,0), "tile_96x48_grass.png"));
+    getFloor().setTile(0,0, new Tile(this, new Posn(0,0), "tile_48x24_grass.png"));
     SwordGuy u = new SwordGuy(this, "u", new Posn(0,0), getHumanPlayer(), swaps);
     //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
     addUnit(u);
@@ -270,7 +270,7 @@ public class RPG implements ActionListener {
     
     int left, top;
     // Offsets are to make it so that pixel (0,0) is at the very top left of the floor
-    int xOffset = floor.height * TILE_WIDTH / 2;
+    int xOffset = floor.getHeight() * TILE_WIDTH / 2;
     int yOffset = 0;
     //System.out.println("offsets " + xOffset + " " + yOffset);
     int x = posn.getX();
@@ -294,8 +294,8 @@ public class RPG implements ActionListener {
    * tile instead of returning null. */
   public Posn pixelToGrid(Posn pixel) {
     // We need to restrict the range of X and Y, but... later
-    for (int y = 0; y <= floor.height; y++) {
-      for (int x = 0; x <= floor.width; x++) {
+    for (int y = 0; y <= floor.getHeight(); y++) {
+      for (int x = 0; x <= floor.getWidth(); x++) {
         Posn tilePixel = gridToPixel(x, y);
         int left = tilePixel.getX();
         int top = tilePixel.getY();
@@ -322,7 +322,7 @@ public class RPG implements ActionListener {
   public void centerCamera(Posn p) {
     int x = p.getX();
     int y = p.getY();
-    int xx = TILE_WIDTH/2 * (x + (floor.height-y)) - gameWindow.getGamePanel().getWidth()/2;
+    int xx = TILE_WIDTH/2 * (x + (floor.getHeight()-y)) - gameWindow.getGamePanel().getWidth()/2;
     int yy = TILE_HEIGHT/2 * (x+y) - gameWindow.getGamePanel().getHeight()/2;
     setCameraPos(xx, yy);
   }

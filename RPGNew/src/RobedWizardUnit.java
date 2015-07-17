@@ -6,18 +6,18 @@ import java.util.HashMap;
 import jwbgl.*;
 
 public abstract class RobedWizardUnit extends Unit implements Serializable {
-  private static String[] defaultActivities = {"walking", "standing", "attacking", "falling"};
+  private static String[] defaultActivities = {"standing", "walking", "falling", "vanishing", "appearing"};
   
   public RobedWizardUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "player", activities, new HashMap<Color, Color>(), posn, player);
+    this(game, name, "robed_wizard", activities, new HashMap<Color, Color>(), posn, player);
     this.setyOffset(-32);
   }  
   
   public RobedWizardUnit(RPG game, String name, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "player", activities, paletteSwaps, posn, player);
+    this(game, name, "robed_wizard", activities, paletteSwaps, posn, player);
     this.setyOffset(-32);
   }  
   
@@ -32,16 +32,6 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     this.setyOffset(-32);
   }
 
-  @Override
-  public void playHitSound() {
-    game.playSound("hit1.wav");
-  }
-  
-  @Override
-  public void playBashSound() {
-    game.playSound("hit1.wav");
-  }
-  
   @Override
   public void setCurrentActivity(String newActivity) {
     currentActivity = newActivity;
@@ -66,6 +56,57 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     
     for (Accessory e: equipment.values()) {
       e.loadAnimations();
+    }
+  }
+  
+  public void loadActivityAnimations(String activity) {
+    if (activity.equals("falling")) {
+      loadFallingAnimations();
+    } else if (activity.equals("standing")) {
+      loadGenericAnimations(activity, AnimationTemplates.WIZARD_STANDING);
+    } else if (activity.equals("walking")) {
+      loadGenericAnimations(activity, AnimationTemplates.WIZARD_WALKING);
+    } else if (activity.equals("teleporting")) {
+      loadTeleportingAnimations();
+    } else if (activity.equals("appearing")) {
+      loadAppearingAnimations();
+    } else {
+      loadGenericAnimations(activity);
+    }
+  }
+  
+  
+  protected void loadAppearingAnimations() {
+    
+  }
+
+  protected void loadTeleportingAnimations() {
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.WIZARD_APPEARING;
+      String[] filenames2 = new String[filenames.length];
+      for (int j=0; j<filenames.length; j++) {
+        String animIndex = filenames[j].split("_")[1];
+        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
+      }
+      animations.add(new Animation(animationName, filenames2, "falling", dir));
+    }
+
+  }
+
+  @Override
+  /* (C&P from ZombieUnit)
+   * Uses the vanishing animation which is directionless. */
+  public void loadFallingAnimations() {
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.FALLING;
+      String[] filenames2 = new String[filenames.length];
+      for (int j=0; j<filenames.length; j++) {
+        String animIndex = filenames[j].split("_")[1];
+        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
+      }
+      animations.add(new Animation(animationName, filenames2, "falling", dir));
     }
   }
 

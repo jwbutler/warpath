@@ -34,6 +34,7 @@ public class EnemyZombie extends ZombieUnit {
              * due to endAttack() [maybe]. Work on this later */
             if (tu == null) {
               setNextTargetUnit(u);
+              tu = u;
               //System.out.println("smell");
             } else if (game.distance2(this,u) < game.distance2(this,tu)) {
               setNextTargetUnit(u);
@@ -81,5 +82,10 @@ public class EnemyZombie extends ZombieUnit {
     // soundFX
     u.takeHit(this, dmg);
     playHitSound();
+  }
+
+  @Override
+  public void playBashSound() {
+    // TODO Auto-generated method stub
   }
 }

@@ -39,11 +39,6 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   }
   
   @Override
-  public void playBashSound() {
-    game.playSound("hit1.wav");
-  }
-  
-  @Override
   public void setCurrentActivity(String newActivity) {
     currentActivity = newActivity;
     setCurrentAnimation(newActivity, getCurrentDirection());

@@ -92,6 +92,25 @@ public class AnimationTemplates {
     "falling_3", "falling_3"
   };
   
+  public static final String[] WIZARD_STANDING = {
+    "standing_1", "standing_1",
+    "standing_2", "standing_2",
+    "standing_3", "standing_3",
+    "standing_4", "standing_4"
+  };
+  
+  public static final String[] WIZARD_WALKING = {
+    "walking_1", "walking_1",
+    "walking_1", "walking_1"
+  };
+
+  public static final String[] WIZARD_APPEARING = {
+    "vanishing_4", "vanishing_4",
+    "vanishing_3", "vanishing_3",
+    "vanishing_2", "vanishing_2",
+    "vanishing_1", "vanishing_1"
+  };
+  
   /* This is a convenience method to load the default Player animations
    * semi-automatically. */
   public static String[] getTemplate(String activity) {

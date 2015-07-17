@@ -69,7 +69,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     dx = 0;
     dy = -1;
     xOffset = 0;
-    /* Sprites are 80x80 (scaled), tiles are 96x48.  There's an 8 pixel space 
+    /* Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8 pixel space 
      * at bottom of player sprites. */
     yOffset = -32;
     loadAnimations();
@@ -135,9 +135,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
-  public void loadGenericAnimations(String activity) {
-    String[] filenames = AnimationTemplates.getTemplate(activity);
-    for (int i = 0; i < RPG.DIRECTIONS.length; i++) {
+  public void loadGenericAnimations(String activity, String[] filenames) {
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
         String activityName = filenames[j].split("_")[0];
@@ -147,6 +146,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i]));
     }
   }
+  
+  public void loadGenericAnimations(String activity) {
+    String[] filenames = AnimationTemplates.getTemplate(activity);
+    loadGenericAnimations(activity, filenames);
+  }
+  
   
   /* Falling has a few variations; this is for human units I think.
    * Two directions, NE or S. */

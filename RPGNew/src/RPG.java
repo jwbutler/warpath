@@ -42,7 +42,11 @@ public class RPG implements ActionListener {
   private Hashtable<Integer, Player> players;
   private ArrayList<Unit> units;
   private ArrayList<GameObject> objects; // Non-units
-  private ArrayList<Unit> deadUnits;
+  
+  /* These are kinda hacks to get around concurrent modification exceptions.
+   * Maybe there is a better solution. */
+  private ArrayList<Unit> unitsToAdd;
+  private ArrayList<Unit> unitsToRemove;
   
   // Unsure if we should keep this reference, he's always going to be
   // player 1, right?
@@ -76,7 +80,8 @@ public class RPG implements ActionListener {
     addHumanPlayer();
     units = new ArrayList<Unit>();
     objects = new ArrayList<GameObject>();
-    deadUnits = new ArrayList<Unit>();
+    unitsToAdd = new ArrayList<Unit>();
+    unitsToRemove = new ArrayList<Unit>();
     RNG = new Random();
     soundPlayer = new SoundPlayer();
     //playSound("crystal.wav");
@@ -127,7 +132,35 @@ public class RPG implements ActionListener {
   // IS THIS THE RIGHT ORDER OF OPERATIONS?
   public void actionPerformed(ActionEvent e) {
   
-    /* Do blocking event code. */
+    /* Do blocking event code.  Should this go to Upkeep? */
+    doBlockUpkeep();
+    
+    for (Unit u: units) {
+      u.doUpkeep();
+    }
+
+    for (Unit u: units) {
+      u.doEvents();
+    }
+    
+    /* Kill units that have been queued for death. (This happens during
+     * nextActivity(), which happens during doUpkeep()... */
+    for (Unit u : unitsToRemove) {
+      removeUnit(u);
+    }
+    unitsToRemove.clear();
+    for (Unit u : unitsToAdd) {
+      addUnit(u);
+    }
+    unitsToAdd.clear();
+    
+    // Repaint() includes a call to drawAll().
+    gameWindow.repaint();
+    incrementTicks();
+  }
+
+  private void doBlockUpkeep() {
+    // TODO Auto-generated method stub
     String currentActivity = getPlayerUnit().getCurrentActivity();
     String nextActivity = getPlayerUnit().getNextActivity();
     if (ctrlIsDown()) {
@@ -178,24 +211,6 @@ public class RPG implements ActionListener {
         }
       }
     }
-    
-    for (Unit u: units) {
-      u.doUpkeep();
-    }
-
-    for (Unit u: units) {
-      u.doEvents();
-    }
-    
-    /* Kill units that have been queued for death. (This happens during
-     * nextActivity(), which happens during doUpkeep()... */
-    for (Unit u : deadUnits) {
-      removeUnit(u);
-    }
-    deadUnits.clear();
-    // Repaint() includes a call to drawAll().
-    gameWindow.repaint();
-    incrementTicks();
   }
 
   // Make the human player and return it.  I'm not sure we need this.
@@ -787,7 +802,7 @@ public class RPG implements ActionListener {
   }
   
   public boolean isObstacle(Posn p) {
-    return getFloor().getTile(p).isObstacle();
+    return getFloor().getTile(p).isBlocked();
   }
 
   public Posn getMousePosn() {
@@ -820,12 +835,20 @@ public class RPG implements ActionListener {
    * array list now, and then after we finish iterating through we'll remove it
    * from both. */
   public void queueRemoveUnit(Unit unit) {
-    deadUnits.add(unit);
+    unitsToRemove.add(unit);
+  }
+  
+  public void queueAddUnit(Unit unit) {
+    unitsToAdd.add(unit);
   }
 
   public int nextEnemyID() {
     // how does ++ work
     return nextEnemyID++;
+  }
+
+  public ArrayList<GameObject> getObjects() {
+    return objects;
   }
 
 }

@@ -1,5 +1,3 @@
-import java.util.HashMap;
-
 /* This class defines the basic set of animations that are used by basically
  * everything in the game.
  */
@@ -109,6 +107,37 @@ public class AnimationTemplates {
     "vanishing_3", "vanishing_3",
     "vanishing_2", "vanishing_2",
     "vanishing_1", "vanishing_1"
+  };
+
+  public static String[] WIZARD_TELEPORTING = {
+    "vanishing_1", "vanishing_1",
+    "vanishing_2", "vanishing_2",
+    "vanishing_3", "vanishing_3",
+    "vanishing_4", "vanishing_4"
+  };
+  
+  public static String[] WIZARD_REZZING = {
+    "casting_1", "casting_1",
+    "casting_2", "casting_2",
+    "casting_3", "casting_3",
+    "casting_4", "casting_4",
+    "casting_1", "casting_1",
+    "casting_2", "casting_2",
+    "casting_3", "casting_3",
+    "casting_4", "casting_4",
+    "casting_1", "casting_1",
+    "casting_2", "casting_2",
+    "casting_3", "casting_3",
+    "casting_4", "casting_4",
+    "casting_5", "casting_5",
+    "casting_6", "casting_6",
+    "casting_7", "casting_7",
+    "casting_8", "casting_8",
+    "casting_5", "casting_5",
+    "casting_6", "casting_6",
+    "casting_7", "casting_7",
+    "casting_8", "casting_8",
+    //for x in [1,2,3,4, 1,2,3,4, 1,2,3,4, 5,6,7,8, 5,6,7,8]: #40 frames long
   };
   
   /* This is a convenience method to load the default Player animations

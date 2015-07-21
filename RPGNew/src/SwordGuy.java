@@ -37,6 +37,11 @@ public class SwordGuy extends HumanUnit {
     int dy = u.getY() - getY();
     int x = u.getX()+dx;
     int y = u.getY()+dy;
+    System.out.println("<kb>");
+    System.out.println(game.isObstacle(new Posn(x,y)));
+    Tile t = game.getFloor().getTile(new Posn(x,y));
+    System.out.println(t.isBlocked());
+    System.out.println("</kb>");
     if (!game.isObstacle(new Posn(x,y))) {
       u.move(dx, dy);
     }

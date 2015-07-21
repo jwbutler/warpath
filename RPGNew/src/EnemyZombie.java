@@ -70,7 +70,7 @@ public class EnemyZombie extends ZombieUnit {
     } else if (currentActivity.equals("attacking")) {
       if (RNG.nextDouble() > attackChance) {
         setCurrentActivity("standing");
-        currentEP += ATTACK_COST;
+        currentEP += attackCost;
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);
       }

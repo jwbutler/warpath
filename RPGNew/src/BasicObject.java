@@ -6,7 +6,7 @@ import jwbgl.*;
 
 public abstract class BasicObject implements GameObject {
   private Posn posn;
-  private int xOffset, yOffset;
+  protected int xOffset, yOffset;
   protected int depthOffset;
   private int depth;
   private Rect rect;
@@ -83,6 +83,10 @@ public abstract class BasicObject implements GameObject {
   }
   
   public boolean isUnit() {
+    return false;
+  }
+  
+  public boolean isCorpse() {
     return false;
   }
   

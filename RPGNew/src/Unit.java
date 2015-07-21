@@ -27,8 +27,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected ArrayList<Animation> animations;
   protected int dx;
   protected int dy;
-  private int xOffset;
-  private int yOffset;
 
   protected Unit targetUnit;
   protected Unit nextTargetUnit;
@@ -46,15 +44,17 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   protected int currentHP, maxHP;
   protected int currentEP, maxEP;
+  protected int hpBarOffset;
   
   private TransHealthBar healthBar;
   protected HashMap<String, Accessory> equipment;
   protected HashMap<Color, Color> paletteSwaps;
-  public static final int BLOCK_COST = 2; // costs N EP per tick
-  public static final int ATTACK_COST = 20;
-  public static final int BASH_COST = 35;
-  public static final int HP_REGEN = 20; // regen 1 HP per N ticks
-  public static final int EP_REGEN = 1; // regen 1 EP per N ticks
+  protected int blockCost = 2; // costs N EP per tick (does not disable HP regen)
+  protected int attackCost = 12; // 8 frames per attack for 66.7% uptime
+  protected int bashCost = 30; // 10 frames per bash for 33.3% uptime
+  protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
+  protected int hpRegen = 20; // regen 1 HP per N ticks
+  protected int epRegen = 1; // regen 1 EP per N ticks
   
   public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
@@ -78,6 +78,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     //player.getUnits().add(this); // NO, the game will do this.
     updateFloorOverlay();
     healthBar = new TransHealthBar(this, 48, 12);
+    hpBarOffset = -20;
   }
   
   public void applyPaletteSwaps() {
@@ -205,9 +206,27 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         //setNextActivity(null);
       }
     
-    /*} else if (currentActivity.equals("blocking_3")) {
-      setCurrentActivity("standing"); */
+    } else if (currentActivity.equals("teleporting")) {
+      setPosn(getTargetPosn());
+      setCurrentActivity("appearing");
+      setTargetPosn(null);
+      currentEP -= teleportCost;
+      
     /* If next activity is walking, do pathfinding. */
+    } else if (currentActivity.equals("rezzing")) {
+      setCurrentActivity("standing");
+      GameObject objectToRemove = null;
+      for (GameObject o : game.getObjects()) {
+        if (o.isCorpse()) {
+          if (o.getPosn().equals(getPosn())) {
+            objectToRemove = o;
+            game.queueAddUnit(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), getPosn(), game.getPlayer(2)));
+          }
+        }
+      }
+      if (objectToRemove != null) {
+        game.removeObject(objectToRemove);
+      }
     } else if (nextActivity != null) {
       Unit lastTargetUnit = null;
       if (targetUnit != null) {
@@ -233,13 +252,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       /* If next activity is attacking, we might have to path to the unit first. */
       } else if (nextActivity.equals("attacking")) {
         if (game.distance2(this, targetUnit) == 1) {
-          if (currentEP >= ATTACK_COST) {
+          if (currentEP >= attackCost) {
             pointAt(targetUnit);
             setCurrentActivity("attacking");
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
-            currentEP -= ATTACK_COST;
+            currentEP -= attackCost;
           } else {
             setCurrentActivity("standing");
             targetPosn = null;
@@ -255,13 +274,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         }
       } else if (nextActivity.equals("bashing")) {
         if (game.distance2(this, targetUnit) == 1) {
-          if (currentEP >= BASH_COST) {
+          if (currentEP >= bashCost) {
             pointAt(targetUnit);
             setCurrentActivity("bashing");
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
-            currentEP -= BASH_COST;
+            currentEP -= bashCost;
           } else {
             setCurrentActivity("standing");
             targetPosn = null;
@@ -276,11 +295,19 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           /* Don't clear nextActivity/nextTargetUnit */ 
         }
       } else if (nextActivity.equals("blocking_1")) {
-        targetPosn = nextTargetPosn;
+        setTargetPosn(getNextTargetPosn());
         pointAt(targetPosn);
         setCurrentActivity("blocking_1");
         //System.out.printf("startblock - %s - %s\n", getPosn(), targetPosn);
         setNextActivity("blocking_2");
+      } else if (nextActivity.equals("teleporting")) {
+        setTargetPosn(getNextTargetPosn());
+        setCurrentActivity("teleporting");
+        setNextActivity(null);
+        setNextTargetPosn(null);
+      } else if (nextActivity.equals("rezzing")) {
+        setCurrentActivity("rezzing");
+        setNextActivity(null);
       }
       /* Shouldn't need to do this anymore now that setters do it for us automatically. 
       if (targetUnit != null) {
@@ -301,6 +328,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         refreshWalk();
       } else {
         setCurrentActivity("standing");
+        setTargetUnit(null);
       }
     }
   }
@@ -443,12 +471,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     // somewhat confusingly, this is executed AFTER drawing
     // ... or is it? not anymore I don't think
     if (getCurrentActivity().equals("blocking_2")) {
-      currentEP -= BLOCK_COST;
+      currentEP -= blockCost;
     }
-    if ((game.getTicks() % HP_REGEN == 0) && (currentHP < maxHP)) {
+    if ((game.getTicks() % hpRegen == 0) && (currentHP < maxHP)) {
       currentHP++;
     }
-    if ((game.getTicks() % EP_REGEN == 0) && (currentEP < maxEP)) {
+    if ((game.getTicks() % epRegen == 0) && (currentEP < maxEP)) {
       currentEP++;
     }
     this.nextFrame();
@@ -457,8 +485,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   
   public void clearTargets() {
-    targetPosn = null;
-    targetUnit = null;
+    setTargetPosn(null);
+    setTargetUnit(null);
     nextTargetPosn = null;
     nextTargetUnit = null;
     nextActivity = null;
@@ -468,8 +496,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
+  /* So this is an important method.
+   * It's a big mess.
+   * The idea here is to handle ALL the activities for ALL unit types here,
+   * so we won't have to copy and paste it into all the unit subclasses.
+   * (They will each have their own nextActivity() logic.)
+   * If this breaks down, figure out a way to split this method up. */
   public void doEvents() {
-    //System.out.println(getCurrentActivity() + " " + nextActivity);
     if (getCurrentActivity().equals("walking")) {
       if (getCurrentAnimation().getIndex() <= 2) {
         checkNextTile();
@@ -486,18 +519,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
         
-        /* Why are we sometimes losing targetUnit?
-         * Haven't seen this one in a while thankfully. */
-        if (targetUnit == null) {
-          System.out.println("FIX TARGETING PROBLEM IDIOT");
-          return;
-        }
-        
-        //System.out.println(targetUnit + " " + nextPosn);
         if (targetUnit.getPosn().equals(nextPosn)) {
           doAttackHit(targetUnit);
-        } else {
-          //System.out.println("Missed");
         }
       }
     } else if (getCurrentActivity().equals("bashing")) {
@@ -523,18 +546,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
         
-        /* Why are we sometimes losing targetUnit?
-         * Haven't seen this one in a while thankfully. */
-        if (targetUnit == null) {
-          System.out.println("FIX TARGETING PROBLEM IDIOT");
-          return;
-        }
-        
-        //System.out.println(targetUnit + " " + nextPosn);
         if (targetUnit.getPosn().equals(nextPosn)) {
           doBashHit(targetUnit);
         } else {
-          //System.out.println("Missed");
         }
       }
     }
@@ -548,24 +562,17 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void move(int dx, int dy) {
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
-    if (t.getUnit() == null) {
-      System.out.println("Move fail 1");
-    } else if (t.getUnit() != this) {
-      System.out.println("Move fail 2");
-    }
     t.setUnit(null);
     
     setPosn(new Posn(getX() + dx, getY() + dy));
     updateDepth();
     game.getDepthTree().add(this);
     t = game.getFloor().getTile(getX(), getY());
-    if (t.getUnit() != null) {
-      System.out.println("Move fail 3");
-    }
     t.setUnit(this);
     updateFloorOverlay();
   }
   
+  /* We can call this on any GameObject for differentiation purposes. */
   public boolean isUnit() {
     return true;
   }
@@ -598,9 +605,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
    * There should always be a targetPosn, right? */ 
   public void checkNextTile() {
     Tile nextTile = game.getFloor().getTile(getX()+dx, getY()+dy); // should match path.first
-    if (nextTile == null) {
-      //System.out.println("Fuck. " + (getX()+dx) + (getY()+dy));
-    }
     if (nextTile.isBlocked()) {
       // If our target posn is next in the path and it's blocked, cancel the movement.
       // Is this good?
@@ -616,7 +620,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             nextTargetUnit = targetUnit;
             setCurrentActivity("standing");
             setNextActivity("attacking");
-            //System.out.println("moved onto target unit.");
           } else if (blockingUnit.isMoving()) {
             /* Nothing queued up, just moving to a spot. */
             if (nextActivity == null) {
@@ -628,18 +631,15 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             } else if (nextActivity.equals("attacking") || nextActivity.equals("blocking")) { 
               setCurrentActivity("standing");
             }
-            //System.out.println("waiting.");
           } else { 
             setCurrentActivity("standing");
             clearTargets();
-            //System.out.println("blocked else case");
           }
         // If the target posn is blocked by an object - maybe this would
         // happen with fog of war - stop pathing.
         } else {
           setCurrentActivity("standing");
           clearTargets();
-          //System.out.println("other block?");
         }
       /* If we're not next to the target posn and our next tile is
        * blocked, compute a new path.  This fails if the target tile is
@@ -651,7 +651,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           /* Just walking, no unit target */
           if (nextActivity == null) {
             setCurrentActivity("standing");
-
             setNextTargetPosn(targetPosn);
             setTargetPosn(null);
             setNextActivity("walking");
@@ -687,31 +686,22 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   // Add the appropriate red/green highlight under the unit.
   // Eventually we'll want some other colors for neutral units, NPCs, etc.
   public void updateFloorOverlay() {
-    //game.getFloorOverlays().remove(floorOverlay);
     if (floorOverlay != null) {
       game.getDepthTree().remove(floorOverlay);
       floorOverlay = null;
     }
     if (game.getHumanPlayer().isHostile(getPlayer())) {
       boolean unitIsTargeted = false;
-      for (Unit u: game.getHumanPlayer().getSelectedUnits()) {
-        if (u.getTargetUnit() != null && u.getTargetUnit().equals(this)) {
-          unitIsTargeted = true;
-        }
-      }
-      if (unitIsTargeted) {
+      if (game.getPlayerUnit().getTargetUnit() == this) {
         Color transRed = new Color(255,0,0,64);
         floorOverlay = new FloorOverlay(game, this, Color.RED, transRed);
       } else {
         floorOverlay = new FloorOverlay(game, this, Color.RED);
       }
     } else {
-      if (game.getHumanPlayer().getSelectedUnits().contains(this)) {
-        Color transGreen = new Color(0,255,0,64);
-        floorOverlay = new FloorOverlay(game, this, Color.GREEN, transGreen);
-      } else {
-        floorOverlay = new FloorOverlay(game, this, Color.GREEN);
-      }
+      Color transGreen = new Color(0,255,0,64);
+      floorOverlay = new FloorOverlay(game, this, Color.GREEN, transGreen);
+      //floorOverlay = new FloorOverlay(game, this, Color.GREEN);
     }
     //game.addFloorOverlay(floorOverlay);
     game.getDepthTree().add(floorOverlay);
@@ -724,7 +714,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   // ===== ACCESSOR METHODS =====
   
   public void setTargetUnit(Unit u) {
+    if (getTargetUnit() != null) {
+      getTargetUnit().updateFloorOverlay();
+    }
     targetUnit = u;
+    if (getTargetUnit() != null) {
+      getTargetUnit().updateFloorOverlay();
+    }
   }
   
   public Unit getTargetUnit() {
@@ -824,8 +820,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     int d = 1; // ...
     u.takeHit(this, d);
     playHitSound();
-    // TODO Auto-generated method stub
-    //System.out.println(this + " hit unit " + u);
   }
   
   public abstract void playHitSound();
@@ -853,7 +847,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     } else {
       currentHP -= dmg;
     }
-    // sound FX, blood, etc will go here too
   }
   
   public void takeHit(GameObject src, int dmg) {
@@ -865,8 +858,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
+  /* For the time being, we're treating the different blocking animations as
+   * equivalent for mitigation purposes. Think about whether this is what
+   * we want. */
   public boolean isBlocking() {
-    // TODO Auto-generated method stub
     if (getCurrentActivity().equals("blocking_1")) return true;
     else if (getCurrentActivity().equals("blocking_2")) return true;
     else if (getCurrentActivity().equals("blocking_3")) return true;
@@ -894,7 +889,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   
   public void draw(Graphics g) {
-
     if (equipment.get("mainhand") != null) {
       if (equipment.get("mainhand").drawBehind() ) {
         equipment.get("mainhand").draw(g);
@@ -920,7 +914,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
     int left = pixel.getX() + RPG.TILE_WIDTH/2 - healthBar.getWidth()/2 + xOffset;
     int top = pixel.getY() + RPG.TILE_HEIGHT/2 - healthBar.getHeight()/2 + yOffset;
-    top -= 20;
+    top += hpBarOffset;
     
     healthBar.draw(g, left, top);
   }

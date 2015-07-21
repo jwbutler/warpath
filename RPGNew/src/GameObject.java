@@ -21,5 +21,6 @@ public interface GameObject {
   public int getyOffset();
   public boolean isUnit();
   public boolean isObstacle();
+  public boolean isCorpse();
   public boolean isInteractable();
 }

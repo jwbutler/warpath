@@ -10,5 +10,8 @@ public class Corpse extends NonBlockingObject {
     surface.setColorkey(Color.WHITE);
     setyOffset(-32); // trial and error...
   }
+  public boolean isCorpse() {
+    return true;
+  }
 
 }

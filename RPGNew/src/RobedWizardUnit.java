@@ -6,30 +6,29 @@ import java.util.HashMap;
 import jwbgl.*;
 
 public abstract class RobedWizardUnit extends Unit implements Serializable {
-  private static String[] defaultActivities = {"standing", "walking", "falling", "vanishing", "appearing"};
+  private static String[] defaultActivities = {"standing", "walking", "falling", "teleporting", "appearing", "rezzing"};
+  
+  public RobedWizardUnit(RPG game, String name, String animationName,
+  String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
+    super(game, name, animationName, activities, paletteSwaps, posn, player);
+    yOffset = -32;
+    hpBarOffset = -40;
+    
+  }
   
   public RobedWizardUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "robed_wizard", activities, new HashMap<Color, Color>(), posn, player);
-    this.setyOffset(-32);
   }  
   
   public RobedWizardUnit(RPG game, String name, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "robed_wizard", activities, paletteSwaps, posn, player);
-    this.setyOffset(-32);
   }  
   
   public RobedWizardUnit(RPG game, String name, Posn posn, Player player) {
     this(game, name, defaultActivities, posn, player);
-    this.setyOffset(-32);
-  }
-  
-  public RobedWizardUnit(RPG game, String name, String animationName,
-  String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
-    super(game, name, animationName, activities, paletteSwaps, posn, player);
-    this.setyOffset(-32);
   }
 
   @Override
@@ -40,17 +39,14 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   
   @Override
   public void die() {
-    String dir = getCurrentDirection();
     game.addObject(new Corpse(game, getPosn(), "robed_wizard_dead.png"));
   
   }
   
   @Override
   public void loadAnimations() {
-    // we could easily rewrite this without k
-
     animations = new ArrayList<Animation>();
-    for (int i = 0; i < activities.length; i++) {
+    for (int i=0; i<activities.length; i++) {
       loadActivityAnimations(activities[i]);
     }
     
@@ -70,17 +66,14 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
       loadTeleportingAnimations();
     } else if (activity.equals("appearing")) {
       loadAppearingAnimations();
+    } else if (activity.equals("rezzing")) {
+      loadRezzingAnimations();
     } else {
       loadGenericAnimations(activity);
     }
   }
   
-  
   protected void loadAppearingAnimations() {
-    
-  }
-
-  protected void loadTeleportingAnimations() {
     for (int i=0; i<RPG.DIRECTIONS.length; i++) {
       String dir = RPG.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_APPEARING;
@@ -89,7 +82,20 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         String animIndex = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
       }
-      animations.add(new Animation(animationName, filenames2, "falling", dir));
+      animations.add(new Animation(animationName, filenames2, "appearing", dir));
+    }
+  }
+
+  protected void loadTeleportingAnimations() {
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.WIZARD_TELEPORTING;
+      String[] filenames2 = new String[filenames.length];
+      for (int j=0; j<filenames.length; j++) {
+        String animIndex = filenames[j].split("_")[1];
+        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
+      }
+      animations.add(new Animation(animationName, filenames2, "teleporting", dir));
     }
 
   }
@@ -107,6 +113,20 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
       }
       animations.add(new Animation(animationName, filenames2, "falling", dir));
+    }
+  }
+  
+  /* Long (40-frame) casting animation, all SE. */
+  public void loadRezzingAnimations() {
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.WIZARD_REZZING;
+      String[] filenames2 = new String[filenames.length];
+      for (int j=0; j<filenames.length; j++) {
+        String animIndex = filenames[j].split("_")[1];
+        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "casting", "SE", animIndex);
+      }
+      animations.add(new Animation(animationName, filenames2, "rezzing", dir));
     }
   }
 

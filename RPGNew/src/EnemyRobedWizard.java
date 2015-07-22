@@ -26,14 +26,14 @@ public class EnemyRobedWizard extends RobedWizardUnit {
     if (currentActivity.equals("standing")) {
       /* Set up variables for the flowchart. */
       boolean hostileInRange = false;
-      Unit closestHostile = null;
+      Unit closestEnemy = null;
       Corpse closestCorpse = null;
       
       for (Unit u : game.getUnits()) {
         if (isHostile(u) && game.distance2(this, u) <= evasiveRadius) {
           hostileInRange = true;
-          if (closestHostile == null || game.distance2(this, u) < game.distance2(this, closestHostile)) {
-            closestHostile = u;
+          if (closestEnemy == null || game.distance2(this, u) < game.distance2(this, closestEnemy)) {
+            closestEnemy = u;
           }
         }
       }
@@ -61,12 +61,14 @@ public class EnemyRobedWizard extends RobedWizardUnit {
           moveRadius = 3;
         }
         do {
+          /* The logic here is a little simpler than the Python version.
+           * I'm also not sure it's bug-free... */
           x = RNG.nextInt(game.getFloor().getWidth());
           y = RNG.nextInt(game.getFloor().getHeight());
           p = new Posn(x,y);
           if (!game.getFloor().getTile(x,y).isBlocked()) {
             if (game.distance2(getPosn(), p) <= moveRadius) {
-              if (game.distance2(p, closestHostile.getPosn()) >= evasiveRadius) {
+              if (game.distance2(p, closestEnemy.getPosn()) >= evasiveRadius) {
                 goodPosn = true;
               }
             }

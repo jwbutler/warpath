@@ -21,11 +21,9 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
   private final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
   private RPG game;
   private GameWindow window;
-  private CharacterCreator cc;
   
   public static void main(String[] args) {
-    RPGDriver me = new RPGDriver();
-    me.doIt();
+    new RPGDriver();
   }
 
   @Override
@@ -44,7 +42,7 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
     System.exit(0);
   }
   
-  public void doIt() {
+  public RPGDriver() {
     try {
       //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -57,8 +55,4 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
     game = new RPG(window);
     window.initCardLayout(game);
   }
-  /*
-  public void startGame(HashMap<Color, Color> swaps) {
-    game.start();
-  }*/
 }

@@ -843,7 +843,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void takeDamage(int dmg) {
     if (dmg >= currentHP) {
       currentHP = 0;
-      setCurrentActivity("falling");
+      if (!getCurrentActivity().equals("falling")) {
+        setCurrentActivity("falling");
+      }
     } else {
       currentHP -= dmg;
     }

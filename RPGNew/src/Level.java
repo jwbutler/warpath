@@ -9,22 +9,28 @@ public class Level {
   protected RPG game;
   protected ArrayList<Unit> units;
   protected ArrayList<GameObject> objects;
+  private Surface img;
   private final Color GRASS_COLOR = new Color(0,255,0);
   private final Color STONE_COLOR = new Color(128,128,128);
   private final Color TREE_COLOR = new Color(0,128,0);
   private final Color WALL_COLOR = new Color(192,192,192);
+  private final Color BANDIT_COLOR = new Color(255,128,64);
   private final Color WIZARD_COLOR = new Color(128,128,0);
-  private final Color ZOMBIE_COLOR = new Color(255,128,64);
-  private final Color CORPSE_COLOR = new Color(64,64,0);
+  private final Color ZOMBIE_COLOR = new Color(255,255,0);
   private final Color PLAYER_COLOR = new Color(255,0,0);
-  public Level(RPG game, int width, int height) {
-    init(game, width, height);
-  }
   public Level(RPG game, String filename) {
-    Surface img = new Surface(filename);
-    init(game, img.getWidth(), img.getHeight());
-    for (int y=0; y<img.getHeight(); y++) {
-      for (int x=0; x<img.getWidth(); x++) {
+    this.game = game;
+    img = new Surface(filename);
+  }
+  /* Had to split this off because the restrictions on this(). */
+  public void init() {
+    int width = img.getWidth();
+    int height = img.getHeight();
+    floor = new Floor(game, width, height);
+    units = new ArrayList<Unit>();
+    objects = new ArrayList<GameObject>();
+    for (int y=0; y<height; y++) {
+      for (int x=0; x<width; x++) {
         int rgb = img.getRGB(x,y);
         Color c = new Color(rgb);
         Tile t;
@@ -59,28 +65,16 @@ public class Level {
           objects.add(new Wall(game, new Posn(x,y), "wall_48x78_1.png"));
         } else if (c.equals(WIZARD_COLOR)) {
           addWizard(x,y);
-          //units.add(new EnemyZombie(game, "", new Posn(x,y), game.getPlayer(2)));
-          //units.add(new EnemyRobedWizard(game, "", new Posn(x,y), game.getPlayer(2)));
         } else if (c.equals(ZOMBIE_COLOR)) {
-          //units.add(new EnemySwordGuy(game, "", new Posn(x,y), game.getPlayer(2)));
           addZombie(x,y);
-          //units.add(new EnemyRobedWizard(game, "", new Posn(x,y), game.getPlayer(2)));
-        } else if (c.equals(CORPSE_COLOR)) {
-          addCorpse(x,y);
+        } else if (c.equals(BANDIT_COLOR)) {
+          addBandit(x,y);
         } else if (c.equals(PLAYER_COLOR)) {
           game.getPlayerUnit().setPosn(new Posn(x,y));
           units.add(game.getPlayerUnit());
         }
       }
     }
-    
-  }
-  /* Had to split this off because the restrictions on this(). */
-  public void init(RPG game, int width, int height) {
-    this.game = game;
-    floor = new Floor(game, width, height);
-    units = new ArrayList<Unit>();
-    objects = new ArrayList<GameObject>();
   }
   
   /* Override this to set enemy types. We can add more methods e.g. addBossEnemy(), addSuperEnemy(). */
@@ -90,12 +84,19 @@ public class Level {
   protected void addWizard(int x, int y) {
     units.add(new EnemyRobedWizard(game, String.format("Wizard %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
   }
+  protected void addBandit(int x, int y) {
+    units.add(new EnemySwordGuy(game, String.format("Bandit %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
+  }
   protected void addCorpse(int x, int y) {
     if (game.getRNG().nextBoolean()) {
       objects.add(new Corpse(game, new Posn(x,y), "player_falling_NE_4.png"));
     } else {
       objects.add(new Corpse(game, new Posn(x,y), "player_falling_S_4.png"));
     }
+  }
+  
+  public boolean checkVictory() {
+    return(game.getPlayer(2).getUnits().size() == 0);
   }
   
   public ArrayList<Unit> getUnits() { return units; }

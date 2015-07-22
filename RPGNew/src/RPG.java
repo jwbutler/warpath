@@ -42,6 +42,7 @@ public class RPG implements ActionListener {
   private Hashtable<Integer, Player> players;
   private ArrayList<Unit> units;
   private ArrayList<GameObject> objects; // Non-units
+  private ArrayList<Level> levels;
   
   /* These are kinda hacks to get around concurrent modification exceptions.
    * Maybe there is a better solution. */
@@ -58,6 +59,9 @@ public class RPG implements ActionListener {
   
   private GameWindow gameWindow;
   private SoundPlayer soundPlayer;
+  
+  /* Not using anything from this except victory/defeat conditions. */
+  private int levelIndex;
   
   // Constants
   public static final int FPS = 15; // should be 20
@@ -118,8 +122,8 @@ public class RPG implements ActionListener {
     getHumanPlayer().setHostile(getPlayer(2));
     getPlayer(2).setHostile(getPlayer(1));
     
-    Level testLevel = new TestLevel(this);
-    openLevel(testLevel);
+    loadLevels();
+    openLevel();
     frameTimer.start();
     centerCamera();
   }
@@ -157,6 +161,12 @@ public class RPG implements ActionListener {
     // Repaint() includes a call to drawAll().
     gameWindow.repaint();
     incrementTicks();
+    
+    /* WHERE DOES THIS BELONG IN THE ORDER? */
+    if (levels.get(levelIndex).checkVictory()) {
+      levelIndex++;
+      openLevel();
+    }
   }
 
   private void doBlockUpkeep() {
@@ -813,8 +823,11 @@ public class RPG implements ActionListener {
     return gameWindow;
   }
   
-  public void openLevel(Level level) {
+  public void openLevel() {
+    Level level = levels.get(levelIndex);
+    level.init();
     floor = level.getFloor();
+    redrawFloor = true;
     depthTree = new DepthTree();
     units = new ArrayList<Unit>();
     for (Unit u: level.getUnits()) {
@@ -849,6 +862,13 @@ public class RPG implements ActionListener {
 
   public ArrayList<GameObject> getObjects() {
     return objects;
+  }
+  
+  public void loadLevels() {
+    levels = new ArrayList<Level>();
+    levels.add(new TestLevel(this));
+    levels.add(new WizardLevel(this));
+    levelIndex=0;
   }
 
 }

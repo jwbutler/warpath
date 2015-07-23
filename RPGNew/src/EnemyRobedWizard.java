@@ -108,4 +108,15 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   public void playBashSound() {
     // TODO Auto-generated method stub
   }
+  
+  public void takeBashHit(GameObject src, int dmg) {
+    Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
+    if (isBlocking() && src.getPosn().equals(blockedPosn)) {
+      /* Do we want to take partial damage? Do we want to block adjacent angles? */
+    } else {
+      setCurrentActivity("stunned_long");
+      clearTargets();
+      takeDamage(dmg);
+    }
+  }
 }

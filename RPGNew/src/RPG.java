@@ -634,11 +634,9 @@ public class RPG implements ActionListener {
           boolean addIt = false;
           if (!floor.getTile(q).isBlocked()) {
             addIt = true;
-          }
-          if (q.equals(p2)) {
+          } else if (q.equals(p2)) {
             addIt = true;
-          }
-          if (floor.getTile(q).getUnit() != null) {
+          } else if (floor.getTile(q).getUnit() != null) {
             Unit blockingUnit = floor.getTile(q).getUnit();
             if (floor.getTile(q).isBlocked() && blockingUnit.isMoving()) {
               addIt = true;

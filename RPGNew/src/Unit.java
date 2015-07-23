@@ -243,11 +243,18 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           setNextTargetPosn(null);
         } else {
           setPath(game.findPath(getPosn(), targetPosn));
-          pointAt(path.peekFirst());
-          setCurrentActivity(nextActivity);
-          nextActivity = null;
-          setNextTargetPosn(null);
-          setNextTargetUnit(null);
+          
+          /* The pathing algorithm is configured to ignore units that are currently moving.
+           * This is for the case where the first tile in the path contains a moving unit. */
+          if (game.getFloor().getTile(path.peekFirst()).isBlocked()) {
+            // System.out.println("fux");
+          } else {
+            pointAt(path.peekFirst());
+            setCurrentActivity("walking");
+            nextActivity = null;
+            setNextTargetPosn(null);
+            setNextTargetUnit(null);
+          }
         }
       /* If next activity is attacking, we might have to path to the unit first. */
       } else if (nextActivity.equals("attacking")) {
@@ -290,8 +297,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         } else {
           setTargetPosn(targetUnit.getPosn());
           setPath(game.findPath(getPosn(), targetPosn));
-          pointAt(path.peekFirst());
-          setCurrentActivity("walking");
+
+          if (game.getFloor().getTile(path.peekFirst()).isBlocked()) {
+            // System.out.println("fux2");
+          } else {
+            pointAt(path.peekFirst());          
+            setCurrentActivity("walking");
+          }
           /* Don't clear nextActivity/nextTargetUnit */ 
         }
       } else if (nextActivity.equals("blocking_1")) {
@@ -458,8 +470,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     } else {
       /* We're NOT calling checkNextTile here. It's OK, we'll check it before doing anything else
        * in doEvents() or something. */
-      pointAt(path.peekFirst());
-      setCurrentActivity("walking");
+      if (game.getFloor().getTile(path.peekFirst()).isBlocked()) {
+        //System.out.println("fux4");
+      } else {
+        pointAt(path.peekFirst());
+        setCurrentActivity("walking");
+      }
     }
   }
 
@@ -473,11 +489,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     if (getCurrentActivity().equals("blocking_2")) {
       currentEP -= blockCost;
     }
-    if ((game.getTicks() % hpRegen == 0) && (currentHP < maxHP)) {
-      currentHP++;
-    }
-    if ((game.getTicks() % epRegen == 0) && (currentEP < maxEP)) {
-      currentEP++;
+    if (!getCurrentActivity().equals("falling")) {
+      if ((game.getTicks() % hpRegen == 0) && (currentHP < maxHP)) {
+        currentHP++;
+      }
+      if ((game.getTicks() % epRegen == 0) && (currentEP < maxEP)) {
+        currentEP++;
+      }
     }
     this.nextFrame();
     //this.doManaRegen();
@@ -529,17 +547,16 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           setPath(game.findPath(this, targetUnit));
           if (path != null && path.size() > 0) {
             targetPosn = targetUnit.getPosn();
-            setCurrentActivity("walking");
+            if (game.getFloor().getTile(path.peekFirst()).isBlocked()) {
+              // System.out.println("fux5");
+            } else {
+              setCurrentActivity("walking");
+            }
           } else {
             setCurrentActivity("standing");
             clearTargets();
             System.out.println("uh oh");
           }
-        }
-      } else if (getCurrentActivity().equals("blocking_2")) {
-        if (currentHP == 0) {
-          setNextActivity(null);
-          setNextTargetPosn(null);
         }
       } else if (getCurrentAnimation().getIndex() == 2) {
         
@@ -549,6 +566,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         if (targetUnit.getPosn().equals(nextPosn)) {
           doBashHit(targetUnit);
         } else {
+        }
+      } else if (getCurrentActivity().equals("blocking_2")) {
+        /* WTF? */
+        if (currentHP == 0) {
+          setNextActivity(null);
+          setNextTargetPosn(null);
         }
       }
     }
@@ -617,21 +640,26 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         // otherwise, cancel pathing.
         if (nextTile.getUnit() != null) {
           if (targetUnit != null && blockingUnit.equals(targetUnit)) {
-            nextTargetUnit = targetUnit;
-            setCurrentActivity("standing");
+            setNextTargetUnit(targetUnit);
             setNextActivity("attacking");
+            setCurrentActivity("standing");
+            setTargetUnit(null);
           } else if (blockingUnit.isMoving()) {
             /* Nothing queued up, just moving to a spot. */
             if (nextActivity == null) {
               setCurrentActivity("standing");
+              System.out.println("W1");
               setNextActivity("walking");
               setNextTargetPosn(targetPosn);
               setTargetPosn(null);
             /* Attacking is queued up; keep it queued. */
             } else if (nextActivity.equals("attacking") || nextActivity.equals("blocking")) { 
               setCurrentActivity("standing");
+            } else {
+              System.out.println("Debug 1");
             }
           } else { 
+            /* There's a unit on our target posn and it's not moving: cancel pathing. */
             setCurrentActivity("standing");
             clearTargets();
           }
@@ -641,6 +669,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           setCurrentActivity("standing");
           clearTargets();
         }
+
       /* If we're not next to the target posn and our next tile is
        * blocked, compute a new path.  This fails if the target tile is
        * perma-blocked - what do we do? */
@@ -649,13 +678,16 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         blockingUnit = nextTile.getUnit();
         if (blockingUnit != null && blockingUnit.isMoving()) {
           /* Just walking, no unit target */
-          if (nextActivity == null) {
+          if (nextActivity == null || nextActivity.equals("walking")) {
             setCurrentActivity("standing");
             setNextTargetPosn(targetPosn);
             setTargetPosn(null);
             setNextActivity("walking");
           } else if (nextActivity.equals("attacking") || nextActivity.equals("bashing")) {
             setCurrentActivity("standing");
+            setTargetPosn(null);
+          } else { 
+            //printDebug();
           }
         } else {
           /* If the path is blocked by an object or a non-moving unit, better re-path around it. */
@@ -663,7 +695,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           /* Just walking, no unit target */
           if (nextActivity == null) {
             setCurrentActivity("standing");
-            nextTargetPosn = targetPosn;
+            setNextTargetPosn(targetPosn);
             targetPosn = null;
             setNextActivity("walking");
             setPath(game.findPath(getPosn(), nextTargetPosn));
@@ -671,6 +703,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             setCurrentActivity("standing");
             targetPosn = null;
             setPath(game.findPath(this, nextTargetUnit));
+          } else {
+            System.out.println("Debug 3");
           }
         }
       }
@@ -854,8 +888,19 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void takeHit(GameObject src, int dmg) {
     Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
-      
+      /* Do we want to take partial damage? Do we want to block adjacent angles? */
     } else {
+      takeDamage(dmg);
+    }
+  }
+  
+  public void takeBashHit(GameObject src, int dmg) {
+    Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
+    if (isBlocking() && src.getPosn().equals(blockedPosn)) {
+      /* Do we want to take partial damage? Do we want to block adjacent angles? */
+    } else {
+      setCurrentActivity("stunned_short");
+      clearTargets();
       takeDamage(dmg);
     }
   }

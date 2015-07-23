@@ -7,7 +7,6 @@ public class EnemyZombie extends ZombieUnit {
   private int minDamage, maxDamage;
   private double slowMoveSpeed, fastMoveSpeed, attackChance;
   private int visionRadius, smellRadius;
-  private Random RNG;
   private static String[] activities = {"walking", "standing", "attacking", "stunned_short", "falling"};
   public EnemyZombie(RPG game, String name, Posn posn, Player player) {
     super(game, name, activities, posn, player);
@@ -15,16 +14,17 @@ public class EnemyZombie extends ZombieUnit {
     currentEP = maxEP = 25;
     minDamage = 3;
     maxDamage = 4;
+    //minDamage = maxDamage = 0;
     slowMoveSpeed = 0.2;
     fastMoveSpeed = 0.5;
     attackChance = 0.6;
-    visionRadius = 4;
-    smellRadius = 8;
-    RNG = new Random();
+    visionRadius = 6;
+    smellRadius = 12;
   }
 
   public void nextActivity() {
     super.nextActivity();
+    Random RNG = game.getRNG();
     Unit tu = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
       for (Unit u: game.getUnits()) {
@@ -38,6 +38,7 @@ public class EnemyZombie extends ZombieUnit {
               //System.out.println("smell");
             } else if (game.distance2(this,u) < game.distance2(this,tu)) {
               setNextTargetUnit(u);
+              tu = u;
             }
           }
         }
@@ -51,7 +52,7 @@ public class EnemyZombie extends ZombieUnit {
     }
     if (currentActivity.equals("walking")) {
       double cancelChance = 1-slowMoveSpeed;
-      tu = getTargetUnit();
+      tu = getNextTargetUnit();
       if (tu != null) {
         if (game.distance2(this, tu) <= visionRadius) {
           cancelChance = 1-fastMoveSpeed;

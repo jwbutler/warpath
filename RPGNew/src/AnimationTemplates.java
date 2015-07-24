@@ -45,14 +45,17 @@ public class AnimationTemplates {
   
   public static final String[] WALKING = {
     "walking_1", "walking_1",
-    "walking_2","walking_2"
+    "walking_2", "walking_2",
+    "standing_1"
   };
   
   public static final String[] ATTACKING = {
     "attacking_1", "attacking_1",
     "attacking_2", "attacking_2",
     "attacking_2", "attacking_2",
+    "attacking_2", "attacking_2",
     "attacking_1", "attacking_1",
+    "standing_1", "standing_1"
   };
   
   public static final String[] BLOCKING_1 = {
@@ -69,6 +72,7 @@ public class AnimationTemplates {
   
   public static final String[] BASHING = {
     "attacking_1", "attacking_1",
+    "attacking_2b", "attacking_2b",
     "attacking_2b", "attacking_2b",
     "attacking_2b", "attacking_2b",
     "attacking_1", "attacking_1",
@@ -153,7 +157,6 @@ public class AnimationTemplates {
     "casting_6", "casting_6",
     "casting_7", "casting_7",
     "casting_8", "casting_8",
-    //for x in [1,2,3,4, 1,2,3,4, 1,2,3,4, 5,6,7,8, 5,6,7,8]: #40 frames long
   };
   
   /* This is a convenience method to load the default Player animations

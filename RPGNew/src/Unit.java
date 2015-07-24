@@ -50,8 +50,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected HashMap<String, Accessory> equipment;
   protected HashMap<Color, Color> paletteSwaps;
   protected int blockCost = 2; // costs N EP per tick (does not disable HP regen)
-  protected int attackCost = 12; // 8 frames per attack for 66.7% uptime
-  protected int bashCost = 30; // 10 frames per bash for 33.3% uptime
+  protected int attackCost = 20; // 10 frames per attack for 50% uptime
+  protected int bashCost = 36; // 12 frames per bash for 50% uptime
   protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
   protected int hpRegen = 20; // regen 1 HP per N ticks
   protected int epRegen = 1; // regen 1 EP per N ticks
@@ -212,15 +212,35 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       setTargetPosn(null);
       currentEP -= teleportCost;
       
-    /* If next activity is walking, do pathfinding. */
+    /* If next activity is rezzing:
+     * 1) Make sure we're standing on the corpse.
+     * 2) Make sure there's a free adjacent square to put the zombie on.
+     * ...
+     */
     } else if (currentActivity.equals("rezzing")) {
       setCurrentActivity("standing");
+      setTargetPosn(null);
       GameObject objectToRemove = null;
       for (GameObject o : game.getObjects()) {
         if (o.isCorpse()) {
           if (o.getPosn().equals(getPosn())) {
+            boolean allTilesBlocked = true;
             objectToRemove = o;
-            game.queueAddUnit(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), getPosn(), game.getPlayer(2)));
+            for (int i=0; i<8; i++) {
+              Posn p = game.getAdjacentSquares(getPosn()).get(i);
+              if (!game.getFloor().getTile(p).isBlocked()) {
+                allTilesBlocked = false;
+              }
+            }
+            if (!allTilesBlocked) {
+              Posn p;
+              do {
+                p = game.getAdjacentSquares(getPosn()).get(game.getRNG().nextInt(8));
+              } while (game.getFloor().getTile(p).isBlocked());
+              game.queueAddUnit(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), p, game.getPlayer(2)));
+            } else {
+              /* anything? */ 
+            }
           }
         }
       }
@@ -505,13 +525,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void clearTargets() {
     setTargetPosn(null);
     setTargetUnit(null);
-    nextTargetPosn = null;
-    nextTargetUnit = null;
+    setNextTargetPosn(null);
+    setNextTargetUnit(null);
     nextActivity = null;
-    if (targetPosnOverlay != null) {
-      game.getDepthTree().remove(targetPosnOverlay);
-      targetPosnOverlay = null;
-    }
+    setTargetPosnOverlay(null);
   }
 
   /* So this is an important method.
@@ -646,7 +663,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             setTargetUnit(null);
           } else if (blockingUnit.isMoving()) {
             /* Nothing queued up, just moving to a spot. */
-            if (nextActivity == null) {
+            if (nextActivity == null || nextActivity.equals("walking")) {
               setCurrentActivity("standing");
               System.out.println("W1");
               setNextActivity("walking");
@@ -657,6 +674,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
               setCurrentActivity("standing");
             } else {
               System.out.println("Debug 1");
+              printDebug();
             }
           } else { 
             /* There's a unit on our target posn and it's not moving: cancel pathing. */

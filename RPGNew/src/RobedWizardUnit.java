@@ -6,7 +6,9 @@ import java.util.HashMap;
 import jwbgl.*;
 
 public abstract class RobedWizardUnit extends Unit implements Serializable {
-  private static String[] defaultActivities = {"standing", "walking", "falling", "teleporting", "appearing", "rezzing"};
+  private static String[] defaultActivities = {
+    "standing", "walking", "falling", "teleporting", "appearing", "rezzing", "stunned_long"
+    };
   
   public RobedWizardUnit(RPG game, String name, String animationName,
   String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {

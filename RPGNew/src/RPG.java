@@ -64,7 +64,7 @@ public class RPG implements ActionListener {
   private int levelIndex;
   
   // Constants
-  public static final int FPS = 15; // should be 20
+  public static final int FPS = 20; // should be 20
   public static final int TILE_WIDTH = 96;
   public static final int TILE_HEIGHT = 48;
   public static final int CAMERA_INCREMENT_X = 48;
@@ -328,10 +328,14 @@ public class RPG implements ActionListener {
         if (tileRect.collidePoint(pixel.getX(), pixel.getY())) {
           int tileX = pixel.getX() - left;
           int tileY = pixel.getY() - top;
-          int rgba = floor.getTile(x, y).getSurface().getRGB(tileX, tileY);
-          Color c = new Color(rgba, true);
-          if (c.getAlpha() == 255) {
-            return new Posn(x,y);
+          try {
+            int rgba = floor.getTile(x, y).getSurface().getRGB(tileX, tileY);
+            Color c = new Color(rgba, true);
+            if (c.getAlpha() == 255) {
+              return new Posn(x,y);
+            }
+          } catch (NullPointerException e) {
+            /* do nothing */
           }
         }
       }
@@ -835,6 +839,7 @@ public class RPG implements ActionListener {
     for (GameObject o: level.getObjects()) {
       addObject(o);
     }
+    centerCamera();
   }
 
   public void playSound(String string) {

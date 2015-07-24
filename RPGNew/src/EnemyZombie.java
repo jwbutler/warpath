@@ -12,7 +12,7 @@ public class EnemyZombie extends ZombieUnit {
     super(game, name, activities, posn, player);
     currentHP = maxHP = 60;
     currentEP = maxEP = 25;
-    minDamage = 3;
+    minDamage = 2;
     maxDamage = 4;
     //minDamage = maxDamage = 0;
     slowMoveSpeed = 0.2;

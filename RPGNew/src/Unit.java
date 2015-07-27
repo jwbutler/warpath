@@ -743,7 +743,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       floorOverlay = null;
     }
     if (game.getHumanPlayer().isHostile(getPlayer())) {
-      boolean unitIsTargeted = false;
       if (game.getPlayerUnit().getTargetUnit() == this) {
         Color transRed = new Color(255,0,0,64);
         floorOverlay = new FloorOverlay(game, this, Color.RED, transRed);
@@ -755,7 +754,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       floorOverlay = new FloorOverlay(game, this, Color.GREEN, transGreen);
       //floorOverlay = new FloorOverlay(game, this, Color.GREEN);
     }
-    //game.addFloorOverlay(floorOverlay);
     game.getDepthTree().add(floorOverlay);
   }
   

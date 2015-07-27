@@ -46,7 +46,7 @@ public class AnimationTemplates {
   public static final String[] WALKING = {
     "walking_1", "walking_1",
     "walking_2", "walking_2",
-    "standing_1"
+    "standing_1", "standing_1"
   };
   
   public static final String[] ATTACKING = {

@@ -51,7 +51,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected HashMap<Color, Color> paletteSwaps;
   protected int blockCost = 2; // costs N EP per tick (does not disable HP regen)
   protected int attackCost = 20; // 10 frames per attack for 50% uptime
-  protected int bashCost = 36; // 12 frames per bash for 50% uptime
+  protected int bashCost = 36; // 12 frames per bash for 33% uptime
+  protected int slashCost = 4; // costs N EP per tick (does not disable HP regen)
   protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
   protected int hpRegen = 20; // regen 1 HP per N ticks
   protected int epRegen = 1; // regen 1 EP per N ticks
@@ -198,7 +199,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     } else if (currentActivity.equals("blocking_2")) {
       if (nextActivity == null) {
         setCurrentActivity("blocking_3");
-      } else if (nextActivity.equals("blocking_2") && currentEP > 0) {
+      } else if (nextActivity.equals("blocking_2") && currentEP >= blockCost) {
         pointAt(nextTargetPosn);
         setCurrentActivity("blocking_2");
       } else {
@@ -206,6 +207,25 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         //setNextActivity(null);
       }
     
+    /* BEGIN SHAMELESS C/P */
+    } else if (currentActivity.equals("slashing_1")) {
+      if (nextActivity != null && nextActivity.equals("slashing_2")) {
+        pointAt(nextTargetPosn);
+        setCurrentActivity("slashing_2");
+      } else {
+        setCurrentActivity("slashing_3");
+      }
+    } else if (currentActivity.equals("slashing_2")) {
+      if (nextActivity == null) {
+        setCurrentActivity("slashing_3");
+      } else if (nextActivity.equals("slashing_2") && currentEP >= slashCost) {
+        pointAt(nextTargetPosn);
+        setCurrentActivity("slashing_2");
+      } else {
+        setCurrentActivity("slashing_3");
+        //setNextActivity(null);
+      }
+    /* END SHAMELESS C/P */
     } else if (currentActivity.equals("teleporting")) {
       setPosn(getTargetPosn());
       setCurrentActivity("appearing");
@@ -332,6 +352,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         setCurrentActivity("blocking_1");
         //System.out.printf("startblock - %s - %s\n", getPosn(), targetPosn);
         setNextActivity("blocking_2");
+      } else if (nextActivity.equals("slashing_1")) {
+        setTargetPosn(getNextTargetPosn());
+        pointAt(targetPosn);
+        setCurrentActivity("slashing_1");
+        setNextActivity("slashing_2");
       } else if (nextActivity.equals("teleporting")) {
         setTargetPosn(getNextTargetPosn());
         setCurrentActivity("teleporting");
@@ -361,111 +386,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       } else {
         setCurrentActivity("standing");
         setTargetUnit(null);
-      }
-    }
-  }
-  
-  // Load the next activity; for example, in the case of walking along a path,
-  // we'll be issuing a walk order after each movement.
-  // I'm not sure this is the right place to issue repeated attack orders.
-  public void nextActivityOLD() {
-    if (nextTargetUnit != null) {
-      if (targetUnit != null) targetUnit.updateFloorOverlay();
-      targetUnit = nextTargetUnit;
-      targetPosn = targetUnit.getPosn();
-      setTargetPosnOverlay(null); // check this
-      nextTargetUnit = null;
-      nextTargetPosn = null;
-      targetUnit.updateFloorOverlay();
-      
-    } else if (nextTargetPosn != null) {
-      if (nextActivity == null) {
-        System.out.println("next activity is null. fix this, idiot (current="+currentActivity+")");
-      } else if (nextActivity.equals("walking")) {
-        targetPosn = nextTargetPosn;
-        setPath(game.findPath(getPosn(), targetPosn));
-        if (targetUnit != null) {
-          Unit u = targetUnit;
-          targetUnit = null;
-          u.updateFloorOverlay();
-        }
-        setCurrentActivity("walking");
-        nextTargetPosn = null;
-        nextActivity = null;
-      } else if (nextActivity.equals("blocking_1")) {
-        setCurrentActivity("blocking_1");
-        targetPosn = nextTargetPosn;
-        nextTargetPosn = null;
-        nextActivity = null;
-      }
-    } else if (currentActivity.equals("attacking")) {
-      setCurrentActivity("standing");
-      clearTargets();
-      return;
-    } else if (currentActivity.equals("bashing")) {
-      setCurrentActivity("standing");
-      clearTargets();
-      return;
-    } else if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
-      if (game.ctrlIsDown() && currentEP > 0) {
-        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
-        pointAt(targetPosn);
-        setCurrentActivity("blocking_2");
-        clearTargets();
-        return;
-      } else {
-        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
-        pointAt(targetPosn);
-        setCurrentActivity("blocking_3");
-        clearTargets();
-        return;
-      }
-    } else if (currentActivity == "stunned_short") {
-      //System.out.println("end stun");
-      setCurrentActivity("standing");
-      clearTargets();
-      return;
-    }
-    if (targetUnit != null) {
-      if (isHostile(targetUnit)) {
-        if (game.distance2(this, targetUnit) <= 1) {
-          pointAt(targetUnit);
-          if (nextActivity == null) {
-            System.out.println("fix null activity idiot, current = " + currentActivity);
-            System.out.println("instanceof enemyunit? "+(this instanceof EnemySwordGuy));
-            return;
-          }
-          if (nextActivity.equals("attacking") || nextActivity.equals("bashing")) {
-            setCurrentActivity(nextActivity);
-            setNextActivity(null);
-          }
-          return;
-        } else {
-          setCurrentActivity("walking");
-          setPath(game.findPath(this, targetUnit));
-          // walking code below
-        }
-      }
-    }
-
-    if (targetPosn != null) {
-      if (currentActivity.equals("walking")) {
-        /* Queue up another walking animation.  Includes checks for
-         * whether we've reached destination, etc. */
-        refreshWalk();
-      } else if (currentActivity.equals("blocking_1")) {
-        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
-        pointAt(targetPosn);
-      }
-    } else {
-      if (game.ctrlIsDown()) {
-        setTargetPosn(game.pixelToGrid(game.getMousePosn()));
-        pointAt(targetPosn);
-        setCurrentActivity("blocking_1");
-      } else {
-        System.out.println("hmm.");
-        setCurrentActivity("standing");
-        clearTargets();
       }
     }
   }

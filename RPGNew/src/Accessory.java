@@ -11,7 +11,9 @@ public abstract class Accessory {
   // inheritance. fuck java
   private String slot;
   protected ArrayList<Animation> animations;
-  protected String[] activities = {"walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3", "falling"};
+  protected String[] activities = {
+    "walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3",
+    "slashing_1", "slashing_2", "slashing_3", "falling"};
   protected String animationName;
   protected RPG game;
   protected Unit unit;

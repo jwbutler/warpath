@@ -169,8 +169,9 @@ public class RPG implements ActionListener {
     }
   }
 
-  private void doBlockUpkeep() {
-    // TODO Auto-generated method stub
+  /* This is to handle persistent actions (i.e. block / slash) - every upkeep,
+   * we check if the SHIFT / CTRL keys are held down and queue up activities accordingly. */
+  public void doBlockUpkeep() {
     String currentActivity = getPlayerUnit().getCurrentActivity();
     String nextActivity = getPlayerUnit().getNextActivity();
     if (ctrlIsDown()) {
@@ -179,7 +180,7 @@ public class RPG implements ActionListener {
           /* Bash */
         } else {
           if (pixelToGrid(getMousePosn()) != null) {
-            if (getPlayerUnit().currentEP > 0) {
+            if (getPlayerUnit().currentEP >= getPlayerUnit().blockCost) {
               getPlayerUnit().setNextActivity("blocking_1");
               getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
               getPlayerUnit().setTargetPosnOverlay(null);
@@ -206,17 +207,47 @@ public class RPG implements ActionListener {
           }
         }
       }
-    } else {
-      /*if (currentActivity.equals("blocking_2")) {
-        if (getPlayerUnit().getNextActivity() != null && getPlayerUnit().getNextActivity().equals("bashing")) {
-          System.out.println("bash?");
+    } else if (shiftIsDown()) {
+      /* SHAMELESS COPY/PASTE OF CTRL CODE */
+      if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
+        if (nextActivity != null && nextActivity.equals("bashing")) {
+          /* Bash */
         } else {
-          //getPlayerUnit().setNextActivity("blocking_3");
-          getPlayerUnit().setNextActivity(null);
+          if (pixelToGrid(getMousePosn()) != null) {
+            if (getPlayerUnit().currentEP >= getPlayerUnit().slashCost) {
+              getPlayerUnit().setNextActivity("slashing_1");
+              getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+              getPlayerUnit().setTargetPosnOverlay(null);
+            }
+          }
         }
-      } else */
+      } else if (currentActivity.equals("slashing_1") || currentActivity.equals("slashing_2")) {
+        if (pixelToGrid(getMousePosn()) != null) {
+          if (nextActivity != null && nextActivity.equals("bashing")) {
+            // bash1
+          } else {
+            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+            getPlayerUnit().setTargetPosnOverlay(null);
+          }
+        }
+      } else if (currentActivity.equals("bashing") || currentActivity.equals("attacking")) {
+        if (pixelToGrid(getMousePosn()) != null) {
+          if (nextActivity != null && nextActivity.equals("bashing")) {
+            // bash2
+          } else {
+            getPlayerUnit().setNextActivity("slashing_1");
+            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+            getPlayerUnit().setTargetPosnOverlay(null);
+          }
+        }
+      }
+    } else {
+      
+      // If CTRL isn't down, end the block OR SLASH.
       if (getPlayerUnit().getNextActivity() != null) {
         if (getPlayerUnit().getNextActivity().equals("blocking_1") || getPlayerUnit().getNextActivity().equals("blocking_2")) {
+          getPlayerUnit().setNextActivity(null);
+        } else if (getPlayerUnit().getNextActivity().equals("slashing_1") || getPlayerUnit().getNextActivity().equals("slashing_2")) {
           getPlayerUnit().setNextActivity(null);
         }
       }

@@ -181,11 +181,11 @@ public class AnimationTemplates {
     } else if (activity.equals("blocking_3")) {
       return BLOCKING_3;
     } else if (activity.equals("slashing_1")) {
-      return BLOCKING_1;
+      return SLASHING_1;
     } else if (activity.equals("slashing_2")) {
-      return BLOCKING_2;
+      return SLASHING_2;
     } else if (activity.equals("slashing_3")) {
-      return BLOCKING_3;
+      return SLASHING_3;
     } else if (activity.equals("falling")) {
       return FALLING;
     } else {

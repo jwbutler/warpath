@@ -10,7 +10,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Hashtable;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -37,13 +37,13 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private RPGDriver driver;
   
   private ArrayList<String> colorNames;
-  private HashMap<String, Color> baseColors;
-  private HashMap<Color, Color> paletteSwaps;
-  private HashMap<String, JLabel> colorLabels;
-  private HashMap<String, JSlider[]> colorSliders;
-  private HashMap<String, JLabel[]> sliderLabels;
-  private HashMap<String, JButton> copyButtons;
-  private HashMap<String, JButton> pasteButtons;
+  private Hashtable<String, Color> baseColors;
+  private Hashtable<Color, Color> paletteSwaps;
+  private Hashtable<String, JLabel> colorLabels;
+  private Hashtable<String, JSlider[]> colorSliders;
+  private Hashtable<String, JLabel[]> sliderLabels;
+  private Hashtable<String, JButton> copyButtons;
+  private Hashtable<String, JButton> pasteButtons;
   private JButton genderSelector;
   private JButton contButton;
   
@@ -73,9 +73,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     colorNames.add("Boots 1");
     colorNames.add("Boots 2");
     
-    baseColors = new HashMap<String, Color>();
-    colorSliders = new HashMap<String, JSlider[]>();
-    sliderLabels = new HashMap<String, JLabel[]>();
+    baseColors = new Hashtable<String, Color>();
+    colorSliders = new Hashtable<String, JSlider[]>();
+    sliderLabels = new Hashtable<String, JLabel[]>();
     
     baseColors.put("Hair", new Color(128,64,0));
     baseColors.put("Face", new Color(255,128,64));
@@ -90,7 +90,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     baseColors.put("Legs", new Color(192,192,192));
     baseColors.put("Boots 1", new Color(0,128,0));
     baseColors.put("Boots 2", new Color(0,255,0));
-    colorLabels = new HashMap<String,JLabel>();
+    colorLabels = new Hashtable<String,JLabel>();
     unitSurfaceBase = new Surface("player_standing_E_1.png");
     try {
       unitSurface = unitSurfaceBase.clone();
@@ -100,11 +100,11 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     }
     
     savedColor = null;
-    copyButtons = new HashMap<String,JButton>();
-    pasteButtons = new HashMap<String,JButton>();
+    copyButtons = new Hashtable<String,JButton>();
+    pasteButtons = new Hashtable<String,JButton>();
 
     unitSurface = unitSurface.scale2x().scale2x();
-    paletteSwaps = new HashMap<Color,Color>();
+    paletteSwaps = new Hashtable<Color,Color>();
     
     unitPanel = new SurfacePanel(unitSurface);
 
@@ -311,7 +311,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     /* KLUDGE, TELL WILL TO FIX ALL THESE */
     /*if (genderSelector.getText().equals("Switch to Male")) {
-      HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
+      Hashtable<Color,Color> tmpSwaps = new Hashtable<Color,Color>();
       tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
       unitSurface.setPaletteSwaps(tmpSwaps);
       unitSurface.applyPaletteSwaps();
@@ -344,7 +344,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     /* KLUDGE, TELL WILL TO FIX ALL THESE */
     /*
     if (genderSelector.getText().equals("Switch to Male")) {
-      HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
+      Hashtable<Color,Color> tmpSwaps = new Hashtable<Color,Color>();
       tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
       unitSurface.setPaletteSwaps(tmpSwaps);
       unitSurface.applyPaletteSwaps();
@@ -363,7 +363,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     unitPanel.setBounds(l, t, w, h);*/
   }
   
-  public HashMap<Color, Color> exportPaletteSwaps() {
+  public Hashtable<Color, Color> exportPaletteSwaps() {
     return paletteSwaps;
   }
 }

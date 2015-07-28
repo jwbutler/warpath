@@ -1,5 +1,6 @@
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import jwbgl.*;
 
@@ -10,6 +11,7 @@ public abstract class Accessory {
   // going on here - BUT i can't think of a way to do this without multiple
   // inheritance. fuck java
   private String slot;
+  protected Hashtable<String, Surface> frames;
   protected ArrayList<Animation> animations;
   protected String[] activities = {
     "walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3",
@@ -26,6 +28,7 @@ public abstract class Accessory {
     this.unit = unit;
     this.slot = slot;
     this.animationName = animationName;
+    frames = new Hashtable<String, Surface>();
     loadAnimations();
   }
   
@@ -101,7 +104,7 @@ public abstract class Accessory {
         String frameNum = filenames[j].split("_")[1];
         filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, activityName, RPG.DIRECTIONS[i], frameNum));
       }
-      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i]));
+      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i], frames));
     }
   }
   /* C&P from Unit.
@@ -124,7 +127,7 @@ public abstract class Accessory {
           filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, "falling", "S", animIndex));
         }
       }
-      animations.add(new Animation(animationName, filenames2, "falling", dir));
+      animations.add(new Animation(animationName, filenames2, "falling", dir, frames));
     }
   }
 

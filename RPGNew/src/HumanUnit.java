@@ -1,6 +1,6 @@
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Hashtable;
 
 import jwbgl.*;
 /* This class is used to represent humanoid units.  Particularly the ones
@@ -11,11 +11,11 @@ public abstract class HumanUnit extends Unit implements Serializable {
   
   public HumanUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "player", activities, new HashMap<Color, Color>(), posn, player);
+    this(game, name, "player", activities, new Hashtable<Color, Color>(), posn, player);
     this.setyOffset(-32);
   }  
   
-  public HumanUnit(RPG game, String name, String[] activities, HashMap<Color, Color> paletteSwaps,
+  public HumanUnit(RPG game, String name, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "player", activities, paletteSwaps, posn, player);
@@ -28,7 +28,7 @@ public abstract class HumanUnit extends Unit implements Serializable {
   }
   
   public HumanUnit(RPG game, String name, String animationName,
-  String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
+  String[] activities, Hashtable<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(game, name, animationName, activities, paletteSwaps, posn, player);
     this.setyOffset(-32);
   }

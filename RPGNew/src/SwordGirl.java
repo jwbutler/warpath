@@ -1,5 +1,5 @@
 import java.awt.Color;
-import java.util.HashMap;
+import java.util.Hashtable;
 import jwbgl.*;
 /* Warrior-type player unit class.  Sword/shield.*/
 public class SwordGirl extends HumanUnit {
@@ -9,7 +9,7 @@ public class SwordGirl extends HumanUnit {
     "bashing", "slashing1", "slashing2", "slashing3"};
 
   public SwordGirl(RPG game, String name, Posn posn, Player player) {
-    super(game, name, "female", activities, new HashMap<Color, Color>(), posn, player);
+    super(game, name, "female", activities, new Hashtable<Color, Color>(), posn, player);
     currentHP = maxHP = 100;
     minDamage = 5;
     maxDamage = 10;

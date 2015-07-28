@@ -1,5 +1,7 @@
 import java.awt.Color;
 import java.io.File;
+import java.util.Hashtable;
+
 import jwbgl.*;
 
 /* Represents a single animation of a unit.  Corresponds to a particular
@@ -25,19 +27,27 @@ public class Animation {
     return direction;
   }
 
-  public Animation(String animName, String[] filenames, String activity, String direction) {
+  public Animation(String animName, String[] filenames, String activity, String direction, Hashtable<String, Surface> ht) {
     frames = new Surface[filenames.length];
     drawBehind = new boolean[filenames.length];
     for (int i = 0; i < filenames.length; i++) {
       String filename = filenames[i];
       drawBehind[i] = (filename.endsWith("_B.png"));
-      frames[i] = new Surface(filename);
-      frames[i] = frames[i].scale2x();
-      frames[i].setColorkey(Color.WHITE);
+      if (ht != null && ht.containsKey(filename)) {
+        frames[i] = ht.get(filename);
+      } else {
+        frames[i] = new Surface(filename);
+        frames[i] = frames[i].scale2x();
+        frames[i].setColorkey(Color.WHITE);
+        if (ht != null) ht.put(filename, frames[i]);
+      }
     }
     this.activity = activity;
     this.direction = direction;
     index = 0;
+  }
+  public Animation(String animName, String[] filenames, String activity, String direction) {
+    this(animName, filenames, activity, direction, null);
   }
   
   /*public static Animation createFixed(String animName, String[] filenames, String activity, String direction) {

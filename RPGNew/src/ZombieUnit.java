@@ -1,6 +1,6 @@
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Hashtable;
 
 import jwbgl.*;
 /* This is the BASE class for all zombie-type units. It'll be subclassed for anything that actually
@@ -11,11 +11,11 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   
   public ZombieUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "zombie", activities, new HashMap<Color, Color>(), posn, player);
+    this(game, name, "zombie", activities, new Hashtable<Color, Color>(), posn, player);
     this.setyOffset(-32);
   }  
   
-  public ZombieUnit(RPG game, String name, String[] activities, HashMap<Color, Color> paletteSwaps,
+  public ZombieUnit(RPG game, String name, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "zombie", activities, paletteSwaps, posn, player);
@@ -28,7 +28,7 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   }
   
   public ZombieUnit(RPG game, String name, String animationName,
-  String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
+  String[] activities, Hashtable<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(game, name, animationName, activities, paletteSwaps, posn, player);
     this.setyOffset(-32);
   }
@@ -70,7 +70,7 @@ public abstract class ZombieUnit extends Unit implements Serializable {
           filenames2[j] = String.format("%s_%s_%s.png", animationName, "fallingB", animIndex);
         }
       }
-      animations.add(new Animation(animationName, filenames2, "falling", dir));
+      animations.add(new Animation(animationName, filenames2, "falling", dir, frames));
     }
   }
 }

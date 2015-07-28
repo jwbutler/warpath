@@ -2,7 +2,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -24,6 +23,7 @@ import jwbgl.*;
 public abstract class Unit extends BasicObject implements GameObject, Serializable {
   private String name;
   protected String animationName;
+  protected Hashtable<String, Surface> frames;
   protected ArrayList<Animation> animations;
   protected int dx;
   protected int dy;
@@ -47,8 +47,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected int hpBarOffset;
   
   private TransHealthBar healthBar;
-  protected HashMap<String, Accessory> equipment;
-  protected HashMap<Color, Color> paletteSwaps;
+  protected Hashtable<String, Accessory> equipment;
+  protected Hashtable<Color, Color> paletteSwaps;
   protected int blockCost = 2; // costs N EP per tick (does not disable HP regen)
   protected int attackCost = 20; // 10 frames per attack for 50% uptime
   protected int bashCost = 36; // 12 frames per bash for 33% uptime
@@ -57,14 +57,14 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected int hpRegen = 20; // regen 1 HP per N ticks
   protected int epRegen = 1; // regen 1 EP per N ticks
   
-  public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
+  public Unit(RPG game, String name, String animationName, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     super(game, posn);
     this.name = name;
     this.animationName = animationName;
     this.activities = activities;
     this.player = player;
-    equipment = new HashMap<String, Accessory>();
+    equipment = new Hashtable<String, Accessory>();
     this.paletteSwaps = paletteSwaps;
     
     dx = 0;
@@ -73,6 +73,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     /* Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8 pixel space 
      * at bottom of player sprites. */
     yOffset = -32;
+    frames = new Hashtable<String, Surface>();
     loadAnimations();
     applyPaletteSwaps();
     setCurrentActivity("standing");
@@ -147,7 +148,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         String frameNum = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, activityName, RPG.DIRECTIONS[i], frameNum); 
       }        
-      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i]));
+      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i], frames));
     }
   }
   
@@ -175,7 +176,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "falling", "S", animIndex);
         }
       }
-      animations.add(new Animation(animationName, filenames2, "falling", dir));
+      animations.add(new Animation(animationName, filenames2, "falling", dir, frames));
     }
   }
 
@@ -393,7 +394,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
 
   /* This is the code that loops the walking! */
-  private void refreshWalk() {
+  public void refreshWalk() {
     /* This is the case where the next tile is non-empty but we're only
      * pausing for one turn. */ 
     if (targetPosn == null) {
@@ -870,6 +871,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public int getMaxEP() {
     return maxEP;
+  }
+
+  /* Perhaps confusing: doesn't return "NE" etc., but returns Posn<-1, -1> etc. */
+  public Posn getDirection() {
+    return new Posn(dx, dy);
   }
   
   public FloorOverlay getFloorOverlay() {

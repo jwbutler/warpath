@@ -106,7 +106,8 @@ public class RPG implements ActionListener {
   }
   
   // Start the timer.  We might also use this to restart/unpause
-  public void start(HashMap<Color, Color> swaps) {
+  // This seems like a REALLY weird place to put the palette swaps (as a parameter).
+  public void start(Hashtable<Color, Color> swaps) {
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
     
@@ -128,14 +129,13 @@ public class RPG implements ActionListener {
     centerCamera();
   }
   public void start() {
-    start(new HashMap<Color, Color>());
+    start(new Hashtable<Color, Color>());
   }
   
   // Called every time the frame timer fires.
   // Redraws everything, then increments the tick counter.
   // IS THIS THE RIGHT ORDER OF OPERATIONS?
   public void actionPerformed(ActionEvent e) {
-  
     /* Do blocking event code.  Should this go to Upkeep? */
     doBlockUpkeep();
     
@@ -212,6 +212,8 @@ public class RPG implements ActionListener {
       
       /* We're gonna change this */
       Posn nextPosn = pixelToGrid(getMousePosn());
+      Posn cwPosn = getPlayerUnit().getPosn();
+      Posn ccwPosn = getPlayerUnit().getPosn();
       
       if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
         if (nextActivity != null && nextActivity.equals("bashing")) {

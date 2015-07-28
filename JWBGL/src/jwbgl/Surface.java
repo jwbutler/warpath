@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
@@ -32,7 +32,7 @@ public class Surface {
   private Color colorkey;
   private String imagePath;
   private Rect transparencyRect;
-  private HashMap<Color,Color> paletteSwaps;
+  private Hashtable<Color,Color> paletteSwaps;
   private final Color DEFAULT_COLOR = Color.BLACK;
   private final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
 
@@ -46,7 +46,7 @@ public class Surface {
     colorkey = null;
     this.imagePath = null;
     transparencyRect = new Rect(0,0,getWidth(),getHeight());
-    paletteSwaps = new HashMap<Color,Color>();
+    paletteSwaps = new Hashtable<Color,Color>();
   }
   
   public Surface(BufferedImage image) {
@@ -206,7 +206,7 @@ public class Surface {
 
   // ===== ACCESSOR METHODS =====
 
-  public HashMap<Color, Color> getPaletteSwaps() {
+  public Hashtable<Color, Color> getPaletteSwaps() {
     return paletteSwaps;
   }
   
@@ -281,7 +281,7 @@ public class Surface {
     return transparencyRect;
   }
   
-  public void setPaletteSwaps(HashMap<Color,Color> paletteSwaps) {
+  public void setPaletteSwaps(Hashtable<Color,Color> paletteSwaps) {
     this.paletteSwaps = paletteSwaps;
   }
   

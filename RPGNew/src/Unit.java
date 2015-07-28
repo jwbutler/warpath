@@ -116,7 +116,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
 
   public void loadAnimations() {
     // we could easily rewrite this without k
-
+    long t = System.currentTimeMillis();
     animations = new ArrayList<Animation>();
     for (int i = 0; i < activities.length; i++) {
       loadActivityAnimations(activities[i]);
@@ -125,6 +125,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     for (Accessory e: equipment.values()) {
       e.loadAnimations();
     }
+    t = System.currentTimeMillis() - t;
+    System.out.printf("%s.loadAnimations(): %d ms\n", this.getClass(), t);
   }
   
   /* Extend this as needed for animations that have different versions for
@@ -428,6 +430,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     // ... or is it? not anymore I don't think
     if (getCurrentActivity().equals("blocking_2")) {
       currentEP -= blockCost;
+    } else if (getCurrentActivity().equals("slashing_2")) {
+      currentEP -= slashCost;
     }
     if (!getCurrentActivity().equals("falling")) {
       if ((game.getTicks() % hpRegen == 0) && (currentHP < maxHP)) {
@@ -437,6 +441,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         currentEP++;
       }
     }
+    if (currentEP<0) currentEP=0;
     this.nextFrame();
     //this.doManaRegen();
     //this.doHealthRegen();
@@ -585,7 +590,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             /* Nothing queued up, just moving to a spot. */
             if (nextActivity == null || nextActivity.equals("walking")) {
               setCurrentActivity("standing");
-              System.out.println("W1");
+              //System.out.println("W1");
               setNextActivity("walking");
               setNextTargetPosn(targetPosn);
               setTargetPosn(null);

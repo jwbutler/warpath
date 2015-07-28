@@ -209,6 +209,10 @@ public class RPG implements ActionListener {
       }
     } else if (shiftIsDown()) {
       /* SHAMELESS COPY/PASTE OF CTRL CODE */
+      
+      /* We're gonna change this */
+      Posn nextPosn = pixelToGrid(getMousePosn());
+      
       if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
         if (nextActivity != null && nextActivity.equals("bashing")) {
           /* Bash */
@@ -216,7 +220,7 @@ public class RPG implements ActionListener {
           if (pixelToGrid(getMousePosn()) != null) {
             if (getPlayerUnit().currentEP >= getPlayerUnit().slashCost) {
               getPlayerUnit().setNextActivity("slashing_1");
-              getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+              getPlayerUnit().setNextTargetPosn(nextPosn);
               getPlayerUnit().setTargetPosnOverlay(null);
             }
           }
@@ -226,7 +230,7 @@ public class RPG implements ActionListener {
           if (nextActivity != null && nextActivity.equals("bashing")) {
             // bash1
           } else {
-            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+            getPlayerUnit().setNextTargetPosn(nextPosn);
             getPlayerUnit().setTargetPosnOverlay(null);
           }
         }
@@ -236,7 +240,7 @@ public class RPG implements ActionListener {
             // bash2
           } else {
             getPlayerUnit().setNextActivity("slashing_1");
-            getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+            getPlayerUnit().setNextTargetPosn(nextPosn);
             getPlayerUnit().setTargetPosnOverlay(null);
           }
         }
@@ -596,6 +600,61 @@ public class RPG implements ActionListener {
       }
     }
     return posns;
+  }
+  
+  /* Given (dx, dy), return the (dx, dy) pairs corresponding to 45 degrees CW and CCW.
+   * Should it return the input? Yes for now. */ 
+  public ArrayList<Posn> getAdjacentDirections(Posn p) {
+    ArrayList<Posn> rtn = new ArrayList<Posn>();
+    rtn.add(rotateClockwise(p));
+    rtn.add(rotateCounterclockwise(p));
+    return rtn;
+  }
+  
+  /* 45 degrees */
+  public Posn rotateClockwise(Posn p) {
+    if (p.equals(new Posn(-1,-1))) {
+      return new Posn(0,-1);
+    } else if (p.equals(new Posn(0,-1))) {
+      return new Posn(1,-1);
+    } else if (p.equals(new Posn(1,-1))) {
+      return new Posn(1,0);
+    } else if (p.equals(new Posn(1,0))) {
+      return new Posn(1,1);
+    } else if (p.equals(new Posn(1,1))) {
+      return new Posn(0,1);
+    } else if (p.equals(new Posn(0,1))) {
+      return new Posn(-1,1);
+    } else if (p.equals(new Posn(-1,1))) {
+      return new Posn(-1,0);
+    } else if (p.equals(new Posn(-1,0))) {
+      return new Posn(-1,-1);
+    } else {
+      return null;
+    }
+  }
+  
+  /* 45 degrees */
+  public Posn rotateCounterclockwise(Posn p) {
+    if (p.equals(new Posn(-1,-1))) {
+      return new Posn(-1,0);
+    } else if (p.equals(new Posn(0,-1))) {
+      return new Posn(-1,-1);
+    } else if (p.equals(new Posn(1,-1))) {
+      return new Posn(0,-1);
+    } else if (p.equals(new Posn(1,0))) {
+      return new Posn(1,-1);
+    } else if (p.equals(new Posn(1,1))) {
+      return new Posn(1,0);
+    } else if (p.equals(new Posn(0,1))) {
+      return new Posn(1,1);
+    } else if (p.equals(new Posn(-1,1))) {
+      return new Posn(0,1);
+    } else if (p.equals(new Posn(-1,0))) {
+      return new Posn(-1,1);
+    } else {
+      return null;
+    }
   }
   
   /* An A* pathfinding attempt.

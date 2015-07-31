@@ -20,4 +20,12 @@ public class Posn {
   public String toString() {
     return "<Posn("+x+","+y+")>";
   }
+  
+  public Posn add(Posn p) {
+    return new Posn(x + p.x, y + p.y);
+  }
+  
+  public Posn clone() {
+    return new Posn(x,y);
+  }
 }

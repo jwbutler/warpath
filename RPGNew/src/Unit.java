@@ -52,10 +52,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected int blockCost = 2; // costs N EP per tick (does not disable HP regen)
   protected int attackCost = 20; // 10 frames per attack for 50% uptime
   protected int bashCost = 36; // 12 frames per bash for 33% uptime
-  protected int slashCost = 4; // costs N EP per tick (does not disable HP regen)
+  protected int slashCost = 3; // costs N EP per tick (does not disable HP regen) // SHOULD BE 2
   protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
   protected int hpRegen = 20; // regen 1 HP per N ticks
   protected int epRegen = 1; // regen 1 EP per N ticks
+  protected boolean newSlashDirection;
   
   public Unit(RPG game, String name, String animationName, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
@@ -81,6 +82,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     updateFloorOverlay();
     healthBar = new TransHealthBar(this, 48, 12);
     hpBarOffset = -20;
+    newSlashDirection = false;
+    //System.out.printf("%s has %d frames\n",getClass(), frames.keySet().size());
   }
   
   public void applyPaletteSwaps() {
@@ -468,14 +471,15 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       if (getCurrentAnimation().getIndex() <= 2) {
         checkNextTile();
       }
+      if (getCurrentActivity().equals("walking")) {  
+        if (getCurrentAnimation().getIndex() == 2) {
+          move(dx, dy); // this is problematic for depth reasons.
+          path.removeFirst();
+        }
+      }
     }
     /* This SEEMS redundant but checkNextTile() can change our activity to standing. */
-    if (getCurrentActivity().equals("walking")) {  
-      if (getCurrentAnimation().getIndex() == 2) {
-        move(dx, dy); // this is problematic for depth reasons.
-        path.removeFirst();
-      }
-    } else if (getCurrentActivity().equals("attacking")) {
+    if (getCurrentActivity().equals("attacking")) {
       if (getCurrentAnimation().getIndex() == 2) {
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
@@ -505,16 +509,26 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
-        
-        if (targetUnit.getPosn().equals(nextPosn)) {
+        if (targetUnit != null && targetUnit.getPosn().equals(nextPosn)) {
           doBashHit(targetUnit);
         } else {
         }
-      } else if (getCurrentActivity().equals("blocking_2")) {
-        /* WTF? */
-        if (currentHP == 0) {
-          setNextActivity(null);
-          setNextTargetPosn(null);
+      }
+    } else if (getCurrentActivity().equals("blocking_2")) {
+      /* WTF? */
+      if (currentHP == 0) {
+        setNextActivity(null);
+        setNextTargetPosn(null);
+      }
+    } else if (getCurrentActivity().equals("slashing_2")) {
+      if (getCurrentAnimation().getIndex() == 0) {
+        if (newSlashDirection) {
+          newSlashDirection = false;
+          Posn nextPosn = getPosn().add(getDirection());
+          Unit tu = game.getFloor().getTile(nextPosn).getUnit();
+          if (tu != null && isHostile(tu)) {
+            doSlashHit(tu);
+          }
         }
       }
     }
@@ -526,11 +540,26 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   /* Does NOT validate the tile we're moving to. You have to do that yourself!
    * checkNextTile() was supposed to do that but it kind of grew in scope. */
   public void move(int dx, int dy) {
+    //System.out.printf("move: %s %s\n", getPosn(), new Posn(getX() + dx, getY() + dy));
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
     t.setUnit(null);
     
     setPosn(new Posn(getX() + dx, getY() + dy));
+    updateDepth();
+    game.getDepthTree().add(this);
+    t = game.getFloor().getTile(getX(), getY());
+    t.setUnit(this);
+    updateFloorOverlay();
+  }
+  
+  /* Moves to a posn rather than a relative amount. */
+  public void moveTo(Posn p) {
+    game.getDepthTree().remove(this);
+    Tile t = game.getFloor().getTile(getX(), getY());
+    t.setUnit(null);
+    
+    setPosn(p);
     updateDepth();
     game.getDepthTree().add(this);
     t = game.getFloor().getTile(getX(), getY());
@@ -774,6 +803,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return animationName;
   }
   
+  /* VERY confusing: this one returns "N", "NE" etc. while getDirection() uses coords. */
   public String getCurrentDirection() {
     return game.coordsToDir(dx, dy);
   }
@@ -805,6 +835,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     int d = 1; // ...
     u.takeHit(this, d);
   }
+  
+  public void doSlashHit(Unit u) {
+    int d = 1; // ...
+    u.takeHit(this, d);
+    playHitSound();
+    System.out.println("OMG SLASH HIT");
+  }
   public void setNextTargetUnit(Unit u) {
     nextTargetUnit = u;
     if (u != null) {
@@ -827,6 +864,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
+  /* Source is a GameObject, not a unit - allows for stuff like projectiles,
+   * floor fire, etc. */
   public void takeHit(GameObject src, int dmg) {
     Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
@@ -842,6 +881,17 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       /* Do we want to take partial damage? Do we want to block adjacent angles? */
     } else {
       setCurrentActivity("stunned_short");
+      clearTargets();
+      takeDamage(dmg);
+    }
+  }
+  
+  public void takeSlashHit(GameObject src, int dmg) {
+    Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
+    if (isBlocking() && src.getPosn().equals(blockedPosn)) {
+      /* Do we want to take partial damage? Do we want to block adjacent angles? */
+    } else {
+      setCurrentActivity("standing");
       clearTargets();
       takeDamage(dmg);
     }
@@ -876,6 +926,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   /* Perhaps confusing: doesn't return "NE" etc., but returns Posn<-1, -1> etc. */
   public Posn getDirection() {
     return new Posn(dx, dy);
+  }
+  
+  public void setDirection(Posn p) {
+    dx = p.getX();
+    dy = p.getY();
   }
   
   public FloorOverlay getFloorOverlay() {

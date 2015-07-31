@@ -10,14 +10,14 @@ public class EnemyZombie extends ZombieUnit {
   private static String[] activities = {"walking", "standing", "attacking", "stunned_short", "falling"};
   public EnemyZombie(RPG game, String name, Posn posn, Player player) {
     super(game, name, activities, posn, player);
-    currentHP = maxHP = 60;
+    currentHP = maxHP = 50;
     currentEP = maxEP = 25;
     minDamage = 2;
     maxDamage = 4;
     //minDamage = maxDamage = 0;
-    slowMoveSpeed = 0.2;
-    fastMoveSpeed = 0.5;
-    attackChance = 0.6;
+    slowMoveSpeed = 0.3;
+    fastMoveSpeed = 0.6;
+    attackChance = 0.7;
     visionRadius = 6;
     smellRadius = 12;
   }

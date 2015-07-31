@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import jwbgl.*;
 /* Warrior-type player unit class.  Sword/shield.*/
 public class SwordGuy extends HumanUnit {
-  private int minDamage, maxDamage, bashDamage;
+  private int minDamage, maxDamage, bashDamage, slashDamage;
   private static String[] activities = {
     "walking", "standing", "attacking", "blocking_1", "blocking_2", "blocking_3",
     "bashing", "slashing_1", "slashing_2", "slashing_3", "falling"};
@@ -19,6 +19,7 @@ public class SwordGuy extends HumanUnit {
     minDamage = 6;
     maxDamage = 12;
     bashDamage = 20;
+    slashDamage = 6;
     addAccessory(new Sword(game, this, "sword"));
     addAccessory(new Shield(game, this, "Shield of Suck"));
   }
@@ -37,11 +38,26 @@ public class SwordGuy extends HumanUnit {
     int dy = u.getY() - getY();
     int x = u.getX()+dx;
     int y = u.getY()+dy;
+    if (!game.isObstacle(new Posn(x,y))) {
+      u.move(dx, dy);
+    } else {
+      System.out.println("bashfail");
+    }
+    u.takeBashHit(this, bashDamage);
+    playHitSound();
+    //System.out.println(this + " hit unit " + u);
+  }
+  
+  public void doSlashHit(Unit u) {
+    int dx = u.getX() - getX();
+    int dy = u.getY() - getY();
+    int x = u.getX()+dx;
+    int y = u.getY()+dy;
     Tile t = game.getFloor().getTile(new Posn(x,y));
     if (!game.isObstacle(new Posn(x,y))) {
       u.move(dx, dy);
     }
-    u.takeBashHit(this, bashDamage);
+    u.takeSlashHit(this, slashDamage);
     playHitSound();
     //System.out.println(this + " hit unit " + u);
   }
@@ -49,6 +65,13 @@ public class SwordGuy extends HumanUnit {
   @Override
   public void draw(Graphics g) {
     super.draw(g);
+  }
+  
+  @Override
+  public void doEvents() {
+    //printDebug();
+    super.doEvents();
+    
   }
 
 }

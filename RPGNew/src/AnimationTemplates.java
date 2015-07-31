@@ -85,7 +85,6 @@ public class AnimationTemplates {
   
   public static final String[] SLASHING_2 = {
     "attacking_2", "attacking_2",
-    "attacking_2", "attacking_2"
   };
   
   public static final String[] SLASHING_3 = {

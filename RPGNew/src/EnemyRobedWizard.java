@@ -3,7 +3,7 @@ import java.util.Random;
 import jwbgl.*;
 
 public class EnemyRobedWizard extends RobedWizardUnit {
-  private static String[] activities = {"walking", "standing", "falling", "teleporting", "appearing", "rezzing"};
+  private static String[] activities = {"walking", "standing", "falling", "teleporting", "appearing", "rezzing", "stunned_long"};
   
   /* These two percentages are additive */
   private double wanderChance = 0.025;
@@ -117,6 +117,14 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       setCurrentActivity("stunned_long");
       clearTargets();
       takeDamage(dmg);
+    }
+  }
+  
+  public void takeDamage(int dmg) {
+    if (getCurrentActivity().equals("stunned_long")) {
+      super.takeDamage(3*dmg);
+    } else {
+      super.takeDamage(dmg);
     }
   }
 }

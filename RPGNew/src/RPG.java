@@ -209,11 +209,35 @@ public class RPG implements ActionListener {
       }
     } else if (shiftIsDown()) {
       /* SHAMELESS COPY/PASTE OF CTRL CODE */
-      
       /* We're gonna change this */
+      Posn oldDir = getPlayerUnit().getDirection();
+      Posn lastTargetPosn = getPlayerUnit().getPosn().add(getPlayerUnit().getDirection());
       Posn nextPosn = pixelToGrid(getMousePosn());
-      Posn cwPosn = getPlayerUnit().getPosn();
-      Posn ccwPosn = getPlayerUnit().getPosn();
+      if (nextPosn == null) {
+        nextPosn = lastTargetPosn;
+      }
+      Posn cwPosn = getPlayerUnit().getPosn().add(rotateClockwise(getPlayerUnit().getDirection()));
+      Posn ccwPosn = getPlayerUnit().getPosn().add(rotateCounterclockwise(getPlayerUnit().getDirection()));
+      if (distance2(cwPosn, nextPosn) < distance2(ccwPosn, nextPosn)) {
+        nextPosn = cwPosn;
+      } else if (distance2(ccwPosn, nextPosn) < distance2(cwPosn, nextPosn)) {
+        nextPosn = ccwPosn;
+      } else {
+        getPlayerUnit().pointAt(nextPosn);
+        if (getPlayerUnit().getDirection().equals(oldDir)) {
+          /* do nothing */
+          getPlayerUnit().setDirection(oldDir);
+          getPlayerUnit().pointAt(getPlayerUnit().getPosn().add(oldDir));
+          getPlayerUnit().newSlashDirection = false;
+        } else {
+          if (RNG.nextBoolean()) {
+          nextPosn = cwPosn;
+          } else {
+            nextPosn = ccwPosn;
+          }
+          getPlayerUnit().newSlashDirection = true;
+        }
+      }
       
       if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
         if (nextActivity != null && nextActivity.equals("bashing")) {
@@ -224,6 +248,7 @@ public class RPG implements ActionListener {
               getPlayerUnit().setNextActivity("slashing_1");
               getPlayerUnit().setNextTargetPosn(nextPosn);
               getPlayerUnit().setTargetPosnOverlay(null);
+              getPlayerUnit().newSlashDirection = true;
             }
           }
         }
@@ -244,9 +269,28 @@ public class RPG implements ActionListener {
             getPlayerUnit().setNextActivity("slashing_1");
             getPlayerUnit().setNextTargetPosn(nextPosn);
             getPlayerUnit().setTargetPosnOverlay(null);
+            getPlayerUnit().pointAt(nextPosn);
+            if (getPlayerUnit().getDirection().equals(oldDir)) {
+              getPlayerUnit().newSlashDirection = false;
+            }
+            getPlayerUnit().setDirection(oldDir);
+            getPlayerUnit().pointAt(getPlayerUnit().getPosn().add(oldDir));
           }
         }
       }
+      /* Determine whether we are slashing in a new direction. */
+      if (getPlayerUnit().getNextActivity() != null && getPlayerUnit().getNextActivity().equals("slashing_2")) {
+        getPlayerUnit().pointAt(getPlayerUnit().getNextTargetPosn());
+        getPlayerUnit().newSlashDirection = !oldDir.equals(getPlayerUnit().getDirection());
+        getPlayerUnit().pointAt(nextPosn);
+        if (getPlayerUnit().getDirection().equals(oldDir)) {
+          getPlayerUnit().newSlashDirection = false;
+        }
+        getPlayerUnit().setDirection(oldDir);
+        getPlayerUnit().pointAt(getPlayerUnit().getPosn().add(oldDir));
+      }
+
+      //System.out.println(getPlayerUnit().newSlashDirection);
     } else {
       
       // If CTRL isn't down, end the block OR SLASH.
@@ -926,6 +970,8 @@ public class RPG implements ActionListener {
     units = new ArrayList<Unit>();
     for (Unit u: level.getUnits()) {
       addUnit(u);
+      /* This is a dumb hack to correct the depth tree. */
+      u.moveTo(u.getPosn());
     }
     objects = new ArrayList<GameObject>();
     for (GameObject o: level.getObjects()) {

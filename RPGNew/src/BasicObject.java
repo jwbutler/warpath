@@ -106,5 +106,4 @@ public abstract class BasicObject implements GameObject {
   public int getDepthOffset() {
     return depthOffset;
   }
-
 }

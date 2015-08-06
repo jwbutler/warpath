@@ -41,12 +41,14 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   
   @Override
   public void die() {
+    super.die();
     game.addObject(new Corpse(game, getPosn(), "robed_wizard_dead.png"));
   
   }
   
   @Override
   public void loadAnimations() {
+    long t = System.currentTimeMillis();
     animations = new ArrayList<Animation>();
     for (int i=0; i<activities.length; i++) {
       loadActivityAnimations(activities[i]);
@@ -55,6 +57,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     for (Accessory e: equipment.values()) {
       e.loadAnimations();
     }
+    t = System.currentTimeMillis() - t;
+    System.out.printf("%s.loadAnimations(): %d ms\n", this.getClass(), t);
   }
   
   public void loadActivityAnimations(String activity) {

@@ -51,6 +51,7 @@ public abstract class HumanUnit extends Unit implements Serializable {
   
   @Override
   public void die() {
+    super.die();
     String dir = getCurrentDirection();
     if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
       game.addObject(new Corpse(game, getPosn(), "player_falling_NE_4.png"));

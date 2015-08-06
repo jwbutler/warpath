@@ -27,20 +27,18 @@ public class AnimationTemplates {
     "standing_1", "standing_1"
   };
   
-  /* 24 frames */
+  /* 40 frames */
   public static final String[] WIZARD_STUNNED_LONG = {
-    "stunned_1", "stunned_1",
-    "stunned_2", "stunned_2",
-    "stunned_1", "stunned_1",
-    "stunned_2", "stunned_2",
-    "stunned_1", "stunned_1",
-    "stunned_2", "stunned_2",
-    "stunned_1", "stunned_1",
-    "stunned_2", "stunned_2",
-    "stunned_1", "stunned_1",
-    "stunned_2", "stunned_2",
-    "stunned_1", "stunned_1",
-    "stunned_2", "stunned_2"
+    "stunned_1", "stunned_1", "stunned_1", "stunned_1",
+    "stunned_2", "stunned_2", "stunned_2", "stunned_2",
+    "stunned_1", "stunned_1", "stunned_1", "stunned_1",
+    "stunned_2", "stunned_2", "stunned_2", "stunned_2",
+    "stunned_1", "stunned_1", "stunned_1", "stunned_1",
+    "stunned_2", "stunned_2", "stunned_2", "stunned_2",
+    "stunned_1", "stunned_1", "stunned_1", "stunned_1",
+    "stunned_2", "stunned_2", "stunned_2", "stunned_2",
+    "stunned_1", "stunned_1", "stunned_1", "stunned_1",
+    "stunned_2", "stunned_2", "stunned_2", "stunned_2",
   };
   
   public static final String[] WALKING = {
@@ -135,27 +133,20 @@ public class AnimationTemplates {
     "vanishing_4", "vanishing_4"
   };
   
+  /* 40 frames */
   public static String[] WIZARD_REZZING = {
-    "casting_1", "casting_1",
-    "casting_2", "casting_2",
-    "casting_3", "casting_3",
-    "casting_4", "casting_4",
-    "casting_1", "casting_1",
-    "casting_2", "casting_2",
-    "casting_3", "casting_3",
-    "casting_4", "casting_4",
-    "casting_1", "casting_1",
-    "casting_2", "casting_2",
-    "casting_3", "casting_3",
-    "casting_4", "casting_4",
-    "casting_5", "casting_5",
-    "casting_6", "casting_6",
-    "casting_7", "casting_7",
-    "casting_8", "casting_8",
-    "casting_5", "casting_5",
-    "casting_6", "casting_6",
-    "casting_7", "casting_7",
-    "casting_8", "casting_8",
+    "casting_1", "casting_1", "casting_1", "casting_1",
+    "casting_2", "casting_2", "casting_2", "casting_2",
+    "casting_3", "casting_3", "casting_3", "casting_3",
+    "casting_4", "casting_4", "casting_4", "casting_4",
+    "casting_5", "casting_5", "casting_5", "casting_5",
+    "casting_6", "casting_6", "casting_6", "casting_6",
+    "casting_7", "casting_7", "casting_7", "casting_7",
+    "casting_8", "casting_8", "casting_8", "casting_8",
+    "casting_5", "casting_5", "casting_5", "casting_5",
+    "casting_6", "casting_6", "casting_6", "casting_6",
+    "casting_7", "casting_7", "casting_7", "casting_7",
+    "casting_8", "casting_8", "casting_8", "casting_8"
   };
   
   /* This is a convenience method to load the default Player animations

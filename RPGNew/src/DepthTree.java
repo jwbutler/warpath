@@ -15,34 +15,85 @@ public class DepthTree {
   
   public void add(GameObject obj) {
     add(new DepthTreeNode(obj));
-    /*
-    DepthTreeNode node = new DepthTreeNode(obj);
-    
-    if (head == null) {
-      head = node;
+  }
+  
+  public void add(DepthTreeNode node) {
+    if (root == null) {
+      root = node;
     } else {
-      DepthTreeNode current = head;
-      while (current != null) {
-        if (current.getData().getDepth() > obj.getDepth()) {
-          if (current.getLeft() == null) {
-            current.setLeft(node);
-            return;
-          } else {
-            current = current.getLeft();
-          }
-        } else if (current.getData().getDepth() <= obj.getDepth()) {
-          if (current.getRight() == null) {
-            current.setRight(node);
-            return;
-          } else {
-            current = current.getRight();
-          }
-        }
+      add(node, root);
+    }
+  }
+  
+  public void add(DepthTreeNode node, DepthTreeNode current) {
+    if (node.getData().getDepth() <= current.getData().getDepth()) {
+      if (current.getLeft() == null) {
+        current.setLeft(node);
+      } else {
+        add(node, current.getLeft());
+      }
+    } else { // if (node.getData().getDepth() > current.getData().getDepth()) {
+      if (current.getRight() == null) {
+        current.setRight(node);
+      } else {
+        add(node, current.getRight());
       }
     }
-    */
   }
-  public void add(DepthTreeNode node) {
+  
+  public boolean remove(GameObject o) {
+    if (root == null) {
+      System.out.printf("Remove failed: %s (1)\n", o);
+      return false;
+    } else if (root.getData() == o) {
+      //System.out.println("rmv root");
+      DepthTreeNode left = root.getLeft();
+      DepthTreeNode right = root.getRight();
+      root = null;
+      if (left != null) add(left);
+      if (right != null) add(right);
+      return true;
+    } else {
+      return remove(o, root);
+    }
+  }
+  public boolean remove(GameObject o, DepthTreeNode current) {
+    DepthTreeNode left = current.getLeft();
+    DepthTreeNode right = current.getRight();
+    if (o.getDepth() <= current.getData().getDepth()) {
+      if (left == null) {
+        System.out.printf("Remove failed: %s (2)\n", o);
+        return false;
+      } else if (left.getData() == o) {
+        DepthTreeNode leftleft = left.getLeft();
+        DepthTreeNode leftright = left.getRight();
+        current.setLeft(null);
+        //System.out.println("rmv left");
+        if (leftleft != null) add(leftleft);
+        if (leftright != null) add(leftright);
+        return true;
+      } else {
+        return remove(o, left);
+      }
+    } else { // if (o.getDepth() > current.getData().getDepth()) {
+      if (right == null) {
+        System.out.printf("Remove failed: %s (3)\n", o);
+        return false;
+      } else if (right.getData() == o) {
+        DepthTreeNode rightleft = right.getLeft();
+        DepthTreeNode rightright = right.getRight();
+        current.setRight(null);
+        //System.out.println("rmv right");
+        if (rightleft != null) add(rightleft);
+        if (rightright != null) add(rightright);
+        return true;
+      } else {
+        return remove(o, right);
+      }
+    }
+  }
+  
+  /*public void add(DepthTreeNode node) {
     if (root == null) {
       root = node;
     } else {
@@ -84,7 +135,7 @@ public class DepthTree {
         if (obj.getDepth() < current.getData().getDepth()) {
           if (current.getLeft() != null) {
             if (current.getLeft().getData() == obj) {
-              DepthTreeNode oldLeft = current.getLeft();            
+              DepthTreeNode oldLeft = current.getLeft();
               current.setLeft(null);
               if (oldLeft.getLeft() != null) {
                 add(oldLeft.getLeft());
@@ -99,7 +150,7 @@ public class DepthTree {
           } else {
             current = current.getLeft();
           }
-        } else if (current.getData().getDepth() <= obj.getDepth()) {
+        } else { // if (obj.getDepth() >= current.getData().getDepth()) {
           if (current.getRight() != null) {
             if (current.getRight().getData() == obj) {
               DepthTreeNode oldRight = current.getRight();
@@ -120,9 +171,9 @@ public class DepthTree {
         }
       }
     }
-    //System.out.println("removefail " + obj);
+    System.out.println("removefail " + obj);
     return false;
-  }
+  } */
   
   public void drawAll(Graphics g) {
     //System.out.println("Depth tree => drawAll() => head = " + head);

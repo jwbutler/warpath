@@ -42,4 +42,8 @@ public class DepthTreeNode {
       right.drawInOrder(g);
     }
   }
+  
+  public String toString() {
+    return String.format("DepthTreeNode<%s>", getData());
+  }
 }

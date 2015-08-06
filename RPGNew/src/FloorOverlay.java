@@ -4,8 +4,7 @@ import jwbgl.*;
 // Represents a glowy spot on the floor.
 // Can be tied either to a Tile or to an object/unit.
 
-
-public class FloorOverlay extends BasicObject {
+public class FloorOverlay extends NonBlockingObject {
   private GameObject src;
   private RPG game;
   private Surface surface;
@@ -42,6 +41,7 @@ public class FloorOverlay extends BasicObject {
   }
   
   public String toString() {
-    return "<FloorOverlay("+outerColor+","+innerColor+")>";
+    //return "<FloorOverlay("+outerColor+","+innerColor+")>";
+    return String.format("<FloorOverlay(%s)>", getPosn());
   }
 }

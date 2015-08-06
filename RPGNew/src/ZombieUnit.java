@@ -46,6 +46,7 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   
   @Override
   public void die() {
+    super.die();
     /* This should be direction-dependent! */
     game.addObject(new Corpse(game, getPosn(), "zombie_falling_3.png"));
   }

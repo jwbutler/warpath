@@ -21,13 +21,12 @@ import jwbgl.*;
   * 5/25    - Added handling for midpath unit collisions.
   * ===================== */
 public abstract class Unit extends BasicObject implements GameObject, Serializable {
-  private String name;
+  protected String name;
   protected String animationName;
   protected Hashtable<String, Surface> frames;
   protected ArrayList<Animation> animations;
   protected int dx;
   protected int dy;
-
   protected Unit targetUnit;
   protected Unit nextTargetUnit;
   protected Posn targetPosn;
@@ -35,28 +34,29 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected String[] activities;
   protected String currentActivity;
   protected String nextActivity;
-  private Animation currentAnimation;
-  private Player player;
-  protected LinkedList<Posn> path;
-  private FloorOverlay floorOverlay;
-
-  private FloorOverlay targetPosnOverlay;
-  
   protected int currentHP, maxHP;
   protected int currentEP, maxEP;
   protected int hpBarOffset;
+  protected boolean newSlashDirection;
   
+  private Animation currentAnimation;
+  private Player player;
+  private FloorOverlay floorOverlay;
+  private FloorOverlay targetPosnOverlay;
   private TransHealthBar healthBar;
+  
+  
+  protected LinkedList<Posn> path;
   protected Hashtable<String, Accessory> equipment;
   protected Hashtable<Color, Color> paletteSwaps;
+  
   protected int blockCost = 2; // costs N EP per tick (does not disable HP regen)
-  protected int attackCost = 20; // 10 frames per attack for 50% uptime
+  protected int attackCost = 15; // 10 frames per attack for 67% uptime
   protected int bashCost = 36; // 12 frames per bash for 33% uptime
   protected int slashCost = 3; // costs N EP per tick (does not disable HP regen) // SHOULD BE 2
   protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
   protected int hpRegen = 20; // regen 1 HP per N ticks
   protected int epRegen = 1; // regen 1 EP per N ticks
-  protected boolean newSlashDirection;
   
   public Unit(RPG game, String name, String animationName, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
@@ -195,7 +195,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
   
   public void nextActivity() {
-    if (currentActivity.equals("blocking_1")) {
+    if (currentActivity.equals("falling")) {
+      game.queueRemoveUnit(this);
+      die();
+    } else if (currentActivity.equals("blocking_1")) {
       if (nextActivity != null && nextActivity.equals("blocking_2")) {
         pointAt(nextTargetPosn);
         setCurrentActivity("blocking_2");
@@ -233,7 +236,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       }
     /* END SHAMELESS C/P */
     } else if (currentActivity.equals("teleporting")) {
-      setPosn(getTargetPosn());
+      //setPosn(getTargetPosn());
+      moveTo(getTargetPosn());
       setCurrentActivity("appearing");
       setTargetPosn(null);
       currentEP -= teleportCost;
@@ -246,32 +250,31 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     } else if (currentActivity.equals("rezzing")) {
       setCurrentActivity("standing");
       setTargetPosn(null);
-      GameObject objectToRemove = null;
-      for (GameObject o : game.getObjects()) {
+      GameObject targetCorpse = null;
+      for (GameObject o : game.getFloor().getTile(getPosn()).getObjects()) {
         if (o.isCorpse()) {
-          if (o.getPosn().equals(getPosn())) {
-            boolean allTilesBlocked = true;
-            objectToRemove = o;
-            for (int i=0; i<8; i++) {
-              Posn p = game.getAdjacentSquares(getPosn()).get(i);
-              if (!game.getFloor().getTile(p).isBlocked()) {
-                allTilesBlocked = false;
-              }
+          boolean allTilesBlocked = true;
+          targetCorpse = o;
+          for (int i=0; i<8; i++) {
+            Posn p = game.getAdjacentSquares(getPosn()).get(i);
+            if (!game.getFloor().getTile(p).isBlocked()) {
+              allTilesBlocked = false;
             }
-            if (!allTilesBlocked) {
-              Posn p;
-              do {
-                p = game.getAdjacentSquares(getPosn()).get(game.getRNG().nextInt(8));
-              } while (game.getFloor().getTile(p).isBlocked());
-              game.queueAddUnit(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), p, game.getPlayer(2)));
-            } else {
-              /* anything? */ 
-            }
+          }
+          if (!allTilesBlocked) {
+            Posn p;
+            do {
+              p = game.getAdjacentSquares(getPosn()).get(game.getRNG().nextInt(8));
+            } while (game.getFloor().getTile(p).isBlocked());
+            game.queueAddUnit(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), p, game.getPlayer(2)));
+          } else {
+            System.out.println("help");
+            /* anything? */ 
           }
         }
       }
-      if (objectToRemove != null) {
-        game.removeObject(objectToRemove);
+      if (targetCorpse != null) {
+        game.removeObject(targetCorpse);
       }
     } else if (nextActivity != null) {
       Unit lastTargetUnit = null;
@@ -377,15 +380,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         targetUnit.updateFloorOverlay();
       }*/
     /* no nextactivity */
-    } else if (currentActivity.equals("falling")) {
-      game.queueRemoveUnit(this);
-      die();
-      /* String dir = getCurrentDirection();
-      if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
-        game.addObject(new Corpse(game, getPosn(), "player_falling_NE_4.png"));
-      } else {
-        game.addObject(new Corpse(game, getPosn(), "player_falling_S_4.png"));
-      } */
     } else { // if (nextActivity == null) {
       if (currentActivity.equals("walking")) {
         refreshWalk();
@@ -535,7 +529,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
 
   // deal with falling animations, sfx, etc later.
-  public abstract void die();
+  public void die() {
+    game.removeObject(getFloorOverlay());
+  }
   
   /* Does NOT validate the tile we're moving to. You have to do that yourself!
    * checkNextTile() was supposed to do that but it kind of grew in scope. */
@@ -719,12 +715,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   // ===== ACCESSOR METHODS =====
   
   public void setTargetUnit(Unit u) {
-    if (getTargetUnit() != null) {
-      getTargetUnit().updateFloorOverlay();
-    }
+    Unit oldTargetUnit = targetUnit;
     targetUnit = u;
-    if (getTargetUnit() != null) {
-      getTargetUnit().updateFloorOverlay();
+    if (oldTargetUnit != null) {
+      oldTargetUnit.updateFloorOverlay();
+    }
+    if (u != null) {
+      u.updateFloorOverlay();
     }
   }
   

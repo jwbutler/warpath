@@ -60,6 +60,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
           setNextActivity("walking");
           moveRadius = 3;
         }
+        /* Find a tile to teleport to. */
         do {
           /* The logic here is a little simpler than the Python version.
            * I'm also not sure it's bug-free... */
@@ -76,10 +77,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         } while (!goodPosn);
         setNextTargetPosn(p);
 
-      } else if (closestCorpse != null) {
+      } else if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= visionRadius)) {
         if (closestCorpse.getPosn().equals(getPosn())) {
           setNextActivity("rezzing");
-        } else if (game.distance2(this, closestCorpse) <= visionRadius){
+        } else {
           setNextActivity("walking");
           setNextTargetPosn(closestCorpse.getPosn());
         }

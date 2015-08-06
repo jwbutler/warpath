@@ -1,9 +1,5 @@
 import java.awt.Graphics;
 
-/* ===== CHANGELOG =====
- * 5/25 - Moved to its own file.  Good practice and all.
- * ===================== */
-
 public class DepthTreeNode {
   private DepthTreeNode left;
   private DepthTreeNode right;
@@ -30,13 +26,11 @@ public class DepthTreeNode {
     this.right = right;
   }
   
+  /* This is an example of an inorder traversal. */
   public void drawInOrder(Graphics g) {
-    //System.out.println("DEPTH TREE: DRAWINORDER()");
     if (left != null) {
       left.drawInOrder(g);
     }
-    //System.out.println("DEPTH TREE: DRAWING! (" + data + ")");
-    //System.out.println(data + " " + data.getPosn());
     data.draw(g);
     if (right != null) {
       right.drawInOrder(g);
@@ -44,6 +38,6 @@ public class DepthTreeNode {
   }
   
   public String toString() {
-    return String.format("DepthTreeNode<%s>", getData());
+    return String.format("<DepthTreeNode(%s)>", getData());
   }
 }

@@ -115,9 +115,11 @@ public class EnemyRobedWizard extends RobedWizardUnit {
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
       /* Do we want to take partial damage? Do we want to block adjacent angles? */
     } else {
+      /* IMPORTANT: take the damage BEFORE changing the activity, since we don't want to take
+       * the multiplied damage on this hit. */
+      takeDamage(dmg);
       setCurrentActivity("stunned_long");
       clearTargets();
-      takeDamage(dmg);
     }
   }
   

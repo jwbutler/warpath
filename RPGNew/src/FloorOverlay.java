@@ -6,7 +6,6 @@ import jwbgl.*;
 
 public class FloorOverlay extends NonBlockingObject {
   private GameObject src;
-  private RPG game;
   private Surface surface;
   private Color outerColor;
   private Color innerColor;
@@ -42,6 +41,6 @@ public class FloorOverlay extends NonBlockingObject {
   
   public String toString() {
     //return "<FloorOverlay("+outerColor+","+innerColor+")>";
-    return String.format("<FloorOverlay(%s)>", getPosn());
+    return String.format("<FloorOverlay(%s, %d)>", getPosn(), this.hashCode());
   }
 }

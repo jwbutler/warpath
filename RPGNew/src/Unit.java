@@ -531,6 +531,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   // deal with falling animations, sfx, etc later.
   public void die() {
     game.removeObject(getFloorOverlay());
+    floorOverlay = null;
   }
   
   /* Does NOT validate the tile we're moving to. You have to do that yourself!
@@ -705,7 +706,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       floorOverlay = new FloorOverlay(game, this, Color.GREEN, transGreen);
       //floorOverlay = new FloorOverlay(game, this, Color.GREEN);
     }
+    int oldSize = game.getDepthTree().size();
     game.getDepthTree().add(floorOverlay);
+    int newSize = game.getDepthTree().size();
   }
   
   public boolean isMoving() {
@@ -737,6 +740,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void setTargetPosnOverlay(Posn posn) {
     if (targetPosnOverlay != null) {
       game.getDepthTree().remove(targetPosnOverlay);
+      targetPosnOverlay = null;
     }
     if (posn != null) {
       //Color transCyan = new Color(0,255,255,64);
@@ -984,5 +988,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public void printDebug() {
     System.out.printf("<%s - %s %s %s %s %s %s>\n", getClass(), currentActivity, nextActivity, targetPosn, nextTargetPosn, targetUnit, nextTargetUnit);
+  }
+
+  public void setFloorOverlay(FloorOverlay floorOverlay) {
+    this.floorOverlay = floorOverlay;
+  }
+
+  public FloorOverlay getTargetPosnOverlay() {
+    return targetPosnOverlay;
   }
 }

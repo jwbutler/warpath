@@ -347,6 +347,7 @@ public class RPG implements ActionListener {
     units.remove(u);
     depthTree.remove(u);
     removeObject(u.getFloorOverlay());
+    u.setFloorOverlay(null);
 
     floor.getTile(u.getX(),u.getY()).setUnit(null);
     for (int i = 1; i < players.size()+1; i++) {
@@ -969,6 +970,10 @@ public class RPG implements ActionListener {
     depthTree = new DepthTree();
     units = new ArrayList<Unit>();
     for (Unit u: level.getUnits()) {
+      depthTree.add(u.getFloorOverlay());
+      if (u.getTargetPosnOverlay() != null) {
+        System.out.println("zomg");
+      }
       addUnit(u);
       /* This is a dumb hack to correct the depth tree. */
       u.moveTo(u.getPosn());

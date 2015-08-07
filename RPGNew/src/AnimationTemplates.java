@@ -27,6 +27,14 @@ public class AnimationTemplates {
     "standing_1", "standing_1"
   };
   
+  /* 8 frames */
+  public static final String[] WIZARD_STUNNED_SHORT = {
+    "standing_1", "standing_1",
+    "standing_2", "standing_2",
+    "standing_3", "standing_3",
+    "standing_4", "standing_4"
+  };
+  
   /* 40 frames */
   public static final String[] WIZARD_STUNNED_LONG = {
     "stunned_1", "stunned_1", "stunned_1", "stunned_1",

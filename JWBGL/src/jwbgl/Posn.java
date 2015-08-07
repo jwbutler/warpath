@@ -4,7 +4,8 @@ public class Posn {
    * Most methods are defined both with posns and with individual
    * X and Y arguments.  I'm not sure which is better but sometimes this feels
    * more convenient. */
-  private int x, y;
+  public int x;
+  public int y;
   
   public Posn(int x, int y) {
     this.x = x;

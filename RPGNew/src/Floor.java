@@ -1,4 +1,5 @@
 import java.awt.Graphics;
+
 import jwbgl.*;
 /* Pretty much just a 2d array of Tiles. We draw all the tiles onto an
  * intermediate draw surface rather than drawing them individually.
@@ -64,6 +65,10 @@ public class Floor {
   }
   public int getHeight() {
     return height;
+  }
+
+  public boolean contains(Posn p) {
+    return (p.x >= 0 && p.x < width && p.y >= 0 && p.y < height); 
   }
   
 }

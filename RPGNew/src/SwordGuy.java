@@ -38,7 +38,7 @@ public class SwordGuy extends HumanUnit {
     int dy = u.getY() - getY();
     int x = u.getX()+dx;
     int y = u.getY()+dy;
-    if (!game.isObstacle(new Posn(x,y))) {
+    if (game.getFloor().contains(new Posn(x,y)) && !game.isObstacle(new Posn(x,y))) {
       u.move(dx, dy);
     } else {
       System.out.println("bashfail");

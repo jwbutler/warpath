@@ -7,7 +7,7 @@ import jwbgl.*;
 
 public abstract class RobedWizardUnit extends Unit implements Serializable {
   private static String[] defaultActivities = {
-    "standing", "walking", "falling", "teleporting", "appearing", "rezzing", "stunned_long"
+    "standing", "walking", "falling", "teleporting", "appearing", "rezzing", "stunned_short", "stunned_long"
     };
   
   public RobedWizardUnit(RPG game, String name, String animationName,
@@ -74,10 +74,26 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
       loadAppearingAnimations();
     } else if (activity.equals("rezzing")) {
       loadRezzingAnimations();
+    } else if (activity.equals("stunned_short")) {
+      loadStunnedShort Animations();
     } else if (activity.equals("stunned_long")) {
       loadStunnedLongAnimations();
     } else {
       loadGenericAnimations(activity);
+    }
+  }
+  
+  /* For now we're just using standing animations. Maybe we can do something better? */
+  public void loadStunnedShortAnimations() {
+    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+      String dir = RPG.DIRECTIONS[i];
+      String[] filenames = AnimationTemplates.WIZARD_STUNNED_SHORT;
+      String[] filenames2 = new String[filenames.length];
+      for (int j=0; j<filenames.length; j++) {
+        String animIndex = filenames[j].split("_")[1];
+        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "standing", "SE", animIndex);
+      }
+      animations.add(new Animation(animationName, filenames2, "stunned_short", dir, frames));
     }
   }
   

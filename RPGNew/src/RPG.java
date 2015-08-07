@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.KeyEventDispatcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public class RPG implements ActionListener {
   
   private GameWindow gameWindow;
   private SoundPlayer soundPlayer;
+  private InputHandler inputHandler;
   
   /* Not using anything from this except victory/defeat conditions. */
   private int levelIndex;
@@ -88,6 +90,7 @@ public class RPG implements ActionListener {
     unitsToRemove = new ArrayList<Unit>();
     RNG = new Random();
     soundPlayer = new SoundPlayer();
+    inputHandler = new InputHandler(this);
     //playSound("crystal.wav");
     
     // Do we need to extend the JFrame class? I'm thinking no.
@@ -943,11 +946,11 @@ public class RPG implements ActionListener {
   }
   
   public boolean ctrlIsDown() {
-    return gameWindow.getGamePanel().ctrlIsDown;
+    return inputHandler.ctrlIsDown;
   }
   
   public boolean shiftIsDown() {
-    return gameWindow.getGamePanel().shiftIsDown;
+    return inputHandler.shiftIsDown;
   }
   
   public boolean isObstacle(Posn p) {
@@ -955,7 +958,7 @@ public class RPG implements ActionListener {
   }
 
   public Posn getMousePosn() {
-    return gameWindow.getGamePanel().getMousePosn();
+    return inputHandler.getMousePosn();
   }
 
   public JFrame getGameWindow() {
@@ -1015,6 +1018,19 @@ public class RPG implements ActionListener {
     levels.add(new TestLevel(this));
     levels.add(new WizardLevel(this));
     levelIndex=0;
+  }
+
+  public InputHandler getInputHandler() {
+    return inputHandler;
+  }
+
+  public void killAllEnemies() {
+    for (Unit u : units) {
+      if (u.isHostile(getPlayerUnit())) {
+        u.die();
+        queueRemoveUnit(u);
+      }
+    }
   }
 
 }

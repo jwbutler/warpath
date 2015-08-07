@@ -42,7 +42,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         for (GameObject c : game.getObjects()) {
           if (c.isCorpse()) {
             if (closestCorpse == null || game.distance2(this, c) <= game.distance2(this, closestCorpse)) {
-              if (!game.getFloor().getTile(c.getPosn()).isBlocked()) {
+              if (!game.getFloor().getTile(c.getPosn()).isBlocked() || c.getPosn().equals(getPosn())) {
                 closestCorpse = (Corpse) c;
               }
             }
@@ -50,8 +50,11 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         }
       }
       /* Execute flowchart. */
-      /* Is there an enemy (player) unit in the danger zone? Teleport or walk away. */
-      if (hostileInRange) {
+      /* Are we standing on a corpse? Start rezzing, regardless of threats. */
+      if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= visionRadius) && (closestCorpse.getPosn().equals(getPosn()))) {
+        setNextActivity("rezzing");
+        /* Is there an enemy (player) unit in the danger zone? Teleport or walk away. */
+      } else if (hostileInRange) {
         int x,y;
         Posn p;
         boolean goodPosn = false;
@@ -79,14 +82,9 @@ public class EnemyRobedWizard extends RobedWizardUnit {
           }
         } while (!goodPosn);
         setNextTargetPosn(p);
-
       } else if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= visionRadius)) {
-        if (closestCorpse.getPosn().equals(getPosn())) {
-          setNextActivity("rezzing");
-        } else {
-          setNextActivity("walking");
-          setNextTargetPosn(closestCorpse.getPosn());
-        }
+        setNextActivity("walking");
+        setNextTargetPosn(closestCorpse.getPosn());
       } else {
         double r = RNG.nextDouble();
         if (r < wanderChance) {
@@ -121,7 +119,11 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       /* IMPORTANT: take the damage BEFORE changing the activity, since we don't want to take
        * the multiplied damage on this hit. */
       takeDamage(dmg);
-      setCurrentActivity("stunned_long");
+      if (getCurrentActivity().equals("rezzing")) {
+        setCurrentActivity("stunned_long");
+      } else {
+        setCurrentActivity("stunned_short");
+      }
       clearTargets();
     }
   }

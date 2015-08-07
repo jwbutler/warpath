@@ -16,7 +16,7 @@ public class EnemyZombie extends ZombieUnit {
     maxDamage = 4;
     //minDamage = maxDamage = 0;
     slowMoveSpeed = 0.3;
-    fastMoveSpeed = 0.6;
+    fastMoveSpeed = 0.7;
     attackChance = 0.7;
     visionRadius = 6;
     smellRadius = 12;

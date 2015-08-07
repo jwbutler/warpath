@@ -55,6 +55,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected int bashCost = 36; // 12 frames per bash for 33% uptime
   protected int slashCost = 3; // costs N EP per tick (does not disable HP regen) // SHOULD BE 2
   protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
+  protected int rezCost = 200; // it's weird to put this in the base class but yeah.
   protected int hpRegen = 20; // regen 1 HP per N ticks
   protected int epRegen = 1; // regen 1 EP per N ticks
   

@@ -14,9 +14,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   private int visionRadius = 30;
   public EnemyRobedWizard(RPG game, String name, Posn posn, Player player) {
     super(game, name, activities, posn, player);
-    currentHP = maxHP = 100;
+    currentHP = maxHP = 200;
     currentEP = maxEP = 200;
     teleportCost = 200;
+    rezCost = 200;
   }
   
   @Override
@@ -41,7 +42,9 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         for (GameObject c : game.getObjects()) {
           if (c.isCorpse()) {
             if (closestCorpse == null || game.distance2(this, c) <= game.distance2(this, closestCorpse)) {
-              closestCorpse = (Corpse) c;
+              if (!game.getFloor().getTile(c.getPosn()).isBlocked()) {
+                closestCorpse = (Corpse) c;
+              }
             }
           }
         }

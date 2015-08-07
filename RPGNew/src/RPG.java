@@ -346,8 +346,6 @@ public class RPG implements ActionListener {
   public void removeUnit(Unit u) {
     units.remove(u);
     depthTree.remove(u);
-    removeObject(u.getFloorOverlay());
-    u.setFloorOverlay(null);
 
     floor.getTile(u.getX(),u.getY()).setUnit(null);
     for (int i = 1; i < players.size()+1; i++) {
@@ -364,6 +362,8 @@ public class RPG implements ActionListener {
         units.get(i).setTargetPosn(null);
       }
     }
+    removeObject(u.getFloorOverlay());
+    u.setFloorOverlay(null);
   }
   
   /** 

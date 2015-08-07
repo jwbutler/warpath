@@ -530,8 +530,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
 
   // deal with falling animations, sfx, etc later.
   public void die() {
-    game.removeObject(getFloorOverlay());
-    floorOverlay = null;
+    //game.removeObject(getFloorOverlay());
+    //floorOverlay = null;
   }
   
   /* Does NOT validate the tile we're moving to. You have to do that yourself!

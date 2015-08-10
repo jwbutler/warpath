@@ -75,7 +75,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     } else if (activity.equals("rezzing")) {
       loadRezzingAnimations();
     } else if (activity.equals("stunned_short")) {
-      loadStunnedShort Animations();
+      loadStunnedShortAnimations();
     } else if (activity.equals("stunned_long")) {
       loadStunnedLongAnimations();
     } else {

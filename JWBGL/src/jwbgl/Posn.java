@@ -13,7 +13,7 @@ public class Posn {
   }
   
   public boolean equals(Posn p) {
-    return ((this.x==p.getX())&&(this.y==p.getY()));
+    return ((this.x == p.x) && (this.y == p.y));
   }
   
   public int getX() { return x; }

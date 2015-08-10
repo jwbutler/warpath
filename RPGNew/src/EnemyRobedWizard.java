@@ -41,7 +41,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       if (!hostileInRange) {
         for (GameObject c : game.getObjects()) {
           if (c.isCorpse()) {
-            if (closestCorpse == null || game.distance2(this, c) <= game.distance2(this, closestCorpse)) {
+            if (closestCorpse == null || game.distance2(this, c) < game.distance2(this, closestCorpse)) {
               if (!game.getFloor().getTile(c.getPosn()).isBlocked() || c.getPosn().equals(getPosn())) {
                 closestCorpse = (Corpse) c;
               }

@@ -2,6 +2,57 @@
  * everything in the game.
  */
 public class AnimationTemplates {
+  /* 12 frames */
+  public static final String[] ATTACKING = {
+    "attacking_1", "attacking_1",
+    "attacking_2", "attacking_2", "attacking_2", "attacking_2", "attacking_2", "attacking_2",
+    "attacking_1", "attacking_1",
+    "standing_1", "standing_1"
+  };
+  
+  /* 12 frames */
+  public static final String[] BASHING = {
+    "attacking_1", "attacking_1",
+    "attacking_2b", "attacking_2b", "attacking_2b", "attacking_2b", "attacking_2b", "attacking_2b",
+    "attacking_1", "attacking_1",
+    "standing_1", "standing_1"
+  };
+  
+  public static final String[] BLOCKING_1 = {
+    "attacking_1", "attacking_1"
+  };
+  
+  public static final String[] BLOCKING_2 = {
+    "attacking_2b", "attacking_2b"
+  };
+  
+  public static final String[] BLOCKING_3 = {
+    "attacking_1", "attacking_1"
+  };
+
+  /* HACK - this is really only 8 frames but the game tries to draw the unit
+   * before removing it. So we're going to give it an extra pair of frames. */
+  public static final String[] FALLING = {
+    "falling_1", "falling_1",
+    "falling_2", "falling_2",
+    "falling_3", "falling_3",
+    "falling_4", "falling_4",
+    "falling_4", "falling_4"
+  };
+  
+  public static final String[] SLASHING_1 = {
+    "attacking_1", "attacking_1"
+  };
+  
+  public static final String[] SLASHING_2 = {
+    "attacking_2", "attacking_2"
+  };
+  
+  public static final String[] SLASHING_3 = {
+    "attacking_1", "attacking_1",
+    "standing_1", "standing_1"
+  };
+  
   public static final String[] STANDING = {
     "standing_1", "standing_1",
     "standing_1", "standing_1"
@@ -27,6 +78,27 @@ public class AnimationTemplates {
     "standing_1", "standing_1"
   };
   
+  
+  public static final String[] WALKING = {
+    "walking_1", "walking_1",
+    "walking_2", "walking_2",
+    "standing_1", "standing_1"
+  };
+
+  public static final String[] WIZARD_APPEARING = {
+    "vanishing_4", "vanishing_4",
+    "vanishing_3", "vanishing_3",
+    "vanishing_2", "vanishing_2",
+    "vanishing_1", "vanishing_1"
+  };
+  
+  public static final String[] WIZARD_STANDING = {
+    "standing_1", "standing_1",
+    "standing_2", "standing_2",
+    "standing_3", "standing_3",
+    "standing_4", "standing_4"
+  };
+
   /* 8 frames */
   public static final String[] WIZARD_STUNNED_SHORT = {
     "standing_1", "standing_1",
@@ -48,92 +120,7 @@ public class AnimationTemplates {
     "stunned_1", "stunned_1", "stunned_1", "stunned_1",
     "stunned_2", "stunned_2", "stunned_2", "stunned_2",
   };
-  
-  public static final String[] WALKING = {
-    "walking_1", "walking_1",
-    "walking_2", "walking_2",
-    "standing_1", "standing_1"
-  };
-  
-  public static final String[] ATTACKING = {
-    "attacking_1", "attacking_1",
-    "attacking_2", "attacking_2",
-    "attacking_2", "attacking_2",
-    "attacking_2", "attacking_2",
-    "attacking_1", "attacking_1",
-    "standing_1", "standing_1"
-  };
-  
-  public static final String[] BLOCKING_1 = {
-    "attacking_1", "attacking_1"
-  };
-  
-  public static final String[] BLOCKING_2 = {
-    "attacking_2b", "attacking_2b"
-  };
-  
-  public static final String[] BLOCKING_3 = {
-    "attacking_1", "attacking_1"
-  };
-  
-  public static final String[] BASHING = {
-    "attacking_1", "attacking_1",
-    "attacking_2b", "attacking_2b",
-    "attacking_2b", "attacking_2b",
-    "attacking_2b", "attacking_2b",
-    "attacking_1", "attacking_1",
-    "standing_1", "standing_1"
-  };
-  
-  public static final String[] SLASHING_1 = {
-    "attacking_1", "attacking_1",
-  };
-  
-  public static final String[] SLASHING_2 = {
-    "attacking_2", "attacking_2",
-  };
-  
-  public static final String[] SLASHING_3 = {
-    "attacking_1", "attacking_1",
-    "standing_1", "standing_1"
-  };
-  
-  /* HACK - this is really only 8 frames but the game tries to draw the unit
-   * before removing it. So we're going to give it an extra pair of frames. */
-  public static final String[] FALLING = {
-    "falling_1", "falling_1",
-    "falling_2", "falling_2",
-    "falling_3", "falling_3",
-    "falling_4", "falling_4",
-    "falling_4", "falling_4"
-  };
-  
-  public static final String[] ZOMBIE_FALLING = {
-    "falling_1", "falling_1",
-    "falling_2", "falling_2",
-    "falling_3", "falling_3",
-    "falling_3", "falling_3"
-  };
-  
-  public static final String[] WIZARD_STANDING = {
-    "standing_1", "standing_1",
-    "standing_2", "standing_2",
-    "standing_3", "standing_3",
-    "standing_4", "standing_4"
-  };
-  
-  public static final String[] WIZARD_WALKING = {
-    "walking_1", "walking_1",
-    "walking_1", "walking_1"
-  };
-
-  public static final String[] WIZARD_APPEARING = {
-    "vanishing_4", "vanishing_4",
-    "vanishing_3", "vanishing_3",
-    "vanishing_2", "vanishing_2",
-    "vanishing_1", "vanishing_1"
-  };
-
+    
   public static String[] WIZARD_TELEPORTING = {
     "vanishing_1", "vanishing_1",
     "vanishing_2", "vanishing_2",
@@ -156,6 +143,22 @@ public class AnimationTemplates {
     "casting_7", "casting_7", "casting_7", "casting_7",
     "casting_8", "casting_8", "casting_8", "casting_8"
   };
+  
+  public static final String[] WIZARD_WALKING = {
+    "walking_1", "walking_1",
+    "walking_1", "walking_1",
+    "walking_1", "walking_1",
+    "walking_1", "walking_1",
+    "walking_1", "walking_1"
+  };
+
+  public static final String[] ZOMBIE_FALLING = {
+    "falling_1", "falling_1",
+    "falling_2", "falling_2",
+    "falling_3", "falling_3",
+    "falling_3", "falling_3"
+  };
+  
   
   /* This is a convenience method to load the default Player animations
    * semi-automatically. */

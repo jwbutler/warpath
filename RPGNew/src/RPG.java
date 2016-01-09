@@ -1016,7 +1016,7 @@ public class RPG implements ActionListener {
   public void loadLevels() {
     levels = new ArrayList<Level>();
     levels.add(new TestLevel(this));
-    levels.add(new WizardLevel(this));
+    //levels.add(new WizardLevel(this));
     levelIndex=0;
   }
 

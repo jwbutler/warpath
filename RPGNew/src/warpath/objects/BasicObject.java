@@ -1,10 +1,11 @@
-package warpath.units;
+package warpath.objects;
 import java.awt.Graphics;
 
 import jwbgl.*;
+import warpath.core.Constants;
 import warpath.core.RPG;
 
-/* This class contains basic methods to be used by all sorts of game objects,
+/** This class contains basic methods to be used by all sorts of game objects,
  * units or otherwise.  We'll be subclassing it a lot. */
 
 public abstract class BasicObject implements GameObject {
@@ -26,13 +27,11 @@ public abstract class BasicObject implements GameObject {
 
   @Override
   public Surface getSurface() {
-    // TODO Auto-generated method stub
     return surface;
   }
 
   @Override
   public Rect getRect() {
-    // TODO Auto-generated method stub
     return rect;
   }
   
@@ -51,7 +50,6 @@ public abstract class BasicObject implements GameObject {
   public void setPosn(Posn p) {
     posn = p;
   }
-  
   
   public int getDepth() {
     return depth;
@@ -73,16 +71,15 @@ public abstract class BasicObject implements GameObject {
     this.yOffset = yOffset;
   }
   
+  /** Draws the object onto the game panel using the specified offsets.
+   * @param g - the AWT graphics object used to render it
+   */
   public void draw(Graphics g) {
     // Offsets have not been figured out yet, need camera shit
     Posn pixel = game.gridToPixel(posn); // returns top left
-    int left = pixel.getX() + RPG.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
-    int top = pixel.getY() + RPG.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
+    int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
+    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
     getSurface().draw(g, left, top);
-  }
-  
-  public RPG getGame() {
-    return game;
   }
   
   public boolean isUnit() {
@@ -103,7 +100,7 @@ public abstract class BasicObject implements GameObject {
   }
   
   public void updateDepth() {
-    depth = (getX()+getY()) * RPG.TILE_HEIGHT/2 + getDepthOffset();
+    depth = (getX()+getY()) * Constants.TILE_HEIGHT/2 + getDepthOffset();
   }
   
   public int getDepthOffset() {

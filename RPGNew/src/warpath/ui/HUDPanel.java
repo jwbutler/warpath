@@ -1,16 +1,18 @@
 package warpath.ui;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.border.Border;
 
 import jwbgl.*;
 import warpath.core.RPG;
+import warpath.ui.components.EnergyBar;
+import warpath.ui.components.HealthBar;
+
+/**
+ * Represents the player HUD. Contains the health and energy bars.
+ */
 public class HUDPanel extends JPanel {
   private RPG game;
   private static final int MARGIN = 16;
@@ -34,8 +36,13 @@ public class HUDPanel extends JPanel {
       BorderFactory.createEmptyBorder(5,5,5,5)));
     validate();
   }
+  
+  /**
+   * I think there's some weirdness where this gets called separately from the
+   * constructor because the player unit hadn't existed yet.
+   */ 
   public void init() {
-    removeAll();
+    removeAll(); // Why?
     JPanel hpPanel = new JPanel();
     hpPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
     hpPanel.setOpaque(false);

@@ -6,16 +6,10 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -24,11 +18,13 @@ import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.basic.BasicSliderUI;
-import javax.swing.plaf.metal.MetalSliderUI;
 
 import jwbgl.*;
 import warpath.core.RPGDriver;
+
+/** The menu for creating a new character.
+ * TODO support saving female characters
+ */
 public class CharacterCreator extends JPanel implements ActionListener, ChangeListener {
   private Timer frameTimer;
   private Surface unitSurface;
@@ -49,6 +45,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private JButton genderSelector;
   private JButton contButton;
   
+  /**
+   * TODO: I really don't like passing the Driver as an argument, figure out
+   * how to avoid this.
+   */
   public CharacterCreator(RPGDriver theDriver, int width, int height) {
 	driver = theDriver;
     setSize(width, height);
@@ -97,7 +97,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     try {
       unitSurface = unitSurfaceBase.clone();
     } catch (CloneNotSupportedException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     
@@ -248,9 +247,13 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     frameTimer = new Timer(50, this);
     frameTimer.start();
   }
+  
+  /**
+   * Called when a button is pressed.
+   * @param e - the ActionEvent from the button press
+   */
   @Override
   public void actionPerformed(ActionEvent e) {
-    // TODO Auto-generated method stub
     if (e.getActionCommand() != null) {
       if (e.getActionCommand().equals("Switch to Male")) {
         doGender();
@@ -267,17 +270,29 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       repaint();
     }
   }
+  
+  /**
+   * Called whenever a slider is moved.
+   * @param e - the event containing slider information
+   */ 
   @Override
   public void stateChanged(ChangeEvent e) {
-    // TODO Auto-generated method stub
     updateColors();
   }
   
+  /**
+   * Copies the given color to the clipboard.
+   * @param name - the name of the color (e.g. "Shirt 1")
+   */
   public void doCopy(String name) {
     Color c = paletteSwaps.get(baseColors.get(name));
     savedColor = new Color(c.getRGB());
   }
   
+  /**
+   * Sets the specified color sliders to the stored value, if it exists.
+   * @param name - the name of the color (e.g. "Shirt 1") 
+   */
   public void doPaste(String name) {
     if (savedColor != null) {
       JSlider RSlider = colorSliders.get(name)[0];
@@ -290,6 +305,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     updateColors();
   }
   
+  /**
+   * Perform palette swaps for each of the color sliders.
+   */
   public void updateColors() {
     for (String label : colorNames) {
       Color src = baseColors.get(label);
@@ -306,7 +324,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     try {
       unitSurface = unitSurfaceBase.clone();
     } catch (CloneNotSupportedException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     
@@ -326,6 +343,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     unitPanel.setSurface(unitSurface);
   }
   
+  /** Swap between male and female creation. */
   public void doGender() {
     if (genderSelector.getText().equals("Switch to Female")) {
       genderSelector.setText("Switch to Male");
@@ -365,6 +383,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     unitPanel.setBounds(l, t, w, h);*/
   }
   
+  /** Returns the set of palette swaps that the user has created. */
   public Hashtable<Color, Color> exportPaletteSwaps() {
     return paletteSwaps;
   }

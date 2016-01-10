@@ -25,10 +25,8 @@ import jwbgl.*;
  * It also handles input (mouse & keyboard), is this good design? */
 import warpath.core.RPG;
  
- /* ===== CHANGELOG =====
-  * 5/23 - Changed from JFrame to JPanel to fix flickering problems.
-  * ===================== */
-
+ /** Represents the actual draw surface of the game.
+  * TODO Learn how AWT/Swing graphics actually work... */
 public class GamePanel extends JPanel {
   private RPG game;
   KeyboardFocusManager focusManager;
@@ -64,6 +62,5 @@ public class GamePanel extends JPanel {
   
   public Rect getRect() {
     return new Rect(0,0,getWidth(),getHeight());  
-  }
-  
+  } 
 }

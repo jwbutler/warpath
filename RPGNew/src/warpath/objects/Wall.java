@@ -1,4 +1,4 @@
-package warpath.units;
+package warpath.objects;
 import java.awt.Color;
 
 import jwbgl.*;

@@ -1,15 +1,17 @@
-package warpath.ui;
+package warpath.ui.components;
 import java.awt.Color;
 import java.awt.Graphics;
 
 import jwbgl.*;
+import warpath.core.Constants;
 import warpath.core.RPG;
+import warpath.objects.GameObject;
 import warpath.objects.NonBlockingObject;
-// Represents a glowy spot on the floor.
-// Can be tied either to a Tile or to an object/unit.
-import warpath.units.GameObject;
 
+/** Represents a floor overlay for units with customizable colors 
+ * representing the unit's alignment, targeting status, etc. */
 public class FloorOverlay extends NonBlockingObject {
+  private final String FLOOR_OVERLAY_PATH = "floor_overlay_96x48";
   private GameObject src;
   private Surface surface;
   private Color outerColor;
@@ -20,8 +22,8 @@ public class FloorOverlay extends NonBlockingObject {
     this.src = src;
     this.outerColor = outerColor;
     this.innerColor = innerColor;
-    surface = new Surface(RPG.TILE_WIDTH, RPG.TILE_HEIGHT);
-    surface.load("floor_overlay_96x48.png");
+    surface = new Surface(Constants.TILE_WIDTH, Constants.TILE_HEIGHT);
+    surface.load(String.format("%s.%s", FLOOR_OVERLAY_PATH, Constants.IMAGE_FORMAT));
     
     surface.getPaletteSwaps().put(Color.BLACK, outerColor);
     surface.getPaletteSwaps().put(Color.RED, innerColor);

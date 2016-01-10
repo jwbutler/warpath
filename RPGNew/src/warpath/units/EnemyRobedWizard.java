@@ -3,8 +3,13 @@ import java.util.Random;
 
 import jwbgl.*;
 import warpath.core.RPG;
+import warpath.objects.Corpse;
+import warpath.objects.GameObject;
 import warpath.players.Player;
 
+/** Represents the first type of robed wizard enemy, with behavior including
+ * teleporting and zombie-resurrecting.
+ * TODO The value of teleport_chance is not used. */
 public class EnemyRobedWizard extends RobedWizardUnit {
   private static String[] activities = {"walking", "standing", "falling", "teleporting", "appearing", "rezzing", "stunned_long"};
   
@@ -28,7 +33,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
     super.nextActivity();
     Random RNG = game.getRNG();
     if (currentActivity.equals("standing")) {
-      /* Set up variables for the flowchart. */
+      // Set up variables for the flowchart.
       boolean hostileInRange = false;
       Unit closestEnemy = null;
       Corpse closestCorpse = null;
@@ -52,11 +57,11 @@ public class EnemyRobedWizard extends RobedWizardUnit {
           }
         }
       }
-      /* Execute flowchart. */
-      /* Are we standing on a corpse? Start rezzing, regardless of threats. */
+      // Execute flowchart.
+      // Are we standing on a corpse? Start rezzing, regardless of threats.
       if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= visionRadius) && (closestCorpse.getPosn().equals(getPosn()))) {
         setNextActivity("rezzing");
-        /* Is there an enemy (player) unit in the danger zone? Teleport or walk away. */
+        // Is there an enemy (player) unit in the danger zone? Teleport or walk away.
       } else if (hostileInRange) {
         int x,y;
         Posn p;
@@ -69,10 +74,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
           setNextActivity("walking");
           moveRadius = 3;
         }
-        /* Find a tile to teleport to. */
+        // Find a tile to teleport to.
         do {
-          /* The logic here is a little simpler than the Python version.
-           * I'm also not sure it's bug-free... */
+          // The logic here is a little simpler than the Python version.
+          // I'm also not sure it's bug-free...
           x = RNG.nextInt(game.getFloor().getWidth());
           y = RNG.nextInt(game.getFloor().getHeight());
           p = new Posn(x,y);
@@ -91,7 +96,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       } else {
         double r = RNG.nextDouble();
         if (r < wanderChance) {
-          /* Full wander. */
+          // Full wander.
           int x,y;
           do {
             x = RNG.nextInt(game.getFloor().getWidth());
@@ -117,10 +122,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   public void takeBashHit(GameObject src, int dmg) {
     Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
-      /* Do we want to take partial damage? Do we want to block adjacent angles? */
+      // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
-      /* IMPORTANT: take the damage BEFORE changing the activity, since we don't want to take
-       * the multiplied damage on this hit. */
+      // IMPORTANT: take the damage BEFORE changing the activity, since we don't want to take
+      // the multiplied damage on this hit.
       takeDamage(dmg);
       if (getCurrentActivity().equals("rezzing")) {
         setCurrentActivity("stunned_long");

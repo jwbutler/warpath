@@ -8,6 +8,11 @@ import javax.swing.JPanel;
 import warpath.core.RPG;
 import warpath.core.RPGDriver;
 
+/**
+ * The main game window.  Everything else gets rendered inside this;
+ * we use a CardLayout to switch between views.
+ * TODO Clean up commented lines
+ */ 
 public class GameWindow extends JFrame {
 
   private JPanel panelContainer = new JPanel();
@@ -20,6 +25,8 @@ public class GameWindow extends JFrame {
   private MenuPanel menuPanel;
   private final int HUD_PANEL_HEIGHT = 80;
   
+  /** Instantiates the game window with the specified width and height.
+   * TODO Can we avoid using the driver as a parameter? */
   public GameWindow(RPGDriver driver, int width, int height) {
     this.driver = driver;
     setSize(width, height);

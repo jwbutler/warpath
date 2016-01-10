@@ -1,13 +1,12 @@
 package warpath.internals;
 import java.awt.Graphics;
 
-import warpath.units.GameObject;
+import warpath.objects.GameObject;
 
-/* This is my attempt to use CSE 2100 principles to draw stuff in a semi-efficient way.
- * It's a binary tree of GameObjects, organized by their depth.
- * I'm pretty sure a lot of these methods can be implemented more efficiently.
- * Let's crack the 2100 book? */
- 
+/** This is my attempt to use CSE 2100 principles to draw stuff in a
+ * semi-efficient way.  It's a binary search tree of GameObjects, ordered by
+ * their depth.
+ * TODO See if we can optimize some of these methods. */
 public class DepthTree {
   private DepthTreeNode root;
   
@@ -16,19 +15,32 @@ public class DepthTree {
     root = null;
   }
   
+  /** Inserts an object into the tree, first constructing a DepthTreeNode
+   * around it.
+   * @param obj - The object to insert
+   */
   public void add(GameObject obj) {
     add(new DepthTreeNode(obj));
   }
   
-  public void add(DepthTreeNode node) {
+  /** Inserts a node into the tree.  Recursively calls
+   * {@link #add(DepthTreeNode, DepthTreeNode)}.
+   * @param n - The DepthTreeNode to insert
+   */
+  private void add(DepthTreeNode n) {
     if (root == null) {
-      root = node;
+      root = n;
     } else {
-      add(node, root);
+      add(n, root);
     }
   }
   
-  public void add(DepthTreeNode node, DepthTreeNode current) {
+  /**
+   * Inserts an object into the subtree rooted at current.
+   * @param node - The DepthTreeNode containing the object to insert
+   * @param current - The root of the current subtree
+   */
+  private void add(DepthTreeNode node, DepthTreeNode current) {
     if (node.getData().getDepth() <= current.getData().getDepth()) {
       if (current.getLeft() == null) {
         current.setLeft(node);
@@ -44,6 +56,12 @@ public class DepthTree {
     }
   }
   
+  /**
+   * Removes the given GameObject from the tree.  Recursively calls
+   * {@link #remove(GameObject, DepthTreeNode)}.
+   * @param o - The object to remove
+   * @return true if the operation succeeds, false otherwise
+   */
   public boolean remove(GameObject o) {
     if (root == null) {
       System.out.printf("Remove failed: %s (1)\n", o);
@@ -60,7 +78,14 @@ public class DepthTree {
       return remove(o, root);
     }
   }
-  public boolean remove(GameObject o, DepthTreeNode current) {
+  
+  /**
+   * Removes an object from the subtree rooted at current.
+   * @param node - The DepthTreeNode containing the object to remove
+   * @param current - The root of the current subtree
+   * @return true if the operation succeeds, false otherwise
+   */
+  private boolean remove(GameObject o, DepthTreeNode current) {
     DepthTreeNode left = current.getLeft();
     DepthTreeNode right = current.getRight();
     if (o.getDepth() <= current.getData().getDepth()) {
@@ -94,6 +119,10 @@ public class DepthTree {
     }
   }
   
+  /** Recursively calls the draw() method of each object in the tree, using
+   * an in-order traversal.
+   * @param g - the AWT Graphics object used to draw.
+   */
   public void drawAll(Graphics g) {
     //System.out.println("Depth tree => drawAll() => head = " + head);
     if (root != null) {
@@ -101,14 +130,26 @@ public class DepthTree {
     }
   }
   
-  public int size(DepthTreeNode root) {
+  /**
+   * Returns the number of elements in the tree.
+   * @return the number of elements in the tree
+   */
+  
+  public int size() {
+    return size(root);
+  }
+  
+  
+  /**
+   * Returns the number of elements in the subtree rooted at root.
+   * @param root - the root of the current subtree
+   * @return the number of elements in the current subtree
+   */
+  private int size(DepthTreeNode root) {
     if (root == null) {
       return 0;
     } else {
       return size(root.getLeft()) + size(root.getRight()) + 1;
     }
-  }
-  public int size() {
-    return size(root);
   }
 }

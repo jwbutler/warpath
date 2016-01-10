@@ -8,17 +8,18 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+/** Used to play sounds.
+ * TODO Music */
 public class SoundPlayer {
+  private final String SOUNDS_FOLDER = "sounds";
   public SoundPlayer() {
   }
   public void playSoundThread(final String filename) {
     new Thread(new Runnable() {
       @Override
       public void run() {
-        // TODO Auto-generated method stub
         playSound(filename);
       }
     }).run();
@@ -26,9 +27,12 @@ public class SoundPlayer {
   public void playSound(String filename) {
     try {
       final Clip clip = AudioSystem.getClip();
-      final AudioInputStream stream = AudioSystem.getAudioInputStream(new File("sounds/"+filename));
+      final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(SOUNDS_FOLDER+File.separatorChar+filename));
       clip.open(stream);
+      // Play the file once to completion.
       clip.loop(0);
+      
+      // This listener is used to close the stream at the end of input.
       clip.addLineListener(new LineListener() {
 
         @Override

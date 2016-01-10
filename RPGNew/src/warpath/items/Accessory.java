@@ -6,11 +6,11 @@ import java.util.Hashtable;
 import jwbgl.*;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
+import warpath.core.Constants;
 import warpath.core.RPG;
 import warpath.units.Unit;
 
-/* An Accessory generally represents armor objects.  Could also be things like
- * beards. */
+/** A generic class for any unit accessories such as weapons, armor or hair. */
 public abstract class Accessory {
   // we should make a generic class to subclass. there's a lot of copying and pasting
   // going on here - BUT i can't think of a way to do this without multiple
@@ -37,16 +37,17 @@ public abstract class Accessory {
     loadAnimations();
   }
   
+  /** Load all the animations for this object.
+   * Calls loadActivityAnimations() for each activity.
+   */
   public void loadAnimations() {
-    // c/p from Unit
-
     animations = new ArrayList<Animation>();
     for (int i = 0; i < activities.length; i++) {
       loadActivityAnimations(activities[i]);
     }
   }
-  
-  public void loadActivityAnimations(String activity) {
+    
+  private void loadActivityAnimations(String activity) {
     if (activity.equals("falling")) {
       loadFallingAnimations();
     } else {
@@ -57,8 +58,8 @@ public abstract class Accessory {
   /* Why are we subtracting 20 here? */
   public void draw(Graphics g) {
     Posn pixel = game.gridToPixel(unit.getPosn()); // returns top left
-    int left = pixel.getX() + RPG.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
-    int top = pixel.getY() + RPG.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
+    int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
+    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
     top -= 20;
     getSurface().draw(g, left, top);
   }
@@ -99,25 +100,28 @@ public abstract class Accessory {
     return getCurrentAnimation().drawBehind(getCurrentAnimation().getIndex());
   }
   
-  /* C&P from Unit! */
-  public void loadGenericAnimations(String activity) {
+  /** Load animations in the expected format used by Units.
+   * C&P from Unit! */
+  protected void loadGenericAnimations(String activity) {
     String[] filenames = AnimationTemplates.getTemplate(activity);
-    for (int i = 0; i < RPG.DIRECTIONS.length; i++) {
+    for (int i = 0; i < Constants.DIRECTIONS.length; i++) {
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
         String activityName = filenames[j].split("_")[0];
         String frameNum = filenames[j].split("_")[1];
-        filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, activityName, RPG.DIRECTIONS[i], frameNum));
+        filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, activityName, Constants.DIRECTIONS[i], frameNum));
       }
-      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i], frames));
+      animations.add(new Animation(animationName, filenames2, activity, Constants.DIRECTIONS[i], frames));
     }
   }
-  /* C&P from Unit.
-   * IMPORTANT: Some of the equipment will have its own falling animations.
+  /** Falling animations follow different rules than the usual Unit falling
+   * animations, so we will define them separately.
+   * C&P from Unit.
+   * TODO: Some of the equipment will have its own falling animations.
    * Need to override this. */
-  public void loadFallingAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+  protected void loadFallingAnimations() {
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.FALLING;
       String[] filenames2 = new String[filenames.length];
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {

@@ -7,8 +7,10 @@ import java.util.Hashtable;
 import jwbgl.*;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
+import warpath.core.Constants;
 import warpath.core.RPG;
 import warpath.items.Accessory;
+import warpath.objects.Corpse;
 import warpath.players.Player;
 
 public abstract class RobedWizardUnit extends Unit implements Serializable {
@@ -91,8 +93,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   
   /* For now we're just using standing animations. Maybe we can do something better? */
   public void loadStunnedShortAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_STUNNED_SHORT;
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
@@ -104,8 +106,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   }
   
   public void loadStunnedLongAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_STUNNED_LONG;
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
@@ -117,8 +119,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   }
 
   protected void loadAppearingAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_APPEARING;
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
@@ -130,8 +132,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   }
 
   protected void loadTeleportingAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_TELEPORTING;
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
@@ -147,8 +149,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   /* (C&P from ZombieUnit)
    * Uses the vanishing animation which is directionless. */
   public void loadFallingAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.FALLING;
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
@@ -161,8 +163,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   
   /* Long (40-frame) casting animation, all SE. */
   public void loadRezzingAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_REZZING;
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {

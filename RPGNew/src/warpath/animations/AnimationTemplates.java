@@ -1,6 +1,6 @@
 package warpath.animations;
-/* This class defines the basic set of animations that are used by basically
- * everything in the game.
+/** Defines the filenames for the basic set of animations that are used by
+ * basically all the units in the game.
  */
 public class AnimationTemplates {
   /* 12 frames */
@@ -161,7 +161,7 @@ public class AnimationTemplates {
   };
   
   
-  /* This is a convenience method to load the default Player animations
+  /** This is a convenience method to load the default Player animations
    * semi-automatically. */
   public static String[] getTemplate(String activity) {
     if (activity.equals("standing")) {

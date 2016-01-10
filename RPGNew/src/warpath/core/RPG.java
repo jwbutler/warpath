@@ -20,15 +20,15 @@ import warpath.internals.PathfinderPQ;
 import warpath.levels.Level;
 import warpath.levels.TestLevel;
 import warpath.objects.Floor;
+import warpath.objects.GameObject;
+import warpath.objects.Tile;
 import warpath.players.AIPlayer;
 import warpath.players.HumanPlayer;
 import warpath.players.Player;
 import warpath.ui.GameWindow;
 import warpath.ui.InputHandler;
 import warpath.ui.SoundPlayer;
-import warpath.units.GameObject;
 import warpath.units.SwordGuy;
-import warpath.units.Tile;
 import warpath.units.Unit;
 
 /* The main game engine.  Expect this one to be a few thousand lines long.
@@ -82,21 +82,15 @@ public class RPG implements ActionListener {
   /* Not using anything from this except victory/defeat conditions. */
   private int levelIndex;
   
-  // Constants
-  public static final int FPS = 20; // should be 20
-  public static final int TILE_WIDTH = 96;
-  public static final int TILE_HEIGHT = 48;
-  public static final int CAMERA_INCREMENT_X = 48;
-  public static final int CAMERA_INCREMENT_Y = 24;
-  public static final int HUD_PANEL_HEIGHT = 100;
-  public static final String[] DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
-  public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
   private boolean redrawFloor;
 
+  /** Constructor for the main RPG class.
+   * @param gameWindow
+   */
   public RPG(GameWindow gameWindow) {
     this.gameWindow = gameWindow;
     floor = new Floor(this, 15, 15);
-    frameTimer = new Timer(1000/FPS, this);
+    frameTimer = new Timer(1000/Constants.FPS, this);
     ticks = 0;
     nextEnemyID = 1;
     players = new Hashtable<Integer, Player>();
@@ -125,16 +119,18 @@ public class RPG implements ActionListener {
 
   }
   
-  // Start the timer.  We might also use this to restart/unpause
-  // This seems like a REALLY weird place to put the palette swaps (as a parameter).
-  public void start(Hashtable<Color, Color> swaps) {
+  /** Start the timer.  We might also use this to restart/unpause
+   * This seems like a REALLY weird place to put the palette swaps (as a parameter).
+   * @param playerUnitPaletteSwaps
+   */
+  public void start(Hashtable<Color, Color> playerUnitPaletteSwaps) {
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
     
     // This is a dumb workaround.
     setFloor(new Floor(this, 1,1));
     getFloor().setTile(0,0, new Tile(this, new Posn(0,0), "tile_48x24_grass.png"));
-    SwordGuy u = new SwordGuy(this, "u", new Posn(0,0), getHumanPlayer(), swaps);
+    SwordGuy u = new SwordGuy(this, "u", new Posn(0,0), getHumanPlayer(), playerUnitPaletteSwaps);
     //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
     addUnit(u);
     
@@ -148,13 +144,20 @@ public class RPG implements ActionListener {
     frameTimer.start();
     centerCamera();
   }
+  
+  /**
+   * Start the game without going through the character creator.
+   */
   public void start() {
-    start(new Hashtable<Color, Color>());
+    Hashtable<Color, Color> emptyPaletteSwaps = new Hashtable<Color, Color>();
+    start();
   }
   
-  // Called every time the frame timer fires.
-  // Redraws everything, then increments the tick counter.
-  // IS THIS THE RIGHT ORDER OF OPERATIONS?
+  /** Called every time the frame timer fires.
+   * Redraws everything, then increments the tick counter.
+   * IS THIS THE RIGHT ORDER OF OPERATIONS?
+   * @param e - the Action event
+   */
   public void actionPerformed(ActionEvent e) {
     /* Do blocking event code.  Should this go to Upkeep? */
     doBlockUpkeep();
@@ -189,20 +192,26 @@ public class RPG implements ActionListener {
     }
   }
 
-  /* This is to handle persistent actions (i.e. block / slash) - every upkeep,
-   * we check if the SHIFT / CTRL keys are held down and queue up activities accordingly. */
+  /** Handle persistent actions (i.e. bash, block, slash):
+   * every upkeep, we check if the SHIFT / CTRL keys are held down and queue
+   * up activities accordingly.
+   * TODO the whole newSlashDirection thing seems inconsistent and awkward. */
   public void doBlockUpkeep() {
     String currentActivity = getPlayerUnit().getCurrentActivity();
     String nextActivity = getPlayerUnit().getNextActivity();
+    
+    // If CTRL is down, queue up a block.
     if (ctrlIsDown()) {
       if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
         if (nextActivity != null && nextActivity.equals("bashing")) {
-          /* Bash */
+          // Don't do anything, we're already getting ready to bash.
         } else {
+          // Queue up a block order.
           if (pixelToGrid(getMousePosn()) != null) {
             if (getPlayerUnit().getCurrentEP() >= getPlayerUnit().getBlockCost()) {
               getPlayerUnit().setNextActivity("blocking_1");
               getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
+              // TODO Is this the best way to handle target posn overlays?
               getPlayerUnit().setTargetPosnOverlay(null);
             }
           }
@@ -210,8 +219,9 @@ public class RPG implements ActionListener {
       } else if (currentActivity.equals("blocking_1") || currentActivity.equals("blocking_2")) {
         if (pixelToGrid(getMousePosn()) != null) {
           if (nextActivity != null && nextActivity.equals("bashing")) {
-            // bash1
+            // Don't do anything, we're already getting ready to bash.
           } else {
+            // We're already blocking; continue blocking.
             getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
             getPlayerUnit().setTargetPosnOverlay(null);
           }
@@ -219,8 +229,9 @@ public class RPG implements ActionListener {
       } else if (currentActivity.equals("bashing") || currentActivity.equals("attacking")) {
         if (pixelToGrid(getMousePosn()) != null) {
           if (nextActivity != null && nextActivity.equals("bashing")) {
-            // bash2
+            // Don't do anything, we're already getting ready to bash.
           } else {
+            // Queue up a block.
             getPlayerUnit().setNextActivity("blocking_1");
             getPlayerUnit().setNextTargetPosn(pixelToGrid(getMousePosn()));
             getPlayerUnit().setTargetPosnOverlay(null);
@@ -228,14 +239,15 @@ public class RPG implements ActionListener {
         }
       }
     } else if (shiftIsDown()) {
-      /* SHAMELESS COPY/PASTE OF CTRL CODE */
-      /* We're gonna change this */
+      // Slashing stuff!
       Posn oldDir = getPlayerUnit().getDirection();
       Posn lastTargetPosn = getPlayerUnit().getPosn().add(getPlayerUnit().getDirection());
       Posn nextPosn = pixelToGrid(getMousePosn());
       if (nextPosn == null) {
         nextPosn = lastTargetPosn;
       }
+      // Calculate the tiles corresponding to rotating 45 degrees clockwise or
+      // counterclockwise.
       Posn cwPosn = getPlayerUnit().getPosn().add(rotateClockwise(getPlayerUnit().getDirection()));
       Posn ccwPosn = getPlayerUnit().getPosn().add(rotateCounterclockwise(getPlayerUnit().getDirection()));
       if (distance2(cwPosn, nextPosn) < distance2(ccwPosn, nextPosn)) {
@@ -245,11 +257,15 @@ public class RPG implements ActionListener {
       } else {
         getPlayerUnit().pointAt(nextPosn);
         if (getPlayerUnit().getDirection().equals(oldDir)) {
-          /* do nothing */
-          getPlayerUnit().setDirection(oldDir);
-          getPlayerUnit().pointAt(getPlayerUnit().getPosn().add(oldDir));
+          // do nothing
+          // These two lines appear to be redundant.
+          // getPlayerUnit().setDirection(oldDir);
+          // getPlayerUnit().pointAt(getPlayerUnit().getPosn().add(oldDir));
           getPlayerUnit().setNewSlashDirection(false);
         } else {
+          // If we pick a point that's in a straight line from the current
+          // direction, it's not clear which way we should rotate; instead of
+          // staying still, we will pick a direction randomly.
           if (RNG.nextBoolean()) {
           nextPosn = cwPosn;
           } else {
@@ -261,10 +277,11 @@ public class RPG implements ActionListener {
       
       if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
         if (nextActivity != null && nextActivity.equals("bashing")) {
-          /* Bash */
+          // Bashing is queued up, let that happen.
         } else {
           if (pixelToGrid(getMousePosn()) != null) {
             if (getPlayerUnit().getCurrentEP() >= getPlayerUnit().getSlashCost()) {
+              // Queue up a slash order.
               getPlayerUnit().setNextActivity("slashing_1");
               getPlayerUnit().setNextTargetPosn(nextPosn);
               getPlayerUnit().setTargetPosnOverlay(null);
@@ -275,8 +292,10 @@ public class RPG implements ActionListener {
       } else if (currentActivity.equals("slashing_1") || currentActivity.equals("slashing_2")) {
         if (pixelToGrid(getMousePosn()) != null) {
           if (nextActivity != null && nextActivity.equals("bashing")) {
-            // bash1
+            // Don't overwrite a queued bash order.
           } else {
+            // Currently slashing, just set the next posn and continue slashing.
+            // TODO do we need to set new slash direction?
             getPlayerUnit().setNextTargetPosn(nextPosn);
             getPlayerUnit().setTargetPosnOverlay(null);
           }
@@ -284,8 +303,9 @@ public class RPG implements ActionListener {
       } else if (currentActivity.equals("bashing") || currentActivity.equals("attacking")) {
         if (pixelToGrid(getMousePosn()) != null) {
           if (nextActivity != null && nextActivity.equals("bashing")) {
-            // bash2
+            // Bashing is queued up, let that happen.
           } else {
+            // Start a new slash.
             getPlayerUnit().setNextActivity("slashing_1");
             getPlayerUnit().setNextTargetPosn(nextPosn);
             getPlayerUnit().setTargetPosnOverlay(null);
@@ -298,7 +318,7 @@ public class RPG implements ActionListener {
           }
         }
       }
-      /* Determine whether we are slashing in a new direction. */
+      // Determine whether we are slashing in a new direction.
       if (getPlayerUnit().getNextActivity() != null && getPlayerUnit().getNextActivity().equals("slashing_2")) {
         getPlayerUnit().pointAt(getPlayerUnit().getNextTargetPosn());
         getPlayerUnit().setNewSlashDirection(!oldDir.equals(getPlayerUnit().getDirection()));
@@ -313,7 +333,7 @@ public class RPG implements ActionListener {
       //System.out.println(getPlayerUnit().newSlashDirection);
     } else {
       
-      // If CTRL isn't down, end the block OR SLASH.
+      // Neither SHIFT nor CTRL is down; cancel blocks, bashes, slashes.
       if (getPlayerUnit().getNextActivity() != null) {
         if (getPlayerUnit().getNextActivity().equals("blocking_1") || getPlayerUnit().getNextActivity().equals("blocking_2")) {
           getPlayerUnit().setNextActivity(null);
@@ -324,7 +344,7 @@ public class RPG implements ActionListener {
     }
   }
 
-  // Make the human player and return it.  I'm not sure we need this.
+  /** Make the human player and return it.  I'm not sure we need this. */
   public Player addHumanPlayer() {
     HumanPlayer player = new HumanPlayer(1);
     addPlayer(1, player);
@@ -337,15 +357,20 @@ public class RPG implements ActionListener {
     ticks++;
   }
   
-  // Add a player with the specified player number.
-  // The whole playerNumber field is oddly handled.  Whatever.
+  /** Add a player with the specified player number.
+  /* TODO The whole playerNumber field is oddly handled.
+   * @param playerNumber - the index to be used to retrieve this player
+   * @param player - the Player object
+   */
   public void addPlayer(int playerNumber, Player player) {
     players.put(playerNumber, player);
   }
   
-  /* Add the specified unit to all relevant lists.
+  /** Add the specified unit to all relevant lists (depth tree, floor units,
+   * HUD panel).
    * Note that the unit is initialized with its controller established.
-   * (I forget why :( ) */
+   * (I forget why :( )
+   * @param u - The unit to add */
   public void addUnit(Unit u) {
     units.add(u);
     u.getPlayer().getUnits().add(u);
@@ -357,17 +382,21 @@ public class RPG implements ActionListener {
     u.updateFloorOverlay();
   }
   
-  /* Removes the specified unit from all relevant lists.
-     Specifically, each floor tile's list of units, and the RPG's units list,
-     as well as the RPG's depth tree.
-     Also removes its floor overlay from all relevant lists.
-     I don't think we need to check contains(), but it feels wrong...
+  /** Removes the specified unit from all relevant lists.
+   * Specifically, each floor tile's list of units, and the RPG's units list,
+   * as well as the RPG's depth tree.
+   * Also removes its floor overlay from all relevant lists.
+   * I don't think we need to check contains(), but it feels wrong...
+   * @param u - The unit to remove
   */
   public void removeUnit(Unit u) {
     units.remove(u);
     depthTree.remove(u);
 
+    // Remove the unit from its floor tile's list.
     floor.getTile(u.getX(),u.getY()).setUnit(null);
+    
+    // Remove the unit from its owner player's list.
     for (int i = 1; i < players.size()+1; i++) {
       Player p = players.get(i);
       if (p.getUnits().contains(u)) {
@@ -375,6 +404,7 @@ public class RPG implements ActionListener {
       }
     }
     
+    // Find any units targeting this unit and clear their target.
     for (int i = 0; i < units.size(); i++) {
       if (units.get(i).getTargetUnit() != null && units.get(i).getTargetUnit().equals(u)) {
         units.get(i).setCurrentActivity("standing");
@@ -382,6 +412,8 @@ public class RPG implements ActionListener {
         units.get(i).setTargetPosn(null);
       }
     }
+    
+    // Remove this unit's floor overlay.
     removeObject(u.getFloorOverlay());
     u.setFloorOverlay(null);
   }
@@ -391,22 +423,27 @@ public class RPG implements ActionListener {
    * origin (0,0) is actually inside the menu bar; the playable area is
    * smaller than it "should" be
    * @param posn - the x and y coordinates of the grid tile
-
+   * @return a Posn representing the pixel
    */
   public Posn gridToPixel(Posn posn) {
     
     int left, top;
     // Offsets are to make it so that pixel (0,0) is at the very top left of the floor
-    int xOffset = floor.getHeight() * TILE_WIDTH / 2;
+    int xOffset = floor.getHeight() * Constants.TILE_WIDTH / 2;
     int yOffset = 0;
     //System.out.println("offsets " + xOffset + " " + yOffset);
     int x = posn.getX();
     int y = posn.getY();
-    left = (x * TILE_WIDTH / 2) - (y * TILE_WIDTH / 2) - getCameraX() + xOffset;
-    top = (x * TILE_HEIGHT / 2) + (y * TILE_HEIGHT / 2) - getCameraY() - yOffset;
+    left = (x * Constants.TILE_WIDTH / 2) - (y * Constants.TILE_WIDTH / 2) - getCameraX() + xOffset;
+    top = (x * Constants.TILE_HEIGHT / 2) + (y * Constants.TILE_HEIGHT / 2) - getCameraY() - yOffset;
     return new Posn(left, top);
   }
   
+  /**
+   * @see #gridToPixel(Posn)
+   * @param x - the x coordinate of the grid tile
+   * @param y - the y coordinate of the grid tile
+   */
   public Posn gridToPixel(int x, int y) {
     return gridToPixel(new Posn(x,y));
   }
@@ -415,10 +452,11 @@ public class RPG implements ActionListener {
    * the map.
    * It works by checking EVERY floor tile, finding the coordinates at which
    * it's being drawn, and checking the transparency at the given point.
-     @param pixel
-     The (x,y) coordinates of the pixel */
-  /* TODO If the coordinates are off the grid, find the closest valid grid
-   * tile instead of returning null. */
+   * TODO If the coordinates are off the grid, find the closest valid grid
+   * tile instead of returning null.
+   * @param pixel - The (x,y) coordinates of the pixel
+   * @return The corresponding grid tile 
+   */
   public Posn pixelToGrid(Posn pixel) {
     // We need to restrict the range of X and Y, but... later
     for (int y = 0; y <= floor.getHeight(); y++) {
@@ -426,7 +464,7 @@ public class RPG implements ActionListener {
         Posn tilePixel = gridToPixel(x, y);
         int left = tilePixel.getX();
         int top = tilePixel.getY();
-        Rect tileRect = new Rect(left, top, TILE_WIDTH, TILE_HEIGHT);
+        Rect tileRect = new Rect(left, top, Constants.TILE_WIDTH, Constants.TILE_HEIGHT);
         if (tileRect.collidePoint(pixel.getX(), pixel.getY())) {
           int tileX = pixel.getX() - left;
           int tileY = pixel.getY() - top;
@@ -445,16 +483,24 @@ public class RPG implements ActionListener {
     return null;
   }
   
+  /**
+   * @see #pixelToGrid(Posn)
+   * @param x - the x coordinate of the pixel
+   * @param y - the y coordinate of the pixel
+   */
   public Posn pixelToGrid(int x, int y) {
     return pixelToGrid(new Posn(x,y));
   }
   
-  //Centers the camera on a given posn.
+  /**
+   * Centers the camera on a given posn.
+   * @param p
+   */
   public void centerCamera(Posn p) {
     int x = p.getX();
     int y = p.getY();
-    int xx = TILE_WIDTH/2 * (x + (floor.getHeight()-y)) - gameWindow.getGamePanel().getWidth()/2;
-    int yy = TILE_HEIGHT/2 * (x+y) - gameWindow.getGamePanel().getHeight()/2;
+    int xx = Constants.TILE_WIDTH/2 * (x + (floor.getHeight()-y)) - gameWindow.getGamePanel().getWidth()/2;
+    int yy = Constants.TILE_HEIGHT/2 * (x+y) - gameWindow.getGamePanel().getHeight()/2;
     setCameraPos(xx, yy);
   }
 
@@ -474,7 +520,7 @@ public class RPG implements ActionListener {
         u.getCurrentAnimation().getIndex(),
         u.getNextActivity());*/
     if (redrawFloor) {
-      floor.redraw(this);
+      floor.redraw();
       redrawFloor = false;
     }
     floor.draw(g);

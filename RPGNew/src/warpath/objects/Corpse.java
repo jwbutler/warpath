@@ -1,10 +1,9 @@
-package warpath.units;
+package warpath.objects;
 import java.awt.Color;
 
 import jwbgl.Posn;
 import jwbgl.Surface;
 import warpath.core.RPG;
-import warpath.objects.NonBlockingObject;
 
 public class Corpse extends NonBlockingObject {
   public Corpse(RPG game, Posn posn, String imgPath) {

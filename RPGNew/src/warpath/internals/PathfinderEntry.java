@@ -1,7 +1,10 @@
 package warpath.internals;
 import jwbgl.*;
-// Just a key-value pair object.
 
+/** An entry used in the A* pathfinding algorithm.  Just a key-value pair
+ * containing a Posn and its pathfinding weight.
+ * @see PathfinderPQ
+ */
 public class PathfinderEntry {
   private int weight;
   private Posn posn;

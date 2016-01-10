@@ -4,13 +4,19 @@ import java.io.File;
 import java.util.Hashtable;
 
 import jwbgl.*;
+import warpath.core.Constants;
 
-/* Represents a single animation of a unit.  Corresponds to a particular
+/** Represents a single animation of a unit.  Corresponds to a particular
  * activity and direction.  It's basically just a collection of Surface
  * objects. */
 
 public class Animation {
+  
+  private static final Object BEHIND_SUFFIX = "_B";
   private Surface[] frames;
+  
+  // Used for items to determine whether they render in front of or behind the
+  // main unit sprite.
   private boolean[] drawBehind;
   private String activity;
   private String direction;
@@ -28,25 +34,36 @@ public class Animation {
     return direction;
   }
 
-  public Animation(String animName, String[] filenames, String activity, String direction, Hashtable<String, Surface> ht) {
+  /** Creates a new Animation object.  Before loading a new image file, try
+   * to retrieve from the frame cache object to avoid duplication.
+   * @param animName - The name of the sprite used.
+   * @param filenames - The list of filenames (not including extension or folder)
+   * @param direction - The direction of the animation (e.g. "NW")
+   * @param frameCache - The parent object's frame cache 
+   */
+  public Animation(String animName, String[] filenames, String activity, String direction, Hashtable<String, Surface> frameCache) {
     frames = new Surface[filenames.length];
     drawBehind = new boolean[filenames.length];
     for (int i = 0; i < filenames.length; i++) {
       String filename = filenames[i];
       drawBehind[i] = (filename.endsWith("_B.png"));
-      if (ht != null && ht.containsKey(filename)) {
-        frames[i] = ht.get(filename);
+      if (frameCache != null && frameCache.containsKey(filename)) {
+        frames[i] = frameCache.get(filename);
       } else {
         frames[i] = new Surface(filename);
         frames[i] = frames[i].scale2x();
         frames[i].setColorkey(Color.WHITE);
-        if (ht != null) ht.put(filename, frames[i]);
+        if (frameCache != null) frameCache.put(filename, frames[i]);
       }
     }
     this.activity = activity;
     this.direction = direction;
     index = 0;
   }
+  
+  /** Instantiate a new Animation without using a frame cache.
+   * TODO Is this in use?
+   */
   public Animation(String animName, String[] filenames, String activity, String direction) {
     this(animName, filenames, activity, direction, null);
   }
@@ -58,14 +75,7 @@ public class Animation {
     }
     return new Animation(animName, filenames2, activity, direction);
   }*/
-  
-  public Animation(Surface[] frames, String activity, String direction) {
-    this.frames = frames;
-    this.activity = activity;
-    this.direction = direction;
-    index = 0;
-  }
-  
+
   public int getLength() {
     return frames.length;
   }
@@ -82,6 +92,9 @@ public class Animation {
     index++;
   }
   
+  /** Returns true if there are frames after the current frame.
+   * @return whether or not there are frames after the current frame
+   */
   public boolean hasNextFrame() {
     return index < frames.length-1;
   }
@@ -90,26 +103,36 @@ public class Animation {
     return index;
   }
   
+  /** For debug purposes; outputs in the form (activity, direction, length)
+   */
   public String toString() {
     return "<Animation("+getActivity()+","+getDirection()+","+getLength()+")>";
   }
   
-  /* NEW: From now on we're going to format filenames ourselves.
-   * All the different patterns are too confusing.
-   * The ONLY functions being performed here are:
-   * 1) Specify the image directory. ("png/")
-   * 2) Load the "behind" ("..._B.png") filenames as needed.
+  /**
+   * Load equipment animation filenames dynamically.
+   * Specifically, we're doing three things:
+   *  - loading it from the correct directory (/png),
+   *  - checking for the "_B" suffix, and
+   *  - appending the file type (.png) to the end.
    */
   public static String fixAccessoryFilename(String filename) {
-    String path = String.format("png/%s.png", filename);
+    String path = String.format("%s/%s.%s", Constants.IMAGE_FOLDER, filename, Constants.IMAGE_FORMAT);
 
     File f = new File(path);
     if (f.exists()) {
-      return String.format("%s.png", filename);
+      return path;
     } else {
-      return String.format("%s_B.png", filename);
+      String behindPath = String.format("%s/%s%s.%s", Constants.IMAGE_FOLDER, filename, BEHIND_SUFFIX, Constants.IMAGE_FORMAT);
+      File fBehind = new File(behindPath);
+      if (fBehind.exists()) {
+        return behindPath;
+      } else {
+        return null;
+      }
     }
   }
+  
   
   public boolean drawBehind(int index) {
     return drawBehind[index];

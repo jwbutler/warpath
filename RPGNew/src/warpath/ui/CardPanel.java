@@ -6,8 +6,12 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 import warpath.core.RPG;
+import warpath.ui.components.UnitCard;
 import warpath.units.Unit;
 
+/** Holds a set of unit cards.
+ * Unused in the current engine.
+ */
 public class CardPanel extends JPanel {
   private RPG game;
   private static final int MARGIN = 10;

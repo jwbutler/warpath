@@ -8,7 +8,9 @@ import jwbgl.*;
  * appears in game (to specify combat stats, etc.) */
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
+import warpath.core.Constants;
 import warpath.core.RPG;
+import warpath.objects.Corpse;
 import warpath.players.Player;
 
 public abstract class ZombieUnit extends Unit implements Serializable {
@@ -61,8 +63,8 @@ public abstract class ZombieUnit extends Unit implements Serializable {
    * than with directions. Not sure which directions they specifically should correspond to.
    * (FU will) */
   public void loadFallingAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.ZOMBIE_FALLING;
       String[] filenames2 = new String[filenames.length];
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {

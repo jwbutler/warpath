@@ -7,6 +7,7 @@ import jwbgl.*;
 import warpath.core.RPG;
 import warpath.items.Shield;
 import warpath.items.Sword;
+import warpath.objects.Tile;
 import warpath.players.Player;
 /* Warrior-type player unit class.  Sword/shield.*/
 public class SwordGuy extends HumanUnit {

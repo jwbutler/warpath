@@ -7,6 +7,7 @@ import jwbgl.*;
 /* This class is used to represent humanoid units.  Particularly the ones
  * that use Will's original "player" sprite.  It'll be subclassed lots. */
 import warpath.core.RPG;
+import warpath.objects.Corpse;
 import warpath.players.Player;
 
 public abstract class HumanUnit extends Unit implements Serializable {

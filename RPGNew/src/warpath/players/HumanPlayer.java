@@ -13,6 +13,7 @@ public class HumanPlayer implements Player {
   private ArrayList<Player> friendlyPlayers;
   private ArrayList<Player> hostilePlayers;
   
+  /** Instantiates the player with the given player number index. */
   public HumanPlayer(int playerNumber) {
     units = new ArrayList<Unit>();
     selectedUnits = new ArrayList<Unit>();
@@ -30,7 +31,6 @@ public class HumanPlayer implements Player {
 
   @Override
   public void setHostile(Player p) {
-    // TODO Auto-generated method stub
     if (!hostilePlayers.contains(p)) {
       hostilePlayers.add(p);
     }

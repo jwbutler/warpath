@@ -1,8 +1,9 @@
 package warpath.internals;
 import java.awt.Graphics;
 
-import warpath.units.GameObject;
+import warpath.objects.GameObject;
 
+/** A node used in the DepthTree binary tree implementation. */
 public class DepthTreeNode {
   private DepthTreeNode left;
   private DepthTreeNode right;
@@ -29,7 +30,9 @@ public class DepthTreeNode {
     this.right = right;
   }
   
-  /* This is an example of an inorder traversal. */
+  /** Recursively calls draw() on each element in this node's subtree.
+   * This is an example of an inorder traversal.
+   * @param g - the AWT Graphics object used to draw*/
   public void drawInOrder(Graphics g) {
     if (left != null) {
       left.drawInOrder(g);

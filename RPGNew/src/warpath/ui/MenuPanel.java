@@ -1,6 +1,4 @@
 package warpath.ui;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -9,22 +7,15 @@ import java.awt.Graphics;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import warpath.core.RPG;
 import warpath.objects.Floor;
 
-/* The panel for the menu
- * ===== CHANGELOG =====
- * 12/22/14 	Created
- * =====================
- */
-
+/** The panel for the menu used at the start of the game. */
 public class MenuPanel extends JPanel {
 
 	private GameWindow window;
-	private Floor floor;
 	private RPG game;
 
 	public MenuPanel(GameWindow theWindow, RPG theGame, int width, int height) {
@@ -45,19 +36,6 @@ public class MenuPanel extends JPanel {
 	    this.add(playButton);
 	    this.add(quickPlayButton);
 	    this.add(exitButton);
-	    
-	    // Position and Size
-	    int bHeight = getHeight() * 1/10;
-	    
-	    //playButton.setMargin(new Insets(50,50,50,50));
-	    //playButton.setBounds((int)(getWidth()*.3),getHeight()*1/6,(int)(getWidth()*.4),bHeight);
-	    //playButton.setHorizontalAlignment(SwingConstants.CENTER);
-	    //playButton.addActionListener(this);
-	    
-	    //exitButton.setMargin(new Insets(5,5,5,5));
-	    //exitButton.setBounds((int)(getWidth()*.3),getHeight()*3/6,(int)(getWidth()*.4),bHeight);
-	    //exitButton.setHorizontalAlignment(SwingConstants.CENTER);
-	    //exitButton.addActionListener(this);
 		
 	    
 	    // These are the action performed methods for the buttons.
@@ -81,16 +59,4 @@ public class MenuPanel extends JPanel {
 	    });
 	    
 	}
-	
-	public void paint(Graphics g) {
-		//System.out.println("paint");
-		super.paint(g);
-		//game.drawAll(g);
-	}
-	
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		//game.getFloor().draw(g);
-	}
-
 }

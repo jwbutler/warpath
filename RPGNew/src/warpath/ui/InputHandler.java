@@ -8,8 +8,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import jwbgl.Posn;
+import warpath.core.Constants;
 import warpath.core.RPG;
 
+/** Handles all keyboard and mouse events from the main game; I think
+ * maybe the character creator listens to its own events. */
 public class InputHandler implements KeyListener, KeyEventDispatcher,
 MouseListener, MouseMotionListener  {
   private RPG game;
@@ -39,16 +42,16 @@ MouseListener, MouseMotionListener  {
         shiftIsDown = false;
         break;
       case KeyEvent.VK_UP:
-        game.moveCamera(0,-RPG.CAMERA_INCREMENT_Y);
+        game.moveCamera(0,-Constants.CAMERA_INCREMENT_Y);
         break;
       case KeyEvent.VK_DOWN:
-        game.moveCamera(0,RPG.CAMERA_INCREMENT_Y);
+        game.moveCamera(0,Constants.CAMERA_INCREMENT_Y);
         break;
       case KeyEvent.VK_LEFT:
-        game.moveCamera(-RPG.CAMERA_INCREMENT_X, 0);
+        game.moveCamera(-Constants.CAMERA_INCREMENT_X, 0);
         break;
       case KeyEvent.VK_RIGHT:
-        game.moveCamera(RPG.CAMERA_INCREMENT_X, 0);
+        game.moveCamera(Constants.CAMERA_INCREMENT_X, 0);
         break;
       case KeyEvent.VK_SPACE:
         game.centerCamera();
@@ -108,6 +111,10 @@ MouseListener, MouseMotionListener  {
   public void mousePressed(MouseEvent e) {
   }
 
+  /** Called when a mouse button is released.  Used to process player unit
+   * actions such as attacking, special attacks, movement and other
+   * interactions.
+   * @param e - The event containing mouse information */
   @Override
   public void mouseReleased(MouseEvent e) {
     switch (e.getButton()) {
@@ -153,6 +160,11 @@ MouseListener, MouseMotionListener  {
     return ((e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) == MouseEvent.ALT_DOWN_MASK);
   }
   
+  /**
+   * Returns true if the given mouse button is down.
+   * @param e - The event containing mouse information
+   * @param mouseButton - The given mouse button (using constants from MouseEvent)
+   */ 
   public boolean mouseButtonIsDown(MouseEvent e, int mouseButton) {
     if (mouseButton == MouseEvent.BUTTON1) {
       if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) == MouseEvent.BUTTON1_DOWN_MASK) {

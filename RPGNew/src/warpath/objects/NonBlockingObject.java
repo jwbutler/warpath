@@ -1,8 +1,9 @@
 package warpath.objects;
 import jwbgl.Posn;
 import warpath.core.RPG;
-import warpath.units.BasicObject;
 
+/** Simply represents an object that does not block unit movement,
+ * e.g. a corpse. */
 public class NonBlockingObject extends BasicObject {
   public NonBlockingObject(RPG game, Posn posn) {
     super(game, posn);

@@ -1,9 +1,9 @@
-package warpath.units;
+package warpath.objects;
 import java.awt.Graphics;
 
 import jwbgl.*;
 
-/* Basically everything that goes on a tile implements this.
+/** Basically everything that goes on a tile implements this.
  * Even tiles themselves! Unclear whether we need this in addition to the 
  * BasicObject class that gets extended by stuff. */ 
 

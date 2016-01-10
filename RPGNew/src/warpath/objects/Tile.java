@@ -1,23 +1,21 @@
-package warpath.units;
+package warpath.objects;
 import java.awt.Color;
 import java.util.ArrayList;
 
 import jwbgl.*;
+import warpath.core.Constants;
 import warpath.core.RPG;
+import warpath.units.Unit;
  
- /* ===== CHANGELOG =====
-  * 5/26 - Changed from ArrayList of units to single unit.
-  * ===================== */
-
+/** Represents a floor tile.  Contains a list of objects that live on it, as
+ * well as its current unit. */
 public class Tile extends BasicObject {
   private Surface surface;
   private Unit unit;
-  // let's say objects DOESN'T include units
-  // corpses are unclear
   private ArrayList<GameObject> objects;
   public Tile(RPG game, Posn posn, String texture) {
     super(game, posn);
-    surface = new Surface(RPG.TILE_WIDTH/2, RPG.TILE_HEIGHT/2);
+    surface = new Surface(Constants.TILE_WIDTH/2, Constants.TILE_HEIGHT/2);
     surface.load(texture);
     surface = surface.scale2x();
     surface.setColorkey(Color.WHITE); 
@@ -36,6 +34,9 @@ public class Tile extends BasicObject {
     return objects;
   }
   
+  /**
+   * Returns true if the tile contains a unit or other blocking object.
+   */
   public boolean isBlocked() {
     if (unit != null) {
       return true;
@@ -48,6 +49,12 @@ public class Tile extends BasicObject {
     }
     return false;
   }
+  
+  /**
+   * Sets the unit pointer to u.
+   * TODO Throw an exception, or maybe make it a boolean?
+   * @param u
+   */
   public void setUnit(Unit u) {
     if (unit != null && u != null) {
       System.out.println("Error: tile already has unit");

@@ -9,25 +9,19 @@ import java.util.LinkedList;
 import jwbgl.*;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
+import warpath.core.Constants;
 import warpath.core.RPG;
 import warpath.items.Accessory;
+import warpath.objects.BasicObject;
+import warpath.objects.GameObject;
+import warpath.objects.Tile;
 import warpath.players.Player;
-import warpath.ui.FloorOverlay;
-import warpath.ui.TransHealthBar;
+import warpath.ui.components.FloorOverlay;
+import warpath.ui.components.TransHealthBar;
 
-/* Class representing any type of unit.  This class should be extended by any
+/** Class representing any type of unit.  This class should be extended by any
  * subsequent unit classes we define.  Not to be used by itself (abstract). */
- 
- /* ===== CHANGELOG =====
-  * 6/6     - removed Unit interface, renamed this class from BasicUnit to Unit
-  * 6/2-6/5 - worked on various activity sequencing (esp. walking), cleaned up
-  *         - & removed counterintuitive helper methods
-  * 5/30    - many comments.
-  * 5/29    - worked on attacking & pathing.
-  * 5/26    - Worked on pathing AI (esp. for multiple player units).
-  *         - Moved most of the walk pathing code to doWalkPathing().
-  * 5/25    - Added handling for midpath unit collisions.
-  * ===================== */
+
 public abstract class Unit extends BasicObject implements GameObject, Serializable {
   protected String name;
   protected String animationName;
@@ -52,7 +46,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private FloorOverlay floorOverlay;
   private FloorOverlay targetPosnOverlay;
   private TransHealthBar healthBar;
-  
   
   protected LinkedList<Posn> path;
   protected Hashtable<String, Accessory> equipment;
@@ -95,8 +88,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     //System.out.printf("%s has %d frames\n",getClass(), frames.keySet().size());
   }
   
+  /** Apply each of the palette swaps to each animation. */
   public void applyPaletteSwaps() {
-    // TODO Auto-generated method stub
     for (Animation anim: animations) {
       for (Surface s: anim.getFrames()) {
         s.setPaletteSwaps(paletteSwaps);
@@ -105,10 +98,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
-  // Face the unit toward the specified point.
-  // That is, make <dx,dy> into an integer unit vector.
-  // We're using Pythagorean distance rather than Civ distance here,
-  // should we change?  
+  /** Face the unit toward the specified point.
+   * That is, make (dx,dy) into an integer unit vector.
+   * We're using Pythagorean distance rather than Civ distance here,
+   * should we change?
+   * @param x - the x coordinate of the tile to point at
+   * @param y - the y coordinate of the tile to point at
+   */
   public void pointAt(int x, int y) {
     int dx = x - this.getX();
     int dy = y - this.getY();
@@ -127,8 +123,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     pointAt(target.getX(), target.getY());
   }
 
+  /** Load all of the animations for this unit.
+   * Calls loadActivityAnimations() for each activity. */
   public void loadAnimations() {
-    // we could easily rewrite this without k
     long t = System.currentTimeMillis();
     animations = new ArrayList<Animation>();
     for (int i = 0; i < activities.length; i++) {
@@ -142,8 +139,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     System.out.printf("%s.loadAnimations(): %d ms\n", this.getClass(), t);
   }
   
-  /* Extend this as needed for animations that have different versions for
-   * different units. Eventually that will likely be all of them. */
+  /**
+   * Extend this as needed for animations that have different versions for
+   * different units. Eventually that will likely be all of them.
+   */
   public void loadActivityAnimations(String activity) {
     if (activity.equals("falling")) {
       loadFallingAnimations();
@@ -152,29 +151,38 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
+  /**
+   * Used to load any animation that follows the general pattern without
+   * exceptions.
+   */
   public void loadGenericAnimations(String activity, String[] filenames) {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
       String[] filenames2 = new String[filenames.length];
       for (int j=0; j<filenames.length; j++) {
         String activityName = filenames[j].split("_")[0];
         String frameNum = filenames[j].split("_")[1];
-        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, activityName, RPG.DIRECTIONS[i], frameNum); 
+        filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, activityName, Constants.DIRECTIONS[i], frameNum); 
       }        
-      animations.add(new Animation(animationName, filenames2, activity, RPG.DIRECTIONS[i], frames));
+      animations.add(new Animation(animationName, filenames2, activity, Constants.DIRECTIONS[i], frames));
     }
   }
   
+  /**
+   * Used to load any animation that follows the general pattern without
+   * exceptions, where the filenames are specified in AnimationTemplates. */
   public void loadGenericAnimations(String activity) {
     String[] filenames = AnimationTemplates.getTemplate(activity);
     loadGenericAnimations(activity, filenames);
   }
   
   
-  /* Falling has a few variations; this is for human units I think.
-   * Two directions, NE or S. */
+  /**
+   * Falling has a few variations; this is for human units I think.
+   * Two directions, NE or S.
+   */
   public void loadFallingAnimations() {
-    for (int i=0; i<RPG.DIRECTIONS.length; i++) {
-      String dir = RPG.DIRECTIONS[i];
+    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
+      String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.FALLING;
       String[] filenames2 = new String[filenames.length];
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
@@ -192,6 +200,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
+  /**
+   * Increments the frame of the unit's current animation, as well as for each
+   * of its accessories.
+   */
   public void nextFrame() {
     if (currentAnimation.hasNextFrame()) {
       currentAnimation.nextFrame();
@@ -203,11 +215,22 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
+  /**
+   * This is called whenever the unit reaches the end of its current animation
+   * to determine the next activity.  There is a LOT of event processing going
+   * on here.  Also, this method is used to handle the full activity tree of
+   * all the units in the game.
+   * TODO Find a way to subdivide this method so that we can override parts of
+   * it in subclasses.
+   */
   public void nextActivity() {
     if (currentActivity.equals("falling")) {
+      // If we've reached the end of our falling animation, get ready to die.
       game.queueRemoveUnit(this);
       die();
     } else if (currentActivity.equals("blocking_1")) {
+      // If we've started blocking, either continue the block or terminate it
+      // based on whether we've queued up additional blocking.
       if (nextActivity != null && nextActivity.equals("blocking_2")) {
         pointAt(nextTargetPosn);
         setCurrentActivity("blocking_2");
@@ -215,9 +238,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         setCurrentActivity("blocking_3");
       }
     } else if (currentActivity.equals("blocking_2")) {
-      if (nextActivity == null) {
-        setCurrentActivity("blocking_3");
-      } else if (nextActivity.equals("blocking_2") && currentEP >= getBlockCost()) {
+      // If we're currently blocking, either continue the block or terminate it
+      // based on whether we've queued up additional blocking; also, check
+      // whether we have enough EPs to continue blocking.
+      if (nextActivity.equals("blocking_2") && currentEP >= getBlockCost()) {
         pointAt(nextTargetPosn);
         setCurrentActivity("blocking_2");
       } else {
@@ -225,7 +249,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         //setNextActivity(null);
       }
     
-    /* BEGIN SHAMELESS C/P */
+    // BEGIN SHAMELESS C/P
     } else if (currentActivity.equals("slashing_1")) {
       if (nextActivity != null && nextActivity.equals("slashing_2")) {
         pointAt(nextTargetPosn);
@@ -243,7 +267,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         setCurrentActivity("slashing_3");
         //setNextActivity(null);
       }
-    /* END SHAMELESS C/P */
+    // END SHAMELESS C/P
     } else if (currentActivity.equals("teleporting")) {
       //setPosn(getTargetPosn());
       moveTo(getTargetPosn());
@@ -251,11 +275,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       setTargetPosn(null);
       currentEP -= teleportCost;
       
-    /* If next activity is rezzing:
-     * 1) Make sure we're standing on the corpse.
-     * 2) Make sure there's a free adjacent square to put the zombie on.
-     * ...
-     */
+    // If next activity is rezzing: (wizard)
+    // 1) Make sure we're standing on the corpse.
+    // 2) Make sure there's a free adjacent square to put the zombie on.
+    // ...
+    //
     } else if (currentActivity.equals("rezzing")) {
       setCurrentActivity("standing");
       setTargetPosn(null);
@@ -277,8 +301,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             } while (game.getFloor().getTile(p).isBlocked());
             game.queueAddUnit(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), p, game.getPlayer(2)));
           } else {
+            // What should we do if all the tiles are blocked?
+            // TODO Make sure there is not an infinite loop here.
             System.out.println("help");
-            /* anything? */ 
           }
         }
       }
@@ -701,18 +726,18 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void updateFloorOverlay() {
     if (floorOverlay != null) {
       game.getDepthTree().remove(floorOverlay);
-      floorOverlay = null;
+      setFloorOverlay(null);
     }
     if (game.getHumanPlayer().isHostile(getPlayer())) {
       if (game.getPlayerUnit().getTargetUnit() == this) {
         Color transRed = new Color(255,0,0,64);
-        floorOverlay = new FloorOverlay(game, this, Color.RED, transRed);
+        setFloorOverlay(floorOverlay = new FloorOverlay(game, this, Color.RED, transRed));
       } else {
-        floorOverlay = new FloorOverlay(game, this, Color.RED);
+        setFloorOverlay(floorOverlay = new FloorOverlay(game, this, Color.RED));
       }
     } else {
       Color transGreen = new Color(0,255,0,64);
-      floorOverlay = new FloorOverlay(game, this, Color.GREEN, transGreen);
+      setFloorOverlay(new FloorOverlay(game, this, Color.GREEN, transGreen));
       //floorOverlay = new FloorOverlay(game, this, Color.GREEN);
     }
     int oldSize = game.getDepthTree().size();
@@ -820,8 +845,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public Rect getRect() {
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
-    int left = pixel.getX() + RPG.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
-    int top = pixel.getY() + RPG.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
+    int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
+    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
     Rect transparencyRect = getSurface().getTransparencyRect().clone();
     transparencyRect.move(left,top);
     return transparencyRect; 
@@ -971,8 +996,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
     
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
-    int left = pixel.getX() + RPG.TILE_WIDTH/2 - healthBar.getWidth()/2 + xOffset;
-    int top = pixel.getY() + RPG.TILE_HEIGHT/2 - healthBar.getHeight()/2 + yOffset;
+    int left = pixel.getX() + Constants.TILE_WIDTH/2 - healthBar.getWidth()/2 + xOffset;
+    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - healthBar.getHeight()/2 + yOffset;
     top += hpBarOffset;
     
     healthBar.draw(g, left, top);

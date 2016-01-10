@@ -1,4 +1,4 @@
-package warpath.ui;
+package warpath.ui.components;
 import java.awt.Color;
 import java.awt.Graphics;
 import jwbgl.*;

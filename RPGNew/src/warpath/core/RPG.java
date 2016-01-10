@@ -150,7 +150,7 @@ public class RPG implements ActionListener {
    */
   public void start() {
     Hashtable<Color, Color> emptyPaletteSwaps = new Hashtable<Color, Color>();
-    start();
+    start(emptyPaletteSwaps);
   }
   
   /** Called every time the frame timer fires.

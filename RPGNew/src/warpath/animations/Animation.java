@@ -12,7 +12,7 @@ import warpath.core.Constants;
 
 public class Animation {
   
-  private static final Object BEHIND_SUFFIX = "_B";
+  private static final String BEHIND_SUFFIX = "_B";
   private Surface[] frames;
   
   // Used for items to determine whether they render in front of or behind the
@@ -117,16 +117,16 @@ public class Animation {
    *  - appending the file type (.png) to the end.
    */
   public static String fixAccessoryFilename(String filename) {
-    String path = String.format("%s/%s.%s", Constants.IMAGE_FOLDER, filename, Constants.IMAGE_FORMAT);
+    String path = String.format("%s%s%s.%s", Constants.IMAGE_FOLDER, File.separator, filename, Constants.IMAGE_FORMAT);
 
     File f = new File(path);
     if (f.exists()) {
-      return path;
+      return String.format("%s.%s", filename, Constants.IMAGE_FORMAT);
     } else {
-      String behindPath = String.format("%s/%s%s.%s", Constants.IMAGE_FOLDER, filename, BEHIND_SUFFIX, Constants.IMAGE_FORMAT);
+      String behindPath = String.format("%s%s%s%s.%s", Constants.IMAGE_FOLDER, File.separator, filename, BEHIND_SUFFIX, Constants.IMAGE_FORMAT);
       File fBehind = new File(behindPath);
       if (fBehind.exists()) {
-        return behindPath;
+        return String.format("%s%s.%s", filename, BEHIND_SUFFIX, Constants.IMAGE_FORMAT);
       } else {
         return null;
       }

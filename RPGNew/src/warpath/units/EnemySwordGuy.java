@@ -17,6 +17,13 @@ public class EnemySwordGuy extends HumanUnit {
     maxDamage = 10;
   }
 
+  /**
+   * An extremely simple AI: simply finds the closest hostile unit and queues
+   * up an attack, repeatedly.
+   * Performs all the logic in {@link Unit#nextActivity}; then, if no action
+   * has been started, issues the AI orders.
+   * @see Unit#nextActivity
+   */
   public void nextActivity() {
     super.nextActivity();
     Unit targetUnit = getNextTargetUnit();

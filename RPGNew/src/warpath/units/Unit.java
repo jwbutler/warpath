@@ -23,6 +23,9 @@ import warpath.ui.components.TransHealthBar;
  * subsequent unit classes we define.  Not to be used by itself (abstract). */
 
 public abstract class Unit extends BasicObject implements GameObject, Serializable {
+  protected final int walkMoveFrame = 2;
+  protected final int attackHitFrame = 2;
+  
   protected String name;
   protected String animationName;
   protected Hashtable<String, Surface> frames;
@@ -57,6 +60,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private int slashCost = 3; // costs N EP per tick (does not disable HP regen) // SHOULD BE 2
   protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
   protected int rezCost = 200; // it's weird to put this in the base class but yeah.
+  
+  // TODO convert these to per-second amounts, deal with the fallout
   protected int hpRegen = 10; // regen 1 HP per N ticks
   protected int epRegen = 1; // regen 1 EP per N ticks
   
@@ -115,16 +120,18 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
+  /** @see #pointAt(int, int) */
   public void pointAt(Posn posn) {
     pointAt(posn.getX(), posn.getY());
   }
   
+  /** @see #pointAt(int, int) */
   public void pointAt(GameObject target) {
     pointAt(target.getX(), target.getY());
   }
 
-  /** Load all of the animations for this unit.
-   * Calls loadActivityAnimations() for each activity. */
+  /** Loads all of the animations for this unit.
+   * Calls {@link #loadActivityAnimations()} for each activity. */
   public void loadAnimations() {
     long t = System.currentTimeMillis();
     animations = new ArrayList<Animation>();
@@ -424,7 +431,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
-  /* This is the code that loops the walking! */
+  /** This is the code that loops the walking! */
   public void refreshWalk() {
     /* This is the case where the next tile is non-empty but we're only
      * pausing for one turn. */ 
@@ -457,14 +464,16 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return getPlayer().isHostile(u.getPlayer());
   }
 
+  /** Performs various maintenance tasks at the beginning of each "turn".
+   * TODO Think hard about the order of execution.
+   */
   public void doUpkeep() {
-    // somewhat confusingly, this is executed AFTER drawing
-    // ... or is it? not anymore I don't think
     if (getCurrentActivity().equals("blocking_2")) {
       currentEP -= getBlockCost();
     } else if (getCurrentActivity().equals("slashing_2")) {
       currentEP -= getSlashCost();
     }
+    
     if (!getCurrentActivity().equals("falling")) {
       if ((game.getTicks() % hpRegen == 0) && (currentHP < maxHP)) {
         currentHP++;
@@ -475,8 +484,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
     if (currentEP<0) currentEP=0;
     this.nextFrame();
-    //this.doManaRegen();
-    //this.doHealthRegen();
   }
   
   public void clearTargets() {
@@ -488,27 +495,32 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     setTargetPosnOverlay(null);
   }
 
-  /* So this is an important method.
+  /** So this is an important method.
    * It's a big mess.
    * The idea here is to handle ALL the activities for ALL unit types here,
    * so we won't have to copy and paste it into all the unit subclasses.
    * (They will each have their own nextActivity() logic.)
-   * If this breaks down, figure out a way to split this method up. */
+   * TODO figure out a way to split this method up. */
   public void doEvents() {
+    
     if (getCurrentActivity().equals("walking")) {
-      if (getCurrentAnimation().getIndex() <= 2) {
+      // If the unit is walking and its target tile is blocked,
+      // handle it (cancel, etc. - checkNextTile does a lot.)
+      if (getCurrentAnimation().getIndex() <= getWalkMoveFrame()) {
         checkNextTile();
       }
+      // If the unit is walking, the actual movement occurs on frame 2.
       if (getCurrentActivity().equals("walking")) {  
-        if (getCurrentAnimation().getIndex() == 2) {
-          move(dx, dy); // this is problematic for depth reasons.
+        if (getCurrentAnimation().getIndex() == getWalkMoveFrame()) {
+          move(dx, dy);
           path.removeFirst();
         }
       }
     }
-    /* This SEEMS redundant but checkNextTile() can change our activity to standing. */
+    
+    // The attack hit occurs on frame 2; maybe we can generalize this.
     if (getCurrentActivity().equals("attacking")) {
-      if (getCurrentAnimation().getIndex() == 2) {
+      if (getCurrentAnimation().getIndex() == getAttackHitFrame()) {
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
         
@@ -562,13 +574,24 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
+  protected int getAttackHitFrame() {
+    return attackHitFrame;
+  }
+
+  protected int getWalkMoveFrame() {
+    return walkMoveFrame;
+  }
+
   // deal with falling animations, sfx, etc later.
+  // What to do with overlays?
   public void die() {
     //game.removeObject(getFloorOverlay());
     //floorOverlay = null;
   }
   
-  /* Does NOT validate the tile we're moving to. You have to do that yourself!
+  /**
+   * Moves the unit by the specified amount.
+   * Does NOT validate the tile we're moving to. You have to do that yourself!
    * checkNextTile() was supposed to do that but it kind of grew in scope. */
   public void move(int dx, int dy) {
     //System.out.printf("move: %s %s\n", getPosn(), new Posn(getX() + dx, getY() + dy));
@@ -584,7 +607,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     updateFloorOverlay();
   }
   
-  /* Moves to a posn rather than a relative amount. */
+  /** Moves the unit to an absolute location, in Posn form.
+   * Like {@link #move(int, int)}, this method does not validate.
+   * @param p - the Posn to move to */
   public void moveTo(Posn p) {
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
@@ -598,7 +623,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     updateFloorOverlay();
   }
   
-  /* We can call this on any GameObject for differentiation purposes. */
+  /** We can call this on any GameObject for differentiation purposes. */
+  @Override
   public boolean isUnit() {
     return true;
   }
@@ -610,25 +636,29 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return nextActivity;
   }
   
+  @Override
   public String toString() {
     return "<Unit("+getName()+")>";
   }
   
-  /* Possibly poorly named.  This function will look at the tile directly in front of the unit,
-   * and do one of three things:
-   * 1) Nothing, if the tile is open;
-   *    - currentActivity = walking
-   *    - nextActivity = null or attacking
-   * 2) Cancel our movement, if there is something blocking us in the tile;
-   *    - currentActivity = standing
-   *    - nextActivity = null
-   * 3) Wait for a turn, if there is something temporarily blocking us.
-   *    - currentActivity = standing
-   *    - nextActivity = walking or attacking
-   *    
-   * Note that it does NOT set currentActivity to walking directly.
-   * 
-   * There should always be a targetPosn, right? */ 
+  /** Possibly poorly named.  This function will look at the tile directly in front of the unit,
+   * and do one of three things:<br>
+   * 1) Nothing, if the tile is open;<br>
+   *    - currentActivity = walking<br>
+   *    - nextActivity = null or attacking<br>
+   * 2) Cancel our movement, if there is something blocking us in the tile;<br>
+   *    - currentActivity = standing<br>
+   *    - nextActivity = null<br>
+   * 3) Wait for a turn, if there is something temporarily blocking us.<br>
+   *    - currentActivity = standing<br>
+   *    - nextActivity = walking or attacking<br>
+   * <br>
+   * Note that it does NOT set currentActivity to walking directly.<br>
+   * <br>
+   * There should always be a targetPosn, right?
+   * TODO A possible solution: make this method return something.  More than
+   * just a boolean, define some constants and return one of them.
+   */ 
   public void checkNextTile() {
     Tile nextTile = game.getFloor().getTile(getX()+dx, getY()+dy); // should match path.first
     if (nextTile.isBlocked()) {
@@ -648,14 +678,14 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             setCurrentActivity("standing");
             setTargetUnit(null);
           } else if (blockingUnit.isMoving()) {
-            /* Nothing queued up, just moving to a spot. */
+            // Nothing queued up, just moving to a spot.
             if (nextActivity == null || nextActivity.equals("walking")) {
               setCurrentActivity("standing");
               //System.out.println("W1");
               setNextActivity("walking");
               setNextTargetPosn(targetPosn);
               setTargetPosn(null);
-            /* Attacking is queued up; keep it queued. */
+            // Attacking is queued up; keep it queued.
             } else if (nextActivity.equals("attacking") || nextActivity.equals("blocking")) { 
               setCurrentActivity("standing");
             } else {
@@ -740,16 +770,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       setFloorOverlay(new FloorOverlay(game, this, Color.GREEN, transGreen));
       //floorOverlay = new FloorOverlay(game, this, Color.GREEN);
     }
-    int oldSize = game.getDepthTree().size();
     game.getDepthTree().add(floorOverlay);
-    int newSize = game.getDepthTree().size();
   }
   
   public boolean isMoving() {
     return currentActivity.equals("walking");
   }
-  
-  // ===== ACCESSOR METHODS =====
   
   public void setTargetUnit(Unit u) {
     Unit oldTargetUnit = targetUnit;
@@ -838,11 +864,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return animationName;
   }
   
-  /* VERY confusing: this one returns "N", "NE" etc. while getDirection() uses coords. */
+  /** Source of confusion: this one returns "N", "NE" etc. while getDirection() uses coords. */
   public String getCurrentDirection() {
     return game.coordsToDir(dx, dy);
   }
   
+  /** Return the drawable area of the sprite. (?) */
   public Rect getRect() {
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
     int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;

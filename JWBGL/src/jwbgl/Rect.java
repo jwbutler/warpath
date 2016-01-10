@@ -1,12 +1,12 @@
 package jwbgl;
 import java.awt.Rectangle;
 
-
+/** Represents a rectangle, used for a variety of purposes: collision,
+ * selection, whatever.  Based on the pygame Rect class.
+ * REALLY need to figure out off-by-one stuff
+ * Todo: getRight(), getBottom() */
 public class Rect {
-  /* Represents a rectangle, used for a variety of purposes: collision,
-   * selection, whatever.  Based on the pygame Rect class.
-   * REALLY need to figure out off-by-one stuff
-   * Todo: getRight(), getBottom() */
+
   private int left;
   private int top;
   private int width;

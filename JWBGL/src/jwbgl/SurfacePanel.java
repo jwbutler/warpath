@@ -1,10 +1,12 @@
 package jwbgl;
 import java.awt.Dimension;
 import java.awt.Graphics;
-
 import javax.swing.JPanel;
-
 import jwbgl.*;
+
+/** A JPanel that contains a Surface object.
+ * Does this need to exist?
+ */
 public class SurfacePanel extends JPanel {
   private Surface surface;
   private static final int DEFAULT_PADDING = 3;
@@ -19,17 +21,20 @@ public class SurfacePanel extends JPanel {
     this(surface, DEFAULT_PADDING, DEFAULT_PADDING);
   }
   
+  @Override
   public void paint(Graphics g) {
     super.paint(g);
     surface.applyPaletteSwaps();
     surface.draw(g, hpad,  vpad);
   }
   
+  @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     surface.applyPaletteSwaps();
     surface.draw(g, hpad,  vpad);
   }
+  
   public void setSurface(Surface s) {
     surface = s;
   }

@@ -17,15 +17,9 @@ import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 
-/* This class is used for every image that gets rendered.  It's basically just
+/** This class is used for every image that gets rendered.  It's basically just
  * an extension of the AWT BufferedImage class.  Allows for scaling
  * (especially 2x), palette swaps, transparency, a few other things? */
- 
- /* ===== Changelog =====
-  * 5/24 - Adjusted palette swap code to fix a potential bug where, for
-  *        example, if red was swapped to green and green was swapped to blue,
-  *        red would be swapped to blue. 
-  * ===================== */
 
 public class Surface {
   private BufferedImage image;

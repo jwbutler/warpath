@@ -1,6 +1,6 @@
 package warpath.objects;
-import java.awt.Color;
 
+import java.awt.Color;
 import jwbgl.Posn;
 import jwbgl.Surface;
 import warpath.core.RPG;
@@ -10,7 +10,6 @@ public class Corpse extends NonBlockingObject {
     super(game, posn);
     surface = new Surface(imgPath).scale2x();
     surface.setColorkey(Color.WHITE);
-    setyOffset(-32); // trial and error...
   }
   public boolean isCorpse() {
     return true;

@@ -4,47 +4,48 @@ import java.io.Serializable;
 import java.util.Hashtable;
 
 import jwbgl.*;
-/* This class is used to represent humanoid units.  Particularly the ones
- * that use Will's original "player" sprite.  It'll be subclassed lots. */
 import warpath.core.RPG;
 import warpath.objects.Corpse;
 import warpath.players.Player;
 
+/**
+ * This class is used to represent humanoid units.  Particularly the ones
+ * that use Will's original "player" sprite.  It'll be subclassed lots.
+ */
 public abstract class HumanUnit extends Unit implements Serializable {
-  private static String[] defaultActivities = {"walking", "standing", "attacking", "falling"};
+  private static final String[] DEFAULT_ACTIVITIES = {"walking", "standing", "attacking", "falling"};
+  private static final String HIT_SOUND = "hit1.wav";
+  private static final int Y_OFFSET = -32;
   
   public HumanUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "player", activities, new Hashtable<Color, Color>(), posn, player);
-    this.setyOffset(-32);
   }  
   
   public HumanUnit(RPG game, String name, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "player", activities, paletteSwaps, posn, player);
-    this.setyOffset(-32);
   }  
   
   public HumanUnit(RPG game, String name, Posn posn, Player player) {
-    this(game, name, defaultActivities, posn, player);
-    this.setyOffset(-32);
+    this(game, name, DEFAULT_ACTIVITIES, posn, player);
   }
   
   public HumanUnit(RPG game, String name, String animationName,
   String[] activities, Hashtable<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(game, name, animationName, activities, paletteSwaps, posn, player);
-    this.setyOffset(-32);
+    this.setYOffset(Y_OFFSET);
   }
 
   @Override
   public void playHitSound() {
-    game.playSound("hit1.wav");
+    game.playSound(HIT_SOUND);
   }
   
   @Override
   public void playBashSound() {
-    game.playSound("hit1.wav");
+    game.playSound(HIT_SOUND);
   }
   
   @Override

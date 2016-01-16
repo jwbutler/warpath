@@ -20,11 +20,11 @@ import warpath.units.Unit;
  * representing these colors.
  */
 public abstract class Level {
-  protected Floor floor;
-  protected RPG game;
-  protected ArrayList<Unit> units;
-  protected ArrayList<GameObject> objects;
-  private Surface img;
+  protected final RPG game;
+  protected final ArrayList<Unit> units;
+  protected final ArrayList<GameObject> objects;
+  private final Surface img;
+  
   private final Color GRASS_COLOR = new Color(0,255,0);
   private final Color STONE_COLOR = new Color(128,128,128);
   private final Color TREE_COLOR = new Color(0,128,0);
@@ -34,9 +34,13 @@ public abstract class Level {
   private final Color ZOMBIE_COLOR = new Color(255,255,0);
   private final Color PLAYER_COLOR = new Color(255,0,0);
   
+  protected Floor floor;
+  
   public Level(RPG game, String filename) {
     this.game = game;
     img = new Surface(filename);
+    units = new ArrayList<Unit>();
+    objects = new ArrayList<GameObject>();
   }
   /**
    * Initializes the map.  This should rightly be part of the constructor, but
@@ -47,8 +51,6 @@ public abstract class Level {
     int width = img.getWidth();
     int height = img.getHeight();
     floor = new Floor(game, width, height);
-    units = new ArrayList<Unit>();
-    objects = new ArrayList<GameObject>();
     // Populate tiles, units and objects from the contents of the map filename.
     for (int y=0; y<height; y++) {
       for (int x=0; x<width; x++) {

@@ -15,33 +15,40 @@ public abstract class Accessory {
   // we should make a generic class to subclass. there's a lot of copying and pasting
   // going on here - BUT i can't think of a way to do this without multiple
   // inheritance. fuck java
-  private String slot;
-  protected Hashtable<String, Surface> frames;
-  protected ArrayList<Animation> animations;
-  protected String[] activities = {
+  private final String slot;
+  protected final RPG game;
+  protected final Unit unit;
+  protected final int xOffset;
+  protected final int yOffset;
+  protected final String animationName;
+  
+  protected final Hashtable<String, Surface> frames;
+  protected final ArrayList<Animation> animations;
+  protected final String[] activities = {
     "walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3",
     "slashing_1", "slashing_2", "slashing_3", "falling"};
-  protected String animationName;
-  protected RPG game;
-  protected Unit unit;
   private Animation currentAnimation;
-  protected int xOffset;
-  protected int yOffset;
   
-  public Accessory(RPG game, Unit unit, String animationName, String slot) {
+  public Accessory(RPG game, Unit unit, String animationName, String slot, int xOffset, int yOffset) {
     this.game = game;
     this.unit = unit;
     this.slot = slot;
     this.animationName = animationName;
     frames = new Hashtable<String, Surface>();
+
+    animations = new ArrayList<Animation>();
     loadAnimations();
+    this.xOffset = xOffset;
+    this.yOffset = yOffset;
+  }
+  public Accessory(RPG game, Unit unit, String animationName, String slot) {
+    this(game, unit, animationName, slot, 0, 0);
   }
   
   /** Load all the animations for this object.
    * Calls loadActivityAnimations() for each activity.
    */
   public void loadAnimations() {
-    animations = new ArrayList<Animation>();
     for (int i = 0; i < activities.length; i++) {
       loadActivityAnimations(activities[i]);
     }

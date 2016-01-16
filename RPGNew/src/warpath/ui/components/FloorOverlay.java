@@ -14,11 +14,16 @@ public class FloorOverlay extends NonBlockingObject {
   private final String FLOOR_OVERLAY_PATH = "floor_overlay_96x48";
   private GameObject src;
   private Surface surface;
-  private Color outerColor;
-  private Color innerColor;
+  private final Color outerColor;
+  private final Color innerColor;
+  private final int X_OFFSET = 0;
+  private final int Y_OFFSET = 0;
+  private final int DEPTH_OFFSET = -1;
   public FloorOverlay(RPG game, GameObject src, Color outerColor, Color innerColor) {
     super(game, src.getPosn());
-    this.game = game;
+    setXOffset(X_OFFSET);
+    setYOffset(Y_OFFSET);
+    setDepthOffset(DEPTH_OFFSET);
     this.src = src;
     this.outerColor = outerColor;
     this.innerColor = innerColor;
@@ -29,7 +34,6 @@ public class FloorOverlay extends NonBlockingObject {
     surface.getPaletteSwaps().put(Color.RED, innerColor);
     surface.applyPaletteSwaps();
     surface.setColorkey(Color.WHITE);
-    depthOffset = -1;
     updateDepth();
   }
   

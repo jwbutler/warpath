@@ -7,14 +7,17 @@ import warpath.units.Unit;
 /* The human player.  There will only be one. */
 
 public class HumanPlayer implements Player {
-  private int playerNumber;
-  private ArrayList<Unit> units;
-  private ArrayList<Unit> selectedUnits;
-  private ArrayList<Player> friendlyPlayers;
-  private ArrayList<Player> hostilePlayers;
+  private final int playerNumber;
+  private final ArrayList<Unit> units;
+  private final ArrayList<Unit> selectedUnits;
+  private final ArrayList<Player> friendlyPlayers;
+  private final ArrayList<Player> hostilePlayers;
   
-  /** Instantiates the player with the given player number index. */
+  /**
+   * Instantiates the player with the given player number index.
+   **/
   public HumanPlayer(int playerNumber) {
+    this.playerNumber = playerNumber;
     units = new ArrayList<Unit>();
     selectedUnits = new ArrayList<Unit>();
     friendlyPlayers = new ArrayList<Player>();

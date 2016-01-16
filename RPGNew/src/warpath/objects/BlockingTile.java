@@ -8,6 +8,7 @@ public class BlockingTile extends Tile {
     super(game, posn, texture);
   }
 
+  @Override
   public boolean isBlocked() {
     return true;
   }

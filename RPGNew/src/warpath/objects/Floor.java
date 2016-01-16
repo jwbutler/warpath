@@ -6,10 +6,10 @@ import warpath.core.RPG;
 
 public class Floor {
 
-  private RPG game;
-  private Tile[][] tiles;
+  private final RPG game;
+  private final Tile[][] tiles;
+  private final int width, height; // number of grid tiles, NOT pixels
   private Surface floorSurface;
-  private int width, height; // number of grid tiles, NOT pixels
   
   public Floor(RPG game, int width, int height) {
     this.game = game;

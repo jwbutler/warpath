@@ -14,41 +14,32 @@ import warpath.objects.Corpse;
 import warpath.players.Player;
 
 public abstract class ZombieUnit extends Unit implements Serializable {
-  private static String[] defaultActivities = {"walking", "standing", "attacking", "falling"};
+  private static final String[] DEFAULT_ACTIVITIES = {"walking", "standing", "attacking", "falling"};
+  private static final int X_OFFSET = 0;
+  private static final int Y_OFFSET = -32;
+  private static final String HIT_SOUND = "hit1.wav";
+  
   
   public ZombieUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "zombie", activities, new Hashtable<Color, Color>(), posn, player);
-    this.setyOffset(-32);
   }  
   
   public ZombieUnit(RPG game, String name, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "zombie", activities, paletteSwaps, posn, player);
-    this.setyOffset(-32);
   }  
   
   public ZombieUnit(RPG game, String name, Posn posn, Player player) {
-    this(game, name, defaultActivities, posn, player);
-    this.setyOffset(-32);
+    this(game, name, DEFAULT_ACTIVITIES, posn, player);
   }
   
   public ZombieUnit(RPG game, String name, String animationName,
   String[] activities, Hashtable<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(game, name, animationName, activities, paletteSwaps, posn, player);
-    this.setyOffset(-32);
-  }
-
-  @Override
-  public void playHitSound() {
-    game.playSound("hit1.wav");
-  }
-  
-  @Override
-  public void setCurrentActivity(String newActivity) {
-    currentActivity = newActivity;
-    setCurrentAnimation(newActivity, getCurrentDirection());
+    this.setXOffset(X_OFFSET);
+    this.setYOffset(Y_OFFSET);
   }
   
   @Override
@@ -70,15 +61,20 @@ public abstract class ZombieUnit extends Unit implements Serializable {
       if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
         for (int j=0; j<filenames.length; j++) {
           String animIndex = filenames[j].split("_")[1];
-          filenames2[j] = String.format("%s_%s_%s.png", animationName, "falling", animIndex);
+          filenames2[j] = String.format("%s_%s_%s.%s", animationName, "falling", animIndex, Constants.IMAGE_FORMAT);
         }
       } else {
         for (int j=0; j<filenames.length; j++) {
           String animIndex = filenames[j].split("_")[1];
-          filenames2[j] = String.format("%s_%s_%s.png", animationName, "fallingB", animIndex);
+          filenames2[j] = String.format("%s_%s_%s.%s", animationName, "fallingB", animIndex, Constants.IMAGE_FORMAT);
         }
       }
       animations.add(new Animation(animationName, filenames2, "falling", dir, frames));
     }
+  }
+  
+  @Override
+  public void playHitSound() {
+    game.playSound(HIT_SOUND);
   }
 }

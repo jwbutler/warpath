@@ -11,21 +11,20 @@ import warpath.players.Player;
  * teleporting and zombie-resurrecting.
  * TODO The value of teleport_chance is not used. */
 public class EnemyRobedWizard extends RobedWizardUnit {
-  private static String[] activities = {"walking", "standing", "falling", "teleporting", "appearing", "rezzing", "stunned_long"};
+  private static final String[] ACTIVITIES = {"walking", "standing", "falling", "teleporting", "appearing", "rezzing", "stunned_long"};
   
   /* These two percentages are additive */
-  private double wanderChance = 0.025;
+  private static final double WANDER_CHANCE = 0.025;
   private double teleportChance = 0.75;
   
-  private int evasiveRadius = 3;
-  private int teleportRadius = 6;
-  private int visionRadius = 30;
+  private static final int EVASIVE_RADIUS = 3;
+  private static final int TELEPORT_RADIUS = 6;
+  private static final int VISION_RADIUS = 30;
+  
   public EnemyRobedWizard(RPG game, String name, Posn posn, Player player) {
-    super(game, name, activities, posn, player);
+    super(game, name, ACTIVITIES, posn, player);
     currentHP = maxHP = 200;
     currentEP = maxEP = 200;
-    teleportCost = 200;
-    rezCost = 200;
   }
   
   @Override
@@ -39,7 +38,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       Corpse closestCorpse = null;
       
       for (Unit u : game.getUnits()) {
-        if (isHostile(u) && game.distance2(this, u) <= evasiveRadius) {
+        if (isHostile(u) && game.distance2(this, u) <= EVASIVE_RADIUS) {
           hostileInRange = true;
           if (closestEnemy == null || game.distance2(this, u) < game.distance2(this, closestEnemy)) {
             closestEnemy = u;
@@ -59,7 +58,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       }
       // Execute flowchart.
       // Are we standing on a corpse? Start rezzing, regardless of threats.
-      if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= visionRadius) && (closestCorpse.getPosn().equals(getPosn()))) {
+      if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= VISION_RADIUS) && (closestCorpse.getPosn().equals(getPosn()))) {
         setNextActivity("rezzing");
         // Is there an enemy (player) unit in the danger zone? Teleport or walk away.
       } else if (hostileInRange) {
@@ -67,9 +66,9 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         Posn p;
         boolean goodPosn = false;
         int moveRadius;
-        if (currentEP >= teleportCost) {
+        if (currentEP >= TELEPORT_COST) {
           setNextActivity("teleporting");
-          moveRadius = teleportRadius;
+          moveRadius = TELEPORT_RADIUS;
         } else {
           setNextActivity("walking");
           moveRadius = 3;
@@ -83,19 +82,19 @@ public class EnemyRobedWizard extends RobedWizardUnit {
           p = new Posn(x,y);
           if (!game.getFloor().getTile(x,y).isBlocked()) {
             if (game.distance2(getPosn(), p) <= moveRadius) {
-              if (game.distance2(p, closestEnemy.getPosn()) >= evasiveRadius) {
+              if (game.distance2(p, closestEnemy.getPosn()) >= EVASIVE_RADIUS) {
                 goodPosn = true;
               }
             }
           }
         } while (!goodPosn);
         setNextTargetPosn(p);
-      } else if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= visionRadius)) {
+      } else if ((closestCorpse != null) && (game.distance2(this, closestCorpse) <= VISION_RADIUS)) {
         setNextActivity("walking");
         setNextTargetPosn(closestCorpse.getPosn());
       } else {
         double r = RNG.nextDouble();
-        if (r < wanderChance) {
+        if (r < WANDER_CHANCE) {
           // Full wander.
           int x,y;
           do {

@@ -16,10 +16,12 @@ public interface GameObject {
   public Surface getSurface();
   public Rect getRect();
   public void draw(Graphics g);
-  public void setxOffset(int xOffset);
-  public void setyOffset(int yOffset);
-  public int getxOffset();
-  public int getyOffset();
+  public int getXOffset();
+  public int getYOffset();
+  public int getDepthOffset();
+  public void setXOffset(int xOffset);
+  public void setYOffset(int yOffset);
+  public void setDepthOffset(int depthOffset);
   public boolean isUnit();
   public boolean isObstacle();
   public boolean isCorpse();

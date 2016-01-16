@@ -8,7 +8,7 @@ import warpath.units.Unit;
  * TODO Make a superclass for bars. */
 
 public class EnergyBar extends Surface {
-  protected Unit unit;
+  protected final Unit unit;
   public EnergyBar(Unit unit, int width, int height) {
     super(width, height);
     this.unit = unit;

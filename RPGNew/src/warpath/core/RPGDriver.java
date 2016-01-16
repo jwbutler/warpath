@@ -22,7 +22,7 @@ import warpath.ui.GameWindow;
 
 public class RPGDriver extends WindowAdapter implements ActionListener {
   private final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
-  private RPG game;
+  private final RPG game;
   private GameWindow window;
   
   public static void main(String[] args) {

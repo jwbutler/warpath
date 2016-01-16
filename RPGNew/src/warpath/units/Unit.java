@@ -23,25 +23,41 @@ import warpath.ui.components.TransHealthBar;
  * subsequent unit classes we define.  Not to be used by itself (abstract). */
 
 public abstract class Unit extends BasicObject implements GameObject, Serializable {
-  protected final int walkMoveFrame = 2;
-  protected final int attackHitFrame = 2;
+  protected final static int WALK_MOVE_FRAME = 2;
+  protected final static int ATTACK_HIT_FRAME = 2;
   
-  protected String name;
-  protected String animationName;
-  protected Hashtable<String, Surface> frames;
-  protected ArrayList<Animation> animations;
+  protected final static int BLOCK_COST = 2; // costs N EP per tick (does not disable HP regen)
+  protected final static int ATTACK_COST = 15; // 10 frames per attack for 67% uptime
+  protected final static int BASH_COST = 36; // 12 frames per bash for 33% uptime
+  protected final static int SLASH_COST = 3; // costs N EP per tick (does not disable HP regen) // SHOULD BE 2
+  protected final static int TELEPORT_COST = 200; // it's weird to put this in the base class but yeah.
+  protected final static int REZ_COST = 200; // it's weird to put this in the base class but yeah.
+  
+  // TODO convert these to per-second amounts, deal with the fallout
+  protected final static int HP_REGEN = 10; // regen 1 HP per N ticks
+  protected final static int EP_REGEN = 1; // regen 1 EP per N ticks
+  
+  protected final static int X_OFFSET = 0;
+  protected final static int Y_OFFSET = -32;
+  
+  protected final Hashtable<String, Surface> frames;
+  protected final ArrayList<Animation> animations;
+  protected final String[] activities;
+  protected final String name;
+  protected final String animationName;
+  protected int hpBarOffset;
+  
   protected int dx;
   protected int dy;
   protected Unit targetUnit;
   protected Unit nextTargetUnit;
   protected Posn targetPosn;
   protected Posn nextTargetPosn;
-  protected String[] activities;
   protected String currentActivity;
   protected String nextActivity;
   protected int currentHP, maxHP;
   protected int currentEP, maxEP;
-  protected int hpBarOffset;
+
   private boolean newSlashDirection;
   
   private Animation currentAnimation;
@@ -51,19 +67,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private TransHealthBar healthBar;
   
   protected LinkedList<Posn> path;
-  protected Hashtable<String, Accessory> equipment;
-  protected Hashtable<Color, Color> paletteSwaps;
-  
-  private int blockCost = 2; // costs N EP per tick (does not disable HP regen)
-  protected int attackCost = 15; // 10 frames per attack for 67% uptime
-  protected int bashCost = 36; // 12 frames per bash for 33% uptime
-  private int slashCost = 3; // costs N EP per tick (does not disable HP regen) // SHOULD BE 2
-  protected int teleportCost = 200; // it's weird to put this in the base class but yeah.
-  protected int rezCost = 200; // it's weird to put this in the base class but yeah.
-  
-  // TODO convert these to per-second amounts, deal with the fallout
-  protected int hpRegen = 10; // regen 1 HP per N ticks
-  protected int epRegen = 1; // regen 1 EP per N ticks
+  protected final Hashtable<String, Accessory> equipment;
+  protected final Hashtable<Color, Color> paletteSwaps;
   
   public Unit(RPG game, String name, String animationName, String[] activities, Hashtable<Color, Color> paletteSwaps,
     Posn posn, Player player) {
@@ -74,14 +79,16 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     this.player = player;
     equipment = new Hashtable<String, Accessory>();
     this.paletteSwaps = paletteSwaps;
+    this.path = new LinkedList<Posn>();
     
     dx = 0;
     dy = -1;
-    xOffset = 0;
+    setXOffset(0);
     /* Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8 pixel space 
      * at bottom of player sprites. */
-    yOffset = -32;
+    setYOffset(-32);
     frames = new Hashtable<String, Surface>();
+    animations = new ArrayList<Animation>();
     loadAnimations();
     applyPaletteSwaps();
     setCurrentActivity("standing");
@@ -134,7 +141,6 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
    * Calls {@link #loadActivityAnimations()} for each activity. */
   public void loadAnimations() {
     long t = System.currentTimeMillis();
-    animations = new ArrayList<Animation>();
     for (int i = 0; i < activities.length; i++) {
       loadActivityAnimations(activities[i]);
     }
@@ -280,7 +286,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       moveTo(getTargetPosn());
       setCurrentActivity("appearing");
       setTargetPosn(null);
-      currentEP -= teleportCost;
+      currentEP -= TELEPORT_COST;
       
     // If next activity is rezzing: (wizard)
     // 1) Make sure we're standing on the corpse.
@@ -349,13 +355,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       /* If next activity is attacking, we might have to path to the unit first. */
       } else if (nextActivity.equals("attacking")) {
         if (game.distance2(this, targetUnit) == 1) {
-          if (currentEP >= attackCost) {
+          if (currentEP >= ATTACK_COST) {
             pointAt(targetUnit);
             setCurrentActivity("attacking");
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
-            currentEP -= attackCost;
+            currentEP -= ATTACK_COST;
           } else {
             setCurrentActivity("standing");
             targetPosn = null;
@@ -371,13 +377,13 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         }
       } else if (nextActivity.equals("bashing")) {
         if (game.distance2(this, targetUnit) == 1) {
-          if (currentEP >= bashCost) {
+          if (currentEP >= BASH_COST) {
             pointAt(targetUnit);
             setCurrentActivity("bashing");
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
-            currentEP -= bashCost;
+            currentEP -= BASH_COST;
           } else {
             setCurrentActivity("standing");
             targetPosn = null;
@@ -475,10 +481,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
     
     if (!getCurrentActivity().equals("falling")) {
-      if ((game.getTicks() % hpRegen == 0) && (currentHP < maxHP)) {
+      if ((game.getTicks() % HP_REGEN == 0) && (currentHP < maxHP)) {
         currentHP++;
       }
-      if ((game.getTicks() % epRegen == 0) && (currentEP < maxEP)) {
+      if ((game.getTicks() % EP_REGEN == 0) && (currentEP < maxEP)) {
         currentEP++;
       }
     }
@@ -575,11 +581,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
 
   protected int getAttackHitFrame() {
-    return attackHitFrame;
+    return ATTACK_HIT_FRAME;
   }
 
   protected int getWalkMoveFrame() {
-    return walkMoveFrame;
+    return WALK_MOVE_FRAME;
   }
 
   // deal with falling animations, sfx, etc later.
@@ -872,8 +878,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   /** Return the drawable area of the sprite. (?) */
   public Rect getRect() {
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
-    int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
-    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
+    int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + getXOffset();
+    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + getYOffset();
     Rect transparencyRect = getSurface().getTransparencyRect().clone();
     transparencyRect.move(left,top);
     return transparencyRect; 
@@ -1023,8 +1029,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
     
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
-    int left = pixel.getX() + Constants.TILE_WIDTH/2 - healthBar.getWidth()/2 + xOffset;
-    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - healthBar.getHeight()/2 + yOffset;
+    int left = pixel.getX() + Constants.TILE_WIDTH/2 - healthBar.getWidth()/2 + getXOffset();
+    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - healthBar.getHeight()/2 + getYOffset();
     top += hpBarOffset;
     
     healthBar.draw(g, left, top);
@@ -1060,19 +1066,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   }
 
   public int getBlockCost() {
-    return blockCost;
-  }
-
-  public void setBlockCost(int blockCost) {
-    this.blockCost = blockCost;
+    return BLOCK_COST;
   }
 
   public int getSlashCost() {
-    return slashCost;
-  }
-
-  public void setSlashCost(int slashCost) {
-    this.slashCost = slashCost;
+    return SLASH_COST;
   }
 
   public boolean getNewSlashDirection() {

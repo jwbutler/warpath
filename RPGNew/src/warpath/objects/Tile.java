@@ -12,7 +12,7 @@ import warpath.units.Unit;
 public class Tile extends BasicObject {
   private Surface surface;
   private Unit unit;
-  private ArrayList<GameObject> objects;
+  private final ArrayList<GameObject> objects;
   public Tile(RPG game, Posn posn, String texture) {
     super(game, posn);
     surface = new Surface(Constants.TILE_WIDTH/2, Constants.TILE_HEIGHT/2);

@@ -152,4 +152,9 @@ public class DepthTree {
       return size(root.getLeft()) + size(root.getRight()) + 1;
     }
   }
+
+  public void clear() {
+    root = null;
+    
+  }
 }

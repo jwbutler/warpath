@@ -1,7 +1,6 @@
 package warpath.units;
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 import jwbgl.*;
@@ -14,14 +13,17 @@ import warpath.objects.Corpse;
 import warpath.players.Player;
 
 public abstract class RobedWizardUnit extends Unit implements Serializable {
-  private static String[] defaultActivities = {
+  private static final String[] DEFAULT_ACTIVITIES = {
     "standing", "walking", "falling", "teleporting", "appearing", "rezzing", "stunned_short", "stunned_long"
     };
+  private static final int X_OFFSET = 0;
+  private static final int Y_OFFSET = -32;
   
   public RobedWizardUnit(RPG game, String name, String animationName,
   String[] activities, Hashtable<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(game, name, animationName, activities, paletteSwaps, posn, player);
-    yOffset = -32;
+    setXOffset(X_OFFSET);
+    setYOffset(Y_OFFSET);
     hpBarOffset = -40;
     
   }
@@ -38,7 +40,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   }  
   
   public RobedWizardUnit(RPG game, String name, Posn posn, Player player) {
-    this(game, name, defaultActivities, posn, player);
+    this(game, name, DEFAULT_ACTIVITIES, posn, player);
   }
 
   @Override
@@ -57,7 +59,6 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   @Override
   public void loadAnimations() {
     long t = System.currentTimeMillis();
-    animations = new ArrayList<Animation>();
     for (int i=0; i<activities.length; i++) {
       loadActivityAnimations(activities[i]);
     }

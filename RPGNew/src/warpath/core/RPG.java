@@ -1,11 +1,9 @@
 package warpath.core;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.KeyEventDispatcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Random;
@@ -31,24 +29,11 @@ import warpath.ui.SoundPlayer;
 import warpath.units.SwordGuy;
 import warpath.units.Unit;
 
-/* The main game engine.  Expect this one to be a few thousand lines long.
- * 
- * ===== CHANGELOG =====
- * 8/16 - New version! Rewriting for single character combat.
- * 5/30 - lots of comments.
- * 5/26 - Modified pathfinding code to allow for blocked destination, and to
- *        handle walking units in the path.
- *      - Added addOverlay() 
- *      - Started unit interaction stuff
- * 5/23 - findPath() added
- *      - getAdjacentSquares() added
- * 1/29 - Commented stuffs.
- * =====================
+/**
+ * The main game engine.  Expect this one to be a few thousand lines long.
  */
   
 public class RPG implements ActionListener {
-	
-  RPGDriver driver;
   
   private Timer frameTimer;
   private int ticks;
@@ -57,30 +42,29 @@ public class RPG implements ActionListener {
   
   // Using a HashTable for this is pretty strange.  But it lets us access
   // players by number, which I think is useful.
-  private Hashtable<Integer, Player> players;
-  private ArrayList<Unit> units;
-  private ArrayList<GameObject> objects; // Non-units
-  private ArrayList<Level> levels;
+  private final Hashtable<Integer, Player> players;
+  private final ArrayList<Unit> units;
+  private final ArrayList<GameObject> objects; // Non-units
+  private final ArrayList<Level> levels;
   
   /* These are kinda hacks to get around concurrent modification exceptions.
    * Maybe there is a better solution. */
-  private ArrayList<Unit> unitsToAdd;
-  private ArrayList<Unit> unitsToRemove;
+  private final ArrayList<Unit> unitsToAdd;
+  private final ArrayList<Unit> unitsToRemove;
   
   // Unsure if we should keep this reference, he's always going to be
   // player 1, right?
   private HumanPlayer humanPlayer;
 
-  private DepthTree depthTree;
-  private Posn cameraPosn;
-  private Random RNG;
-  
-  private GameWindow gameWindow;
-  private SoundPlayer soundPlayer;
-  private InputHandler inputHandler;
+  private final DepthTree depthTree;
+  private final Random RNG;
+  private final GameWindow gameWindow;
+  private final SoundPlayer soundPlayer;
+  private final InputHandler inputHandler;  
   
   /* Not using anything from this except victory/defeat conditions. */
   private int levelIndex;
+  private Posn cameraPosn;
   
   private boolean redrawFloor;
 
@@ -97,6 +81,7 @@ public class RPG implements ActionListener {
     addHumanPlayer();
     units = new ArrayList<Unit>();
     objects = new ArrayList<GameObject>();
+    levels = new ArrayList<Level>();
     unitsToAdd = new ArrayList<Unit>();
     unitsToRemove = new ArrayList<Unit>();
     RNG = new Random();
@@ -984,9 +969,6 @@ public class RPG implements ActionListener {
   public ArrayList<Unit> getUnits() {
     return units;
   }
-  public void setUnits(ArrayList<Unit> units) {
-    this.units = units;
-  }
   
   public Random getRNG() {
     return RNG;
@@ -1033,8 +1015,8 @@ public class RPG implements ActionListener {
     level.init();
     floor = level.getFloor();
     redrawFloor = true;
-    depthTree = new DepthTree();
-    units = new ArrayList<Unit>();
+    depthTree.clear();
+    units.clear();
     for (Unit u: level.getUnits()) {
       depthTree.add(u.getFloorOverlay());
       if (u.getTargetPosnOverlay() != null) {
@@ -1044,7 +1026,7 @@ public class RPG implements ActionListener {
       /* This is a dumb hack to correct the depth tree. */
       u.moveTo(u.getPosn());
     }
-    objects = new ArrayList<GameObject>();
+    objects.clear();
     for (GameObject o: level.getObjects()) {
       addObject(o);
     }
@@ -1077,7 +1059,7 @@ public class RPG implements ActionListener {
   }
   
   public void loadLevels() {
-    levels = new ArrayList<Level>();
+    levels.clear();
     levels.add(new TestLevel(this));
     //levels.add(new WizardLevel(this));
     levelIndex=0;

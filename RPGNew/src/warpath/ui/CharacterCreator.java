@@ -2,15 +2,19 @@ package warpath.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.io.File;
+import java.util.HashMap;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
@@ -21,36 +25,41 @@ import javax.swing.event.ChangeListener;
 
 import jwbgl.*;
 import warpath.core.RPGDriver;
+import warpath.units.UnitTemplate;
 
 /** The menu for creating a new character.
  * TODO support saving female characters
  */
 public class CharacterCreator extends JPanel implements ActionListener, ChangeListener {
-  private Timer frameTimer;
+  private final SurfacePanel unitPanel;
+  private final JPanel sliderPanel;
+  private final JPanel buttonPanel;
+  private final Timer frameTimer;
   private Surface unitSurface;
   private Surface unitSurfaceBase;
-  private SurfacePanel unitPanel;
-  private JPanel sliderPanel;
   private Color savedColor;
-  private RPGDriver driver;
   
-  private ArrayList<String> colorNames;
-  private Hashtable<String, Color> baseColors;
-  private Hashtable<Color, Color> paletteSwaps;
-  private Hashtable<String, JLabel> colorLabels;
-  private Hashtable<String, JSlider[]> colorSliders;
-  private Hashtable<String, JLabel[]> sliderLabels;
-  private Hashtable<String, JButton> copyButtons;
-  private Hashtable<String, JButton> pasteButtons;
-  private JButton genderSelector;
-  private JButton contButton;
+  private final String[] colorNames;
+  private final HashMap<String, Color> baseColors;
+  private final HashMap<Color, Color> paletteSwaps;
+  private final HashMap<String, JLabel> colorLabels;
+  private final HashMap<String, JSlider[]> colorSliders;
+  private final HashMap<String, JLabel[]> sliderLabels;
+  private final HashMap<String, JButton> copyButtons;
+  private final HashMap<String, JButton> pasteButtons;
+  private final JButton genderSelector;
+  private final JButton continueButton;
+  private final JButton loadSaveButton;
   
   /**
    * TODO: I really don't like passing the Driver as an argument, figure out
    * how to avoid this.
    */
-  public CharacterCreator(RPGDriver theDriver, int width, int height) {
-	driver = theDriver;
+  public CharacterCreator(RPGDriver driver, int width, int height) {
+    copyButtons = new HashMap<String,JButton>();
+    pasteButtons = new HashMap<String,JButton>();
+    paletteSwaps = new HashMap<Color,Color>();
+    
     setSize(width, height);
     setPreferredSize(new Dimension(width, height));
     setVisible(true);
@@ -59,25 +68,13 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     setDoubleBuffered(true);
     setBackground(Color.BLACK);
     setLayout(null);
-    
-    colorNames = new ArrayList<String>();
-    colorNames.add("Hair");
-    colorNames.add("Face");
-    colorNames.add("Eyes");
-    colorNames.add("Mouth");
-    colorNames.add("Shirt 1");
-    colorNames.add("Shirt 2");
-    colorNames.add("Shirt 3");
-    colorNames.add("Hands");
-    colorNames.add("Belt");
-    colorNames.add("Skirt");
-    colorNames.add("Legs");
-    colorNames.add("Boots 1");
-    colorNames.add("Boots 2");
-    
-    baseColors = new Hashtable<String, Color>();
-    colorSliders = new Hashtable<String, JSlider[]>();
-    sliderLabels = new Hashtable<String, JLabel[]>();
+    colorNames = new String[] {
+      "Hair", "Face", "Eyes", "Mouth", "Shirt 1", "Shirt 2", "Shirt 3",
+      "Hands", "Belt", "Skirt", "Legs", "Boots 1", "Boots 2"
+    };
+    baseColors = new HashMap<String, Color>();
+    colorSliders = new HashMap<String, JSlider[]>();
+    sliderLabels = new HashMap<String, JLabel[]>();
     
     baseColors.put("Hair", new Color(128,64,0));
     baseColors.put("Face", new Color(255,128,64));
@@ -92,7 +89,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     baseColors.put("Legs", new Color(192,192,192));
     baseColors.put("Boots 1", new Color(0,128,0));
     baseColors.put("Boots 2", new Color(0,255,0));
-    colorLabels = new Hashtable<String,JLabel>();
+    colorLabels = new HashMap<String,JLabel>();
     unitSurfaceBase = new Surface("player_standing_E_1.png");
     try {
       unitSurface = unitSurfaceBase.clone();
@@ -101,11 +98,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     }
     
     savedColor = null;
-    copyButtons = new Hashtable<String,JButton>();
-    pasteButtons = new Hashtable<String,JButton>();
-
     unitSurface = unitSurface.scale2x().scale2x();
-    paletteSwaps = new Hashtable<Color,Color>();
     
     unitPanel = new SurfacePanel(unitSurface);
 
@@ -113,53 +106,56 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     int w = unitSurface.getWidth();
     int h = unitSurface.getHeight();
     int l = (int)(getWidth()*0.30 - unitSurface.getWidth())/2;
-    int t = (int)(getHeight()*0.30);
+    int t = (int)(getHeight()*0.10);
     unitPanel.setBounds(l, t, w, h);
     add(unitPanel);
     
+    buttonPanel = new JPanel();
+    buttonPanel.setBounds((int)0, (int)(getHeight()*0.5), (int)(getWidth()*0.30), (int)(getHeight()*0.5));
+    buttonPanel.setLayout(new GridLayout(3, 0, 10, 10));
+    buttonPanel.setAlignmentX(0.5f);
+    buttonPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+    this.add(buttonPanel);
+    
     genderSelector = new JButton("Switch to Female");
-    
+    genderSelector.setAlignmentX(CENTER_ALIGNMENT);
     genderSelector.addActionListener(this);
-    w = (int)(getWidth()*.24); h = (int)(getHeight()*.09);
-    l = (int)(getWidth()*0.30 - w)/2;
-    t = (int)(getHeight()*0.65);
-    genderSelector.setBounds(l,t,w,h);
-    add(genderSelector);
+    buttonPanel.add(genderSelector);
+
     
-    //Dealing with transition from CC to Game
-    contButton = new JButton("Continue...");
-    w = (int)(getWidth()*.24); h = (int)(getHeight()*.09);
-    l = (int)(getWidth()*0.30 - w)/2;
-    t = (int)(getHeight()*.80);
-    contButton.setBounds(l,t,w,h);
-    this.add(contButton);
+    loadSaveButton = new JButton("Load/Save");
+    loadSaveButton.setAlignmentX(CENTER_ALIGNMENT);
+    loadSaveButton.addActionListener(this);
+    buttonPanel.add(loadSaveButton);
     
     // When the continue button is pressed, export color swaps and move to game panel
-    contButton.addActionListener(driver);
-    
+    continueButton = new JButton("Continue");
+    continueButton.setAlignmentX(CENTER_ALIGNMENT);
+    continueButton.addActionListener(driver);
+    buttonPanel.add(continueButton);
     
     // add the surface
     sliderPanel = new JPanel();
-    sliderPanel.setLayout(new GridLayout(colorNames.size(), 5, 5, 5));
+    sliderPanel.setLayout(new GridLayout(colorNames.length, 5, 5, 5));
     sliderPanel.setBounds((int)(getWidth()*0.30), 0, (int)(getWidth()*0.70), (int)(getHeight()*1));
     sliderPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-    int i = 0;
+    
+    populateSliderPanel();
+    
+    add(sliderPanel);
+    frameTimer = new Timer(50, this);
+    frameTimer.start();
+  }
+  
+  /**
+   * For each color, make an R/G/B slider with number labels, plus copy/paste
+   * buttons.
+   */
+  private void populateSliderPanel() {
     for (String name : colorNames) {
       Color c = baseColors.get(name);
       paletteSwaps.put(c, c);
-      JLabel colorLabel = new JLabel();
-      /*
-      l = (int)(sliderPanel.getWidth()*0.01);
-      t = 35*i + 20;
-      w = (int)(sliderPanel.getWidth()*0.12);
-      h = 25;
-      colorLabel.setBounds(l,t,w,h);*/
-      colorLabel.setForeground(Color.WHITE);
-      colorLabel.setBackground(c);
-      colorLabel.setText(name);
-      colorLabel.setOpaque(true);
-      colorLabel.setHorizontalAlignment(SwingConstants.CENTER);
-      colorLabel.setFont(new Font("Arial",Font.PLAIN, 9));
+      JLabel colorLabel = createColorLabel(name, c);
       colorLabels.put(name, colorLabel);
       sliderPanel.add(colorLabel);
       JSlider RSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getRed());
@@ -170,15 +166,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       sliders[1] = GSlider;
       sliders[2] = BSlider;
       colorSliders.put(name, sliders);
-      /*t = 35*i + 20;
-      h = 25;
-      w = (int)(sliderPanel.getWidth()*0.19);
-      l = (int)(sliderPanel.getWidth()*0.14);
-      RSlider.setBounds(l,t,w,h);
-      l = (int)(sliderPanel.getWidth()*0.34);
-      GSlider.setBounds(l,t,w,h);
-      l = (int)(sliderPanel.getWidth()*0.54);
-      BSlider.setBounds(l,t,w,h);*/
       RSlider.setOpaque(false);
       GSlider.setOpaque(false);
       BSlider.setOpaque(false);
@@ -195,15 +182,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       JLabel BLabel = new JLabel();
       BLabel.setText(Integer.toString(BSlider.getValue()));
       BLabel.setHorizontalAlignment(SwingConstants.CENTER);
-      /*t = 35*i + 35;
-      h = 15;
-      w = (int)(sliderPanel.getWidth()*0.19);
-      l = (int)(sliderPanel.getWidth()*0.14);
-      RLabel.setBounds(l,t,w,h);
-      l = (int)(sliderPanel.getWidth()*0.34);
-      GLabel.setBounds(l,t,w,h);
-      l = (int)(sliderPanel.getWidth()*0.54);
-      BLabel.setBounds(l,t,w,h);*/
       JLabel[] labels = {RLabel, GLabel, BLabel};
       sliderLabels.put(name, labels);
       JPanel rp = new JPanel();
@@ -227,27 +205,27 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       copyButton.addActionListener(this);
       copyButtons.put(name, copyButton);
       sliderPanel.add(copyButton);
-      /*t = 35*i + 20;
-      h = 25;
-      w = (int)(sliderPanel.getWidth()*0.11);
-      l = (int)(sliderPanel.getWidth()*0.74);
-      copyButton.setBounds(l,t,w,h);*/
       copyButton.setFont(new Font("Arial",Font.PLAIN, 9));
       JButton pasteButton = new JButton("Paste");
       pasteButton.setActionCommand("Paste_"+name);
       pasteButton.addActionListener(this);
       pasteButtons.put(name, pasteButton);
       sliderPanel.add(pasteButton);
-      /*l = (int)(sliderPanel.getWidth()*0.86);
-      pasteButton.setBounds(l,t,w,h);*/
       pasteButton.setFont(new Font("Arial",Font.PLAIN, 9));
-      i++;
     }
-    add(sliderPanel);
-    frameTimer = new Timer(50, this);
-    frameTimer.start();
   }
-  
+
+  private JLabel createColorLabel(String name, Color c) {
+    JLabel colorLabel = new JLabel();
+    colorLabel.setForeground(Color.WHITE);
+    colorLabel.setBackground(c);
+    colorLabel.setText(name);
+    colorLabel.setOpaque(true);
+    colorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    colorLabel.setFont(new Font("Arial",Font.PLAIN, 9));
+    return colorLabel;
+  }
+
   /**
    * Called when a button is pressed.
    * @param e - the ActionEvent from the button press
@@ -261,14 +239,22 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         doGender();
       } else if (e.getActionCommand().startsWith("Copy")) {
         String name = e.getActionCommand().substring(5, e.getActionCommand().length());
-        doCopy(name);
+        copyColor(name);
       } else if (e.getActionCommand().startsWith("Paste")) {
         String name = e.getActionCommand().substring(6, e.getActionCommand().length());
-        doPaste(name);
+        pasteColor(name);
+      } else if (e.getActionCommand().equals("Load/Save")) {
+        showLoadSaveDialog();
       }
     } else {
       repaint();
     }
+  }
+  
+  private void showLoadSaveDialog() {
+    UnitTemplate template = new UnitTemplate("player", paletteSwaps);
+    JDialog loadSaveDialog = new LoadSaveCharacterDialog(template);
+    loadSaveDialog.setVisible(true);
   }
   
   /**
@@ -284,7 +270,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * Copies the given color to the clipboard.
    * @param name - the name of the color (e.g. "Shirt 1")
    */
-  public void doCopy(String name) {
+  private void copyColor(String name) {
     Color c = paletteSwaps.get(baseColors.get(name));
     savedColor = new Color(c.getRGB());
   }
@@ -293,7 +279,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * Sets the specified color sliders to the stored value, if it exists.
    * @param name - the name of the color (e.g. "Shirt 1") 
    */
-  public void doPaste(String name) {
+  private void pasteColor(String name) {
     if (savedColor != null) {
       JSlider RSlider = colorSliders.get(name)[0];
       RSlider.setValue(savedColor.getRed());
@@ -330,7 +316,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     /* KLUDGE, TELL WILL TO FIX ALL THESE */
     /*if (genderSelector.getText().equals("Switch to Male")) {
-      Hashtable<Color,Color> tmpSwaps = new Hashtable<Color,Color>();
+      HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
       tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
       unitSurface.setPaletteSwaps(tmpSwaps);
       unitSurface.applyPaletteSwaps();
@@ -343,8 +329,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     unitPanel.setSurface(unitSurface);
   }
   
-  /** Swap between male and female creation. */
-  public void doGender() {
+  /**
+   * Swap between male and female creation.
+   **/
+  private void doGender() {
     if (genderSelector.getText().equals("Switch to Female")) {
       genderSelector.setText("Switch to Male");
       unitSurfaceBase = new Surface("female_standing_E_1.png");
@@ -364,7 +352,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     /* KLUDGE, TELL WILL TO FIX ALL THESE */
     /*
     if (genderSelector.getText().equals("Switch to Male")) {
-      Hashtable<Color,Color> tmpSwaps = new Hashtable<Color,Color>();
+      HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
       tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
       unitSurface.setPaletteSwaps(tmpSwaps);
       unitSurface.applyPaletteSwaps();
@@ -375,16 +363,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     unitSurface.applyPaletteSwaps();
     unitSurface = unitSurface.scale2x().scale2x();
     unitPanel.setSurface(unitSurface);
-    /*
-    int w = unitSurface.getWidth();
-    int h = unitSurface.getHeight();
-    int l = (int)(ccPanel.getWidth()*0.40 - unitSurface.getWidth())/2;
-    int t = (int)(ccPanel.getHeight()*0.40);
-    unitPanel.setBounds(l, t, w, h);*/
   }
   
   /** Returns the set of palette swaps that the user has created. */
-  public Hashtable<Color, Color> exportPaletteSwaps() {
+  public HashMap<Color, Color> exportPaletteSwaps() {
     return paletteSwaps;
   }
 }

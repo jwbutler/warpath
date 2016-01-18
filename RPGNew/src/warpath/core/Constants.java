@@ -12,6 +12,9 @@ public class Constants {
   public static final int HUD_PANEL_HEIGHT = 100;
   public static final String[] DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
   public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
+  
+  public static final String CHARACTER_SAVE_FOLDER = "characters";
+  public static final String CHARACTER_SAVE_FORMAT = "sav";
   public static final String IMAGE_FOLDER = "png";
   public static final String IMAGE_FORMAT = "png";
 }

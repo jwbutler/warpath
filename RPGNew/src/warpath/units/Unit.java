@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -11,6 +12,7 @@ import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
 import warpath.core.Constants;
 import warpath.core.RPG;
+import warpath.core.Utils;
 import warpath.items.Accessory;
 import warpath.objects.BasicObject;
 import warpath.objects.GameObject;
@@ -40,8 +42,10 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   protected final static int X_OFFSET = 0;
   protected final static int Y_OFFSET = -32;
   
-  protected final Hashtable<String, Surface> frames;
+  protected final HashMap<String, Surface> frameCache;
   protected final ArrayList<Animation> animations;
+  protected final HashMap<String, Accessory> equipment;
+  protected final HashMap<Color, Color> paletteSwaps;
   protected final String[] activities;
   protected final String name;
   protected final String animationName;
@@ -67,17 +71,15 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   private TransHealthBar healthBar;
   
   protected LinkedList<Posn> path;
-  protected final Hashtable<String, Accessory> equipment;
-  protected final Hashtable<Color, Color> paletteSwaps;
   
-  public Unit(RPG game, String name, String animationName, String[] activities, Hashtable<Color, Color> paletteSwaps,
+  public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     super(game, posn);
     this.name = name;
     this.animationName = animationName;
     this.activities = activities;
     this.player = player;
-    equipment = new Hashtable<String, Accessory>();
+    equipment = new HashMap<String, Accessory>();
     this.paletteSwaps = paletteSwaps;
     this.path = new LinkedList<Posn>();
     
@@ -87,7 +89,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     /* Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8 pixel space 
      * at bottom of player sprites. */
     setYOffset(-32);
-    frames = new Hashtable<String, Surface>();
+    frameCache = new HashMap<String, Surface>();
     animations = new ArrayList<Animation>();
     loadAnimations();
     applyPaletteSwaps();
@@ -176,7 +178,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         String frameNum = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, activityName, Constants.DIRECTIONS[i], frameNum); 
       }        
-      animations.add(new Animation(animationName, filenames2, activity, Constants.DIRECTIONS[i], frames));
+      animations.add(new Animation(animationName, filenames2, activity, Constants.DIRECTIONS[i], frameCache));
     }
   }
   
@@ -209,7 +211,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "falling", "S", animIndex);
         }
       }
-      animations.add(new Animation(animationName, filenames2, "falling", dir, frames));
+      animations.add(new Animation(animationName, filenames2, "falling", dir, frameCache));
     }
   }
 
@@ -354,7 +356,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         }
       /* If next activity is attacking, we might have to path to the unit first. */
       } else if (nextActivity.equals("attacking")) {
-        if (game.distance2(this, targetUnit) == 1) {
+        if (Utils.distance2(this, targetUnit) == 1) {
           if (currentEP >= ATTACK_COST) {
             pointAt(targetUnit);
             setCurrentActivity("attacking");
@@ -376,7 +378,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           /* Don't clear nextActivity/nextTargetUnit */ 
         }
       } else if (nextActivity.equals("bashing")) {
-        if (game.distance2(this, targetUnit) == 1) {
+        if (Utils.distance2(this, targetUnit) == 1) {
           if (currentEP >= BASH_COST) {
             pointAt(targetUnit);
             setCurrentActivity("bashing");
@@ -536,7 +538,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       }
     } else if (getCurrentActivity().equals("bashing")) {
       if (getCurrentAnimation().getIndex() == 0) {
-        if (game.distance2(this, targetUnit) > 1) {
+        if (Utils.distance2(this, targetUnit) > 1) {
           setPath(game.findPath(this, targetUnit));
           if (path != null && path.size() > 0) {
             targetPosn = targetUnit.getPosn();
@@ -872,7 +874,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   /** Source of confusion: this one returns "N", "NE" etc. while getDirection() uses coords. */
   public String getCurrentDirection() {
-    return game.coordsToDir(dx, dy);
+    return Utils.coordsToDir(dx, dy);
   }
   
   /** Return the drawable area of the sprite. (?) */
@@ -1038,7 +1040,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   
   public void addAccessory(Accessory e) {
     equipment.put(e.getSlot(), e);
-    e.setCurrentAnimation(this.getCurrentActivity(), game.coordsToDir(dx,dy));
+    e.setCurrentAnimation(this.getCurrentActivity(), Utils.coordsToDir(dx,dy));
   }
 
   public void setNextActivity(String activity) {

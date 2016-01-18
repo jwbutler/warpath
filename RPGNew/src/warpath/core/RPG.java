@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -35,14 +35,14 @@ import warpath.units.Unit;
   
 public class RPG implements ActionListener {
   
-  private Timer frameTimer;
+  private final Timer frameTimer;
   private int ticks;
   private int nextEnemyID;
   private Floor floor;
   
-  // Using a HashTable for this is pretty strange.  But it lets us access
+  // Using a HashMap for this is pretty strange.  But it lets us access
   // players by number, which I think is useful.
-  private final Hashtable<Integer, Player> players;
+  private final HashMap<Integer, Player> players;
   private final ArrayList<Unit> units;
   private final ArrayList<GameObject> objects; // Non-units
   private final ArrayList<Level> levels;
@@ -77,7 +77,7 @@ public class RPG implements ActionListener {
     frameTimer = new Timer(1000/Constants.FPS, this);
     ticks = 0;
     nextEnemyID = 1;
-    players = new Hashtable<Integer, Player>();
+    players = new HashMap<Integer, Player>();
     addHumanPlayer();
     units = new ArrayList<Unit>();
     objects = new ArrayList<GameObject>();
@@ -108,7 +108,7 @@ public class RPG implements ActionListener {
    * This seems like a REALLY weird place to put the palette swaps (as a parameter).
    * @param playerUnitPaletteSwaps
    */
-  public void start(Hashtable<Color, Color> playerUnitPaletteSwaps) {
+  public void start(HashMap<Color, Color> playerUnitPaletteSwaps) {
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
     
@@ -134,7 +134,7 @@ public class RPG implements ActionListener {
    * Start the game without going through the character creator.
    */
   public void start() {
-    Hashtable<Color, Color> emptyPaletteSwaps = new Hashtable<Color, Color>();
+    HashMap<Color, Color> emptyPaletteSwaps = new HashMap<Color, Color>();
     start(emptyPaletteSwaps);
   }
   
@@ -235,9 +235,9 @@ public class RPG implements ActionListener {
       // counterclockwise.
       Posn cwPosn = getPlayerUnit().getPosn().add(rotateClockwise(getPlayerUnit().getDirection()));
       Posn ccwPosn = getPlayerUnit().getPosn().add(rotateCounterclockwise(getPlayerUnit().getDirection()));
-      if (distance2(cwPosn, nextPosn) < distance2(ccwPosn, nextPosn)) {
+      if (Utils.distance2(cwPosn, nextPosn) < Utils.distance2(ccwPosn, nextPosn)) {
         nextPosn = cwPosn;
-      } else if (distance2(ccwPosn, nextPosn) < distance2(cwPosn, nextPosn)) {
+      } else if (Utils.distance2(ccwPosn, nextPosn) < Utils.distance2(cwPosn, nextPosn)) {
         nextPosn = ccwPosn;
       } else {
         getPlayerUnit().pointAt(nextPosn);
@@ -512,34 +512,6 @@ public class RPG implements ActionListener {
     depthTree.drawAll(g);
   }
   
-  public double distance(Posn p, Posn q) { 
-    int dx = Math.abs(q.getX() - p.getX());
-    int dy = Math.abs(q.getY() - p.getY());
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-  
-  public double distance(GameObject p, GameObject q) { 
-    double dx = Math.abs(q.getX() - p.getX());
-    double dy = Math.abs(q.getY() - p.getY());
-    return Math.sqrt(dx*dx + dy*dy);
-  }
-  
-  /** Calculate the distance between two points.
-   * IMPORTANT: not Pythagorean distance, but Civ-style (I think) distance.
-   * Returns the larger of the x-distance and the y-distance.
-   * @param p the first point
-   * @param q the second point
-   */
-  public int distance2(Posn p, Posn q) {
-    int dx = Math.abs(q.getX() - p.getX());
-    int dy = Math.abs(q.getY() - p.getY());
-    return Math.max(dx, dy);
-  }
-  
-  public int distance2(GameObject x, GameObject y) {
-    return distance2(x.getPosn(), y.getPosn());
-  }
-  
   /** Left click stuff - just movement for now (Doesn't include modifiers)
    * @param pixel The (x,y) coordinates of the pixel */
   public void doLeftClick(Posn pixel) {
@@ -643,31 +615,6 @@ public class RPG implements ActionListener {
     moveCamera(posn.getX(), posn.getY());
   }
   
-  /* Given an (x,y) pair, returns the corresponding compass direction. */ 
-  public String coordsToDir(int x, int y) {
-    String rtn = "";
-    if (y == -1) {
-      rtn = "N";
-    } else if (y == 1) {
-      rtn = "S";
-    }
-    if (x == -1) {
-      rtn += "W";
-    } else if (x == 1) {
-      rtn+= "E";
-    }
-    if (rtn.equals("")) {
-      return null; 
-    } else {
-      return rtn;
-    }
-  }
-  
-  // Helper method.
-  public String coordsToDir(Posn posn) {
-    return coordsToDir(posn.getX(), posn.getY());
-  }
-  
   // Add a non-unit object to all relevant lists. 
   public void addObject(GameObject obj) {
     objects.add(obj);
@@ -766,15 +713,15 @@ public class RPG implements ActionListener {
    * to units/other blocking stuff. */
   public LinkedList<Posn> findPath(Posn p1, Posn p2) {
   
-    // We're not using these hashtables and I'm kind of concerned. Check on
+    // We're not using these HashMaps and I'm kind of concerned. Check on
     // this later.
 
     //System.out.println("finding path between " + p1 + " and " + p2);
     PathfinderPQ openList = new PathfinderPQ();
     PathfinderPQ closedList = new PathfinderPQ();
-    Hashtable<Posn, Integer> costFromCurrent = new Hashtable<Posn, Integer>();
-    Hashtable<Posn, Integer> estCostToEnd = new Hashtable<Posn, Integer>();
-    Hashtable<Posn, Posn> posnParent = new Hashtable<Posn, Posn>();
+    HashMap<Posn, Integer> costFromCurrent = new HashMap<Posn, Integer>();
+    HashMap<Posn, Integer> estCostToEnd = new HashMap<Posn, Integer>();
+    HashMap<Posn, Posn> posnParent = new HashMap<Posn, Posn>();
     
     LinkedList<Posn> path = new LinkedList<Posn>();
     int dx, dy;
@@ -981,7 +928,7 @@ public class RPG implements ActionListener {
     Posn targetPosn = null;
     for (Posn p: adjacentSquares) {
       //if (!isObstacle(p)) {
-      if (targetPosn == null || distance(p, posn) < distance(targetPosn, posn)) {
+      if (targetPosn == null || Utils.distance(p, posn) < Utils.distance(targetPosn, posn)) {
         targetPosn = p;
       }
     }
@@ -1006,7 +953,7 @@ public class RPG implements ActionListener {
     return inputHandler.getMousePosn();
   }
 
-  public JFrame getGameWindow() {
+  public GameWindow getGameWindow() {
     return gameWindow;
   }
   

@@ -15,15 +15,16 @@ import warpath.core.RPGDriver;
  */ 
 public class GameWindow extends JFrame {
 
-  private JPanel panelContainer = new JPanel();
-  private RPGDriver driver;
-  private CharacterCreator cc;
+  private final static int HUD_PANEL_HEIGHT = 80;
+  
+  private final JPanel panelContainer;
+  private final RPGDriver driver;
 
-  private CardLayout cardLayout;
+  private final CardLayout cardLayout;
+  private CharacterCreator cc;
   private GamePanel gamePanel;
   private HUDPanel hudPanel;
   private MenuPanel menuPanel;
-  private final int HUD_PANEL_HEIGHT = 80;
   
   /** Instantiates the game window with the specified width and height.
    * TODO Can we avoid using the driver as a parameter? */
@@ -33,14 +34,15 @@ public class GameWindow extends JFrame {
     setVisible(true);
     setResizable(false);
     addWindowListener(driver);
+    panelContainer = new JPanel();
+    cardLayout = new CardLayout();
+    panelContainer.setLayout(cardLayout);
     add(panelContainer);
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
   }
 
   // Sets up the Card Layout and the panelContainer.
   public void initCardLayout(RPG game) {
-    cardLayout = new CardLayout();
-    panelContainer.setLayout(cardLayout);
     panelContainer.setPreferredSize(new Dimension(getWidth(), getHeight()));
     // To be moved to the menuPanel when I'm less lazy. 
 
@@ -91,7 +93,6 @@ public class GameWindow extends JFrame {
   public GamePanel getGamePanel() {
 	  return gamePanel;
   }
-  
 
   public CharacterCreator getCharacterCreator() {
     return cc;

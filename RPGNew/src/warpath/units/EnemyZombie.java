@@ -4,6 +4,7 @@ import java.util.Random;
 import jwbgl.*;
 /* A basic enemy unit for testing! */
 import warpath.core.RPG;
+import warpath.core.Utils;
 import warpath.players.Player;
 
 public class EnemyZombie extends ZombieUnit {
@@ -30,14 +31,14 @@ public class EnemyZombie extends ZombieUnit {
     if (currentActivity.equals("standing")) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
-          if (game.distance2(this,u) <= SMELL_RADIUS) {
+          if (Utils.distance2(this,u) <= SMELL_RADIUS) {
             /* This should be where the "smell" sound is played, but we're losing the target
              * due to endAttack() [maybe]. Work on this later */
             if (tu == null) {
               setNextTargetUnit(u);
               tu = u;
               //System.out.println("smell");
-            } else if (game.distance2(this,u) < game.distance2(this,tu)) {
+            } else if (Utils.distance2(this,u) < Utils.distance2(this,tu)) {
               setNextTargetUnit(u);
               tu = u;
             }
@@ -55,7 +56,7 @@ public class EnemyZombie extends ZombieUnit {
       double cancelChance = 1-SLOW_MOVE_SPEED;
       tu = getNextTargetUnit();
       if (tu != null) {
-        if (game.distance2(this, tu) <= VISION_RADIUS) {
+        if (Utils.distance2(this, tu) <= VISION_RADIUS) {
           cancelChance = 1-FAST_MOVE_SPEED;
         } else {
           cancelChance = 1-SLOW_MOVE_SPEED;

@@ -1,6 +1,7 @@
 package warpath.animations;
 import java.awt.Color;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import jwbgl.*;
@@ -13,11 +14,11 @@ import warpath.core.Constants;
 public class Animation {
   
   private static final String BEHIND_SUFFIX = "_B";
-  private Surface[] frames;
+  private final Surface[] frames;
   
   // Used for items to determine whether they render in front of or behind the
   // main unit sprite.
-  private boolean[] drawBehind;
+  private final boolean[] drawBehind;
   private String activity;
   private String direction;
   private int index;
@@ -41,7 +42,7 @@ public class Animation {
    * @param direction - The direction of the animation (e.g. "NW")
    * @param frameCache - The parent object's frame cache 
    */
-  public Animation(String animName, String[] filenames, String activity, String direction, Hashtable<String, Surface> frameCache) {
+  public Animation(String animName, String[] filenames, String activity, String direction, HashMap<String, Surface> frameCache) {
     frames = new Surface[filenames.length];
     drawBehind = new boolean[filenames.length];
     for (int i = 0; i < filenames.length; i++) {
@@ -96,7 +97,7 @@ public class Animation {
    * @return whether or not there are frames after the current frame
    */
   public boolean hasNextFrame() {
-    return index < frames.length-1;
+    return (index < frames.length-1);
   }
   
   public int getIndex() {

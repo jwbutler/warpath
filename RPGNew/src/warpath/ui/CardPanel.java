@@ -13,9 +13,9 @@ import warpath.units.Unit;
  * Unused in the current engine.
  */
 public class CardPanel extends JPanel {
-  private RPG game;
+  private final RPG game;
   private static final int MARGIN = 10;
-  private ArrayList<UnitCard> cards;
+  private final ArrayList<UnitCard> cards;
   public CardPanel(RPG game, int width, int height) {
     super();
     this.game = game;

@@ -4,13 +4,14 @@ import java.util.Random;
 import jwbgl.*;
 /* A basic enemy unit for testing! */
 import warpath.core.RPG;
+import warpath.core.Utils;
 import warpath.players.Player;
 
 public class EnemySwordGuy extends HumanUnit {
   private int minDamage, maxDamage;
-  private static String[] activities = {"walking", "standing", "attacking", "stunned_short", "falling"};
+  private static final String[] ACTIVITIES = {"walking", "standing", "attacking", "stunned_short", "falling"};
   public EnemySwordGuy(RPG game, String name, Posn posn, Player player) {
-    super(game, name, activities, posn, player);
+    super(game, name, ACTIVITIES, posn, player);
     currentHP = maxHP = 100;
     currentEP = maxEP = 40;
     minDamage = 5;
@@ -30,7 +31,7 @@ public class EnemySwordGuy extends HumanUnit {
     if (currentActivity.equals("standing")) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
-          if (targetUnit == null || game.distance2(this,u) < game.distance2(this,targetUnit)) {
+          if (targetUnit == null || Utils.distance2(this,u) < Utils.distance2(this,targetUnit)) {
             setNextTargetUnit(u);
           }
         }

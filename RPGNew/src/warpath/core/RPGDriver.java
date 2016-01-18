@@ -1,18 +1,14 @@
 package warpath.core;
-import java.awt.Color;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.util.HashMap;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import jwbgl.*;
 import warpath.ui.CharacterCreator;
 import warpath.ui.GameWindow;
 
@@ -32,7 +28,7 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     // continue button
-    if (e.getActionCommand().equals("Continue...")) {
+    if (e.getActionCommand().equals("Continue")) {
       CharacterCreator cc = window.getCharacterCreator();
       window.setCardLayout("Game");
       game.start(cc.exportPaletteSwaps());

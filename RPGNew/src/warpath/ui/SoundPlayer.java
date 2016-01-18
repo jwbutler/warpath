@@ -13,7 +13,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 /** Used to play sounds.
  * TODO Music */
 public class SoundPlayer {
-  private final String SOUNDS_FOLDER = "sounds";
+  private final static String SOUNDS_FOLDER = "sounds";
   public SoundPlayer() {
   }
   public void playSoundThread(final String filename) {

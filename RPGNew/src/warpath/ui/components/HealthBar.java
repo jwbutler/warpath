@@ -5,7 +5,7 @@ import jwbgl.*;
 import warpath.units.Unit;
 
 public class HealthBar extends Surface {
-  protected Unit unit;
+  protected final Unit unit;
   public HealthBar(Unit unit, int width, int height) {
     super(width, height);
     this.unit = unit;

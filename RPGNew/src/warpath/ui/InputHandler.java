@@ -15,7 +15,7 @@ import warpath.core.RPG;
  * maybe the character creator listens to its own events. */
 public class InputHandler implements KeyListener, KeyEventDispatcher,
 MouseListener, MouseMotionListener  {
-  private RPG game;
+  private final RPG game;
   public boolean ctrlIsDown, shiftIsDown;
   private Posn mousePosn;
   public InputHandler(RPG game) {

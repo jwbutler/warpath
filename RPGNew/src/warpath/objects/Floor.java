@@ -16,16 +16,11 @@ public class Floor {
     this.width = width;
     this.height = height;
     tiles = new Tile[this.width][this.height];
-    /* We're going to set these manually now. */
-    /*for (int y = 0; y < this.height; y++) {
-      for (int x = 0; x < this.width; x++) {
-        tiles[x][y] = new Tile(game, new Posn(x,y), "tile_48x24_stone.png");
-      }
-    }*/
     floorSurface = new Surface(game.getGameWindow().getWidth(), game.getGameWindow().getHeight());
   }
 
-  /** Refreshes the image of the floor.  Does not actually render it onto the
+  /**
+   * Refreshes the image of the floor.  Does not actually render it onto the
    * screen.
    */
   public void redraw() {

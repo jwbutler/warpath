@@ -25,14 +25,14 @@ public abstract class Level {
   protected final ArrayList<GameObject> objects;
   private final Surface img;
   
-  private final Color GRASS_COLOR = new Color(0,255,0);
-  private final Color STONE_COLOR = new Color(128,128,128);
-  private final Color TREE_COLOR = new Color(0,128,0);
-  private final Color WALL_COLOR = new Color(192,192,192);
-  private final Color BANDIT_COLOR = new Color(255,128,64);
-  private final Color WIZARD_COLOR = new Color(128,128,0);
-  private final Color ZOMBIE_COLOR = new Color(255,255,0);
-  private final Color PLAYER_COLOR = new Color(255,0,0);
+  private final static Color GRASS_COLOR = new Color(0,255,0);
+  private final static Color STONE_COLOR = new Color(128,128,128);
+  private final static Color TREE_COLOR = new Color(0,128,0);
+  private final static Color WALL_COLOR = new Color(192,192,192);
+  private final static Color BANDIT_COLOR = new Color(255,128,64);
+  private final static Color WIZARD_COLOR = new Color(128,128,0);
+  private final static Color ZOMBIE_COLOR = new Color(255,255,0);
+  private final static Color PLAYER_COLOR = new Color(255,0,0);
   
   protected Floor floor;
   
@@ -44,8 +44,8 @@ public abstract class Level {
   }
   /**
    * Initializes the map.  This should rightly be part of the constructor, but
-   * I Had to split this off because of the restrictions on this().
-   * TODO Figure out what I meant by the above comment...
+   * I Had to split this off because we don't actually load this until
+   * the level is started in game.
    */
   public void init() {
     int width = img.getWidth();
@@ -124,6 +124,9 @@ public abstract class Level {
     }
   }
   
+  /**
+   * Placeholder.
+   */
   public boolean checkVictory() {
     return(game.getPlayer(2).getUnits().size() == 0);
   }

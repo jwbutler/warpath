@@ -3,20 +3,18 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Graphics;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import warpath.core.RPG;
-import warpath.objects.Floor;
 
 /** The panel for the menu used at the start of the game. */
 public class MenuPanel extends JPanel {
 
-	private GameWindow window;
-	private RPG game;
+	private final GameWindow window;
+	private final RPG game;
 
 	public MenuPanel(GameWindow theWindow, RPG theGame, int width, int height) {
 		super();

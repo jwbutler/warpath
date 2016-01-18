@@ -1,22 +1,7 @@
 package warpath.ui;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.Window;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.awt.image.BufferedImage;
-
-import java.util.ArrayList;
-
-import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import jwbgl.*;
@@ -25,10 +10,12 @@ import jwbgl.*;
  * It also handles input (mouse & keyboard), is this good design? */
 import warpath.core.RPG;
  
- /** Represents the actual draw surface of the game.
-  * TODO Learn how AWT/Swing graphics actually work... */
+ /**
+  * Represents the actual draw surface of the game.
+  * TODO Learn how AWT/Swing graphics actually work...
+  * */
 public class GamePanel extends JPanel {
-  private RPG game;
+  private final RPG game;
   KeyboardFocusManager focusManager;
 
   public GamePanel(RPG game, int width, int height) {

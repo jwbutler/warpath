@@ -1,7 +1,7 @@
 package warpath.units;
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import jwbgl.*;
 import warpath.animations.Animation;
@@ -20,7 +20,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   private static final int Y_OFFSET = -32;
   
   public RobedWizardUnit(RPG game, String name, String animationName,
-  String[] activities, Hashtable<Color, Color> paletteSwaps, Posn posn, Player player) {
+  String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(game, name, animationName, activities, paletteSwaps, posn, player);
     setXOffset(X_OFFSET);
     setYOffset(Y_OFFSET);
@@ -30,10 +30,10 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   
   public RobedWizardUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "robed_wizard", activities, new Hashtable<Color, Color>(), posn, player);
+    this(game, name, "robed_wizard", activities, new HashMap<Color, Color>(), posn, player);
   }  
   
-  public RobedWizardUnit(RPG game, String name, String[] activities, Hashtable<Color, Color> paletteSwaps,
+  public RobedWizardUnit(RPG game, String name, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(game, name, "robed_wizard", activities, paletteSwaps, posn, player);
@@ -102,7 +102,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         String animIndex = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "standing", "SE", animIndex);
       }
-      animations.add(new Animation(animationName, filenames2, "stunned_short", dir, frames));
+      animations.add(new Animation(animationName, filenames2, "stunned_short", dir, frameCache));
     }
   }
   
@@ -115,7 +115,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         String animIndex = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "stunned", "SE", animIndex);
       }
-      animations.add(new Animation(animationName, filenames2, "stunned_long", dir, frames));
+      animations.add(new Animation(animationName, filenames2, "stunned_long", dir, frameCache));
     }
   }
 
@@ -128,7 +128,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         String animIndex = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
       }
-      animations.add(new Animation(animationName, filenames2, "appearing", dir, frames));
+      animations.add(new Animation(animationName, filenames2, "appearing", dir, frameCache));
     }
   }
 
@@ -141,7 +141,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         String animIndex = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
       }
-      animations.add(new Animation(animationName, filenames2, "teleporting", dir, frames));
+      animations.add(new Animation(animationName, filenames2, "teleporting", dir, frameCache));
     }
 
   }
@@ -158,7 +158,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         String animIndex = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "vanishing", "SE", animIndex);
       }
-      animations.add(new Animation(animationName, filenames2, "falling", dir, frames));
+      animations.add(new Animation(animationName, filenames2, "falling", dir, frameCache));
     }
   }
   
@@ -172,7 +172,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
         String animIndex = filenames[j].split("_")[1];
         filenames2[j] = String.format("%s_%s_%s_%s.png", animationName, "casting", "SE", animIndex);
       }
-      animations.add(new Animation(animationName, filenames2, "rezzing", dir, frames));
+      animations.add(new Animation(animationName, filenames2, "rezzing", dir, frameCache));
     }
   }
 

@@ -1,7 +1,7 @@
 package warpath.items;
 import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import jwbgl.*;
 import warpath.animations.Animation;
@@ -22,11 +22,12 @@ public abstract class Accessory {
   protected final int yOffset;
   protected final String animationName;
   
-  protected final Hashtable<String, Surface> frames;
+  protected final HashMap<String, Surface> frames;
   protected final ArrayList<Animation> animations;
   protected final String[] activities = {
     "walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3",
     "slashing_1", "slashing_2", "slashing_3", "falling"};
+  
   private Animation currentAnimation;
   
   public Accessory(RPG game, Unit unit, String animationName, String slot, int xOffset, int yOffset) {
@@ -34,7 +35,7 @@ public abstract class Accessory {
     this.unit = unit;
     this.slot = slot;
     this.animationName = animationName;
-    frames = new Hashtable<String, Surface>();
+    frames = new HashMap<String, Surface>();
 
     animations = new ArrayList<Animation>();
     loadAnimations();

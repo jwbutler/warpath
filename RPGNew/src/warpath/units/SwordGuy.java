@@ -1,6 +1,7 @@
 package warpath.units;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import jwbgl.*;
@@ -16,10 +17,10 @@ public class SwordGuy extends HumanUnit {
     "walking", "standing", "attacking", "blocking_1", "blocking_2", "blocking_3",
     "bashing", "slashing_1", "slashing_2", "slashing_3", "falling"};
 
-  public SwordGuy(RPG game, String name, Posn posn, Player player, Hashtable<Color, Color> paletteSwaps) {
+  public SwordGuy(RPG game, String name, Posn posn, Player player, HashMap<Color, Color> playerUnitPaletteSwaps) {
     /*public HumanUnit(RPG game, String name, String animationName,
         String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {*/
-    super(game, name, activities, paletteSwaps, posn, player);
+    super(game, name, activities, playerUnitPaletteSwaps, posn, player);
     currentHP = maxHP = 200;
     currentEP = maxEP = 100;
     minDamage = 6;
@@ -30,7 +31,7 @@ public class SwordGuy extends HumanUnit {
     addAccessory(new Shield(game, this, "Shield of Suck"));
   }
   public SwordGuy(RPG game, String name, Posn posn, Player player) {
-    this(game, name, posn, player, new Hashtable<Color, Color>());
+    this(game, name, posn, player, new HashMap<Color, Color>());
   }
 
   public void doAttackHit(Unit u) {

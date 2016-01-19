@@ -46,7 +46,7 @@ public class GameWindow extends JFrame {
     panelContainer.setPreferredSize(new Dimension(getWidth(), getHeight()));
     // To be moved to the menuPanel when I'm less lazy. 
 
-    cc = new CharacterCreator(driver, getWidth(), getHeight());
+    cc = new CharacterCreator(driver, this, getWidth(), getHeight());
     
     // Make the Menu Panel
     menuPanel = new MenuPanel(this,game,getWidth(),getHeight());

@@ -10,6 +10,7 @@ public class Constants {
   public static final int CAMERA_INCREMENT_X = 48;
   public static final int CAMERA_INCREMENT_Y = 24;
   public static final int HUD_PANEL_HEIGHT = 100;
+  public static final int MENU_PADDING = 10;
   public static final String[] DIRECTIONS = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
   public static final Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
   

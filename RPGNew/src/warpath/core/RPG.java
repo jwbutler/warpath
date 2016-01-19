@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
-import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import jwbgl.*;
@@ -109,6 +108,8 @@ public class RPG implements ActionListener {
    * @param playerUnitPaletteSwaps
    */
   public void start(HashMap<Color, Color> playerUnitPaletteSwaps) {
+    // handlers, etc.
+    gameWindow.getGamePanel().init();
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
     

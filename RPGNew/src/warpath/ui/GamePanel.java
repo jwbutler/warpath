@@ -23,6 +23,12 @@ public class GamePanel extends JPanel {
     setSize(width, height);
     this.game = game;
     //getContentPane().setBackground(Color.BLACK);
+  }
+  
+  /**
+   * To be called when the RPG class calls start().
+   */
+  public void init() {
     focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
     focusManager.addKeyEventDispatcher(game.getInputHandler());
     addMouseListener(game.getInputHandler());

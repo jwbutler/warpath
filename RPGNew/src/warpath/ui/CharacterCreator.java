@@ -13,10 +13,12 @@ import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
@@ -24,6 +26,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jwbgl.*;
+import warpath.core.Constants;
 import warpath.core.RPGDriver;
 import warpath.units.UnitTemplate;
 
@@ -34,6 +37,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final SurfacePanel unitPanel;
   private final JPanel sliderPanel;
   private final JPanel buttonPanel;
+  private final JFrame window;
   private final Timer frameTimer;
   private Surface unitSurface;
   private Surface unitSurfaceBase;
@@ -41,7 +45,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   
   private final String[] colorNames;
   private final HashMap<String, Color> baseColors;
-  private final HashMap<Color, Color> paletteSwaps;
   private final HashMap<String, JLabel> colorLabels;
   private final HashMap<String, JSlider[]> colorSliders;
   private final HashMap<String, JLabel[]> sliderLabels;
@@ -50,15 +53,17 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final JButton genderSelector;
   private final JButton continueButton;
   private final JButton loadSaveButton;
-  
+
+  private HashMap<Color, Color> paletteSwaps;
   /**
    * TODO: I really don't like passing the Driver as an argument, figure out
    * how to avoid this.
    */
-  public CharacterCreator(RPGDriver driver, int width, int height) {
+  public CharacterCreator(RPGDriver driver, JFrame window, int width, int height) {
     copyButtons = new HashMap<String,JButton>();
     pasteButtons = new HashMap<String,JButton>();
     paletteSwaps = new HashMap<Color,Color>();
+    this.window = window;
     
     setSize(width, height);
     setPreferredSize(new Dimension(width, height));
@@ -112,7 +117,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     buttonPanel = new JPanel();
     buttonPanel.setBounds((int)0, (int)(getHeight()*0.5), (int)(getWidth()*0.30), (int)(getHeight()*0.5));
-    buttonPanel.setLayout(new GridLayout(3, 0, 10, 10));
+    buttonPanel.setLayout(new GridLayout(3, 0, Constants.MENU_PADDING, Constants.MENU_PADDING));
     buttonPanel.setAlignmentX(0.5f);
     buttonPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
     this.add(buttonPanel);
@@ -138,7 +143,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     sliderPanel = new JPanel();
     sliderPanel.setLayout(new GridLayout(colorNames.length, 5, 5, 5));
     sliderPanel.setBounds((int)(getWidth()*0.30), 0, (int)(getWidth()*0.70), (int)(getHeight()*1));
-    sliderPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+    sliderPanel.setBorder(new EmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
     
     populateSliderPanel();
     
@@ -253,7 +258,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   
   private void showLoadSaveDialog() {
     UnitTemplate template = new UnitTemplate("player", paletteSwaps);
-    JDialog loadSaveDialog = new LoadSaveCharacterDialog(template);
+    //JDialog loadSaveDialog = new LoadSaveCharacterDialog(window, template);
+    //loadSaveDialog.setVisible(true);
+    LoadSaveCharacterDialog loadSaveDialog = new LoadSaveCharacterDialog(this, template);
     loadSaveDialog.setVisible(true);
   }
   
@@ -368,5 +375,30 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   /** Returns the set of palette swaps that the user has created. */
   public HashMap<Color, Color> exportPaletteSwaps() {
     return paletteSwaps;
+  }
+
+  public void loadTemplate(UnitTemplate template) {
+    paletteSwaps = template.getPaletteSwaps();
+    for (String label : colorNames) {
+      Color src = baseColors.get(label);
+      Color dest = paletteSwaps.get(src);
+      int r = dest.getRed();
+      int g = dest.getGreen();
+      int b = dest.getBlue();
+      colorLabels.get(label).setBackground(dest);
+      sliderLabels.get(label)[0].setText(Integer.toString(r));
+      sliderLabels.get(label)[1].setText(Integer.toString(g));
+      sliderLabels.get(label)[2].setText(Integer.toString(b));
+    }
+    try {
+      unitSurface = unitSurfaceBase.clone();
+    } catch (CloneNotSupportedException e) {
+      e.printStackTrace();
+    }
+    
+    unitSurface.setPaletteSwaps(paletteSwaps);
+    unitSurface.applyPaletteSwaps();
+    unitSurface = unitSurface.scale2x().scale2x();
+    unitPanel.setSurface(unitSurface);
   }
 }

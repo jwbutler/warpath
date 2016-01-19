@@ -5,9 +5,6 @@ import java.awt.KeyboardFocusManager;
 import javax.swing.JPanel;
 
 import jwbgl.*;
-/* This class represents the game window.  It extends the JPanel class
- * and contains some painting methods.
- * It also handles input (mouse & keyboard), is this good design? */
 import warpath.core.RPG;
  
  /**
@@ -16,7 +13,7 @@ import warpath.core.RPG;
   * */
 public class GamePanel extends JPanel {
   private final RPG game;
-  KeyboardFocusManager focusManager;
+  private KeyboardFocusManager focusManager;
 
   public GamePanel(RPG game, int width, int height) {
     super();

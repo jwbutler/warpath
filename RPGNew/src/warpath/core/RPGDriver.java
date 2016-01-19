@@ -12,9 +12,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import warpath.ui.CharacterCreator;
 import warpath.ui.GameWindow;
 
-  /* This is the file where we actually create the game parameters: adding
+  /**
+   * This is the file where we actually create the game parameters: adding
    * players, units, etc. to the game.  We can define different ones for
-   * various levels, modes, whatever. */
+   * various levels, modes, whatever.
+   **/
 
 public class RPGDriver extends WindowAdapter implements ActionListener {
   private final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;

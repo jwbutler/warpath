@@ -14,6 +14,7 @@ import warpath.core.RPGDriver;
  * TODO Clean up commented lines
  */ 
 public class GameWindow extends JFrame {
+  private static final long serialVersionUID = 1L;
 
   private final static int HUD_PANEL_HEIGHT = 80;
   
@@ -21,13 +22,15 @@ public class GameWindow extends JFrame {
   private final RPGDriver driver;
 
   private final CardLayout cardLayout;
-  private CharacterCreator cc;
+  private CharacterCreatorNew cc;
   private GamePanel gamePanel;
   private HUDPanel hudPanel;
   private MenuPanel menuPanel;
   
-  /** Instantiates the game window with the specified width and height.
-   * TODO Can we avoid using the driver as a parameter? */
+  /**
+   * Instantiates the game window with the specified width and height.
+   * TODO Can we avoid using the driver as a parameter?
+   */
   public GameWindow(RPGDriver driver, int width, int height) {
     this.driver = driver;
     setSize(width, height);
@@ -46,24 +49,20 @@ public class GameWindow extends JFrame {
     panelContainer.setPreferredSize(new Dimension(getWidth(), getHeight()));
     // To be moved to the menuPanel when I'm less lazy. 
 
-    cc = new CharacterCreator(driver, this, getWidth(), getHeight());
+    cc = new CharacterCreatorNew(driver, this, getWidth(), getHeight());
     
     // Make the Menu Panel
     menuPanel = new MenuPanel(this,game,getWidth(),getHeight());
     menuPanel.setPreferredSize(new Dimension(getWidth(), getHeight()));
-    //menuPanel.setLayout(null);
-    //menuPanel.setLayout(new BorderLayout());
 
     // Make the Game Panel
     gamePanel = new GamePanel(game, getWidth(), getHeight());
     gamePanel.setPreferredSize(new Dimension(getWidth(), getHeight()));
     gamePanel.setLayout(new BorderLayout());
 
+    // FIXME move to gamepanel
     hudPanel = new HUDPanel(game, getWidth(), HUD_PANEL_HEIGHT);
     hudPanel.setPreferredSize(new Dimension(getWidth(), HUD_PANEL_HEIGHT));
-    //hudPanel.setBounds(0, getHeight()-HUD_PANEL_HEIGHT, getWidth(), HUD_PANEL_HEIGHT);
-    /*gamePanel.setAlignmentX(0.0f);
-    gamePanel.setAlignmentY(0.0f);*/
     gamePanel.add(hudPanel, BorderLayout.SOUTH);
 
     // Add to the main panel (panelContainer) and prepare for display.
@@ -71,19 +70,12 @@ public class GameWindow extends JFrame {
     panelContainer.add(gamePanel,"Game");
     panelContainer.add(cc,"Creator");
     pack();
-
   }
 
   // This will be used to set the current display from other classes. 
   public void setCardLayout(String panel) {
-
     cardLayout.show(panelContainer, panel);
-	  /*if ( panel.equals("Game")) {
-		  cardLayout.show(panelContainer,"Game");
-	  }
-	  if ( panel.equals("Creator")) {
-		  cardLayout.show(panelContainer,"Creator");
-	  }*/
+    pack();
   }
 
   public HUDPanel getHudPanel() {
@@ -94,7 +86,7 @@ public class GameWindow extends JFrame {
 	  return gamePanel;
   }
 
-  public CharacterCreator getCharacterCreator() {
+  public CharacterCreatorNew getCharacterCreator() {
     return cc;
   }
 }

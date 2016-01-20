@@ -2,7 +2,6 @@ package warpath.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -254,10 +253,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   
   private void showLoadSaveDialog() {
     UnitTemplate template = new UnitTemplate("player", paletteSwaps);
-    //JDialog loadSaveDialog = new LoadSaveCharacterDialog(window, template);
+    //LoadSaveCharacterDialog loadSaveDialog = new LoadSaveCharacterDialog(this, template);
     //loadSaveDialog.setVisible(true);
-    LoadSaveCharacterDialog loadSaveDialog = new LoadSaveCharacterDialog(this, template);
-    loadSaveDialog.setVisible(true);
   }
   
   /**

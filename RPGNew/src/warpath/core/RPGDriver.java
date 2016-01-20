@@ -10,6 +10,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import warpath.ui.CharacterCreator;
+import warpath.ui.CharacterCreatorNew;
 import warpath.ui.GameWindow;
 
   /**
@@ -31,7 +32,7 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     // continue button
     if (e.getActionCommand().equals("Continue")) {
-      CharacterCreator cc = window.getCharacterCreator();
+      CharacterCreatorNew cc = window.getCharacterCreator();
       window.setCardLayout("Game");
       game.start(cc.exportPaletteSwaps());
     }

@@ -18,4 +18,6 @@ public class Constants {
   public static final String CHARACTER_SAVE_FORMAT = "sav";
   public static final String IMAGE_FOLDER = "png";
   public static final String IMAGE_FORMAT = "png";
+  
+  public static final String[] SLOT_LIST = {"Head", "Hair", "Beard", "Chest", "Legs", "Mainhand", "Offhand"};
 }

@@ -29,6 +29,8 @@ import warpath.units.UnitTemplate;
  * TODO support saving female characters
  */
 public class CharacterCreator extends JPanel implements ActionListener, ChangeListener {
+
+  private static final long serialVersionUID = 1L;
   private final SurfacePanel unitPanel;
   private final JPanel sliderPanel;
   private final JPanel buttonPanel;

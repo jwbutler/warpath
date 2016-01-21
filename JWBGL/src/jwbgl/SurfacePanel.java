@@ -5,13 +5,16 @@ import java.awt.Graphics;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import jwbgl.*;
 
 /**
  * A JPanel that contains a Surface object.
  * Does this need to exist?
  */
 public class SurfacePanel extends JPanel {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private Surface surface;
   private static final int DEFAULT_PADDING = 3;
   private final int hpad, vpad;

@@ -28,6 +28,11 @@ import warpath.core.Utils;
 import warpath.units.UnitTemplate;
 
 public class LoadSaveCharacterDialog extends JDialog implements ActionListener {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   private final static String NEW_SAVE_TEXT = "(New file)";
   
   private final CharacterCreatorNew cc;

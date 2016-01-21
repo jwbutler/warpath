@@ -2,7 +2,6 @@ package warpath.units;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import jwbgl.*;
 import warpath.core.RPG;
@@ -12,6 +11,10 @@ import warpath.objects.Tile;
 import warpath.players.Player;
 /* Warrior-type player unit class.  Sword/shield.*/
 public class SwordGuy extends HumanUnit {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage, bashDamage, slashDamage;
   private static String[] activities = {
     "walking", "standing", "attacking", "blocking_1", "blocking_2", "blocking_3",
@@ -60,7 +63,6 @@ public class SwordGuy extends HumanUnit {
     int dy = u.getY() - getY();
     int x = u.getX()+dx;
     int y = u.getY()+dy;
-    Tile t = game.getFloor().getTile(new Posn(x,y));
     if (!game.isObstacle(new Posn(x,y))) {
       u.move(dx, dy);
     }

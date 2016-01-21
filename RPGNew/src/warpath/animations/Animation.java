@@ -2,10 +2,10 @@ package warpath.animations;
 import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import jwbgl.*;
 import warpath.core.Constants;
+import warpath.core.Utils;
 
 /** Represents a single animation of a unit.  Corresponds to a particular
  * activity and direction.  It's basically just a collection of Surface
@@ -13,7 +13,6 @@ import warpath.core.Constants;
 
 public class Animation {
   
-  private static final String BEHIND_SUFFIX = "_B";
   private final Surface[] frames;
   
   // Used for items to determine whether they render in front of or behind the
@@ -118,16 +117,13 @@ public class Animation {
    *  - appending the file type (.png) to the end.
    */
   public static String fixAccessoryFilename(String filename) {
-    String path = String.format("%s%s%s.%s", Constants.IMAGE_FOLDER, File.separator, filename, Constants.IMAGE_FORMAT);
-
-    File f = new File(path);
-    if (f.exists()) {
+    String path = String.format("%s.%s", filename, Constants.IMAGE_FORMAT);
+    if (Utils.imageExists(path)) {
       return String.format("%s.%s", filename, Constants.IMAGE_FORMAT);
     } else {
-      String behindPath = String.format("%s%s%s%s.%s", Constants.IMAGE_FOLDER, File.separator, filename, BEHIND_SUFFIX, Constants.IMAGE_FORMAT);
-      File fBehind = new File(behindPath);
-      if (fBehind.exists()) {
-        return String.format("%s%s.%s", filename, BEHIND_SUFFIX, Constants.IMAGE_FORMAT);
+      String behindPath = filename + "_B";
+      if (Utils.imageExists(behindPath)) {
+        return String.format("%s_B.%s", filename, Constants.IMAGE_FORMAT);
       } else {
         return null;
       }

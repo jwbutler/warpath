@@ -1,6 +1,5 @@
 package warpath.players;
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 import warpath.units.Unit;
 

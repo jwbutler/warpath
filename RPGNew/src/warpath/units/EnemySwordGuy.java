@@ -1,5 +1,4 @@
 package warpath.units;
-import java.util.Random;
 
 import jwbgl.*;
 /* A basic enemy unit for testing! */
@@ -8,6 +7,10 @@ import warpath.core.Utils;
 import warpath.players.Player;
 
 public class EnemySwordGuy extends HumanUnit {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static final String[] ACTIVITIES = {"walking", "standing", "attacking", "stunned_short", "falling"};
   public EnemySwordGuy(RPG game, String name, Posn posn, Player player) {

@@ -4,7 +4,6 @@ import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 
 import jwbgl.*;
@@ -21,10 +20,12 @@ import warpath.players.Player;
 import warpath.ui.components.FloorOverlay;
 import warpath.ui.components.TransHealthBar;
 
-/** Class representing any type of unit.  This class should be extended by any
- * subsequent unit classes we define.  Not to be used by itself (abstract). */
-
+/**
+ * Class representing any type of unit.  This class should be extended by any
+ * subsequent unit classes we define.  Not to be used by itself (abstract).
+ **/
 public abstract class Unit extends BasicObject implements GameObject, Serializable {
+  private static final long serialVersionUID = 1L;
   protected final static int WALK_MOVE_FRAME = 2;
   protected final static int ATTACK_HIT_FRAME = 2;
   

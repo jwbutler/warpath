@@ -13,6 +13,10 @@ import warpath.units.Unit;
  * Not used in the current game implementation.
  */
 public class UnitCard extends JButton implements ActionListener {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private HealthBar healthBar;
   private static final int MARGIN = 10;
   private static final int HEALTH_BAR_HEIGHT = 20;

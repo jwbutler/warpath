@@ -1,5 +1,7 @@
 package warpath.core;
 
+import java.io.File;
+
 import jwbgl.Posn;
 import warpath.objects.GameObject;
 
@@ -62,8 +64,19 @@ public class Utils {
     return Math.sqrt(dx*dx + dy*dy);
   }
   
-  public static boolean isSaveFile(String s) {
-    return s.endsWith("."+Constants.CHARACTER_SAVE_FORMAT);
+  public static boolean isSaveFile(String filename) {
+    return filename.endsWith("."+Constants.CHARACTER_SAVE_FORMAT);
+  }
+  
+  public static boolean imageExists(String filename) {
+    String fullFilename = String.format(
+      "%s%s%s.%s",
+      Constants.IMAGE_FOLDER,
+      File.separator,
+      filename,
+      Constants.IMAGE_FORMAT
+    );
+    return (new File(fullFilename).exists());
   }
 
 }

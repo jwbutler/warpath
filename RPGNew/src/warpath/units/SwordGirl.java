@@ -7,6 +7,10 @@ import warpath.core.RPG;
 import warpath.players.Player;
 /* Warrior-type player unit class.  Sword/shield.*/
 public class SwordGirl extends HumanUnit {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static String[] activities = {
     "walking", "standing", "attacking", "blocking1", "blocking2", "blocking3",

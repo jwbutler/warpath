@@ -14,6 +14,10 @@ import warpath.objects.Corpse;
 import warpath.players.Player;
 
 public abstract class ZombieUnit extends Unit implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private static final String[] DEFAULT_ACTIVITIES = {"walking", "standing", "attacking", "falling"};
   private static final int X_OFFSET = 0;
   private static final int Y_OFFSET = -32;

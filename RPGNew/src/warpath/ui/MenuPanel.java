@@ -13,7 +13,11 @@ import warpath.core.RPG;
 /** The panel for the menu used at the start of the game. */
 public class MenuPanel extends JPanel {
 
-	private final GameWindow window;
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  private final GameWindow window;
 	private final RPG game;
 
 	public MenuPanel(GameWindow theWindow, RPG theGame, int width, int height) {

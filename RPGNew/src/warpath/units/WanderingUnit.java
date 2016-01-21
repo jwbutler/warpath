@@ -8,6 +8,10 @@ import warpath.core.RPG;
 import warpath.players.Player;
 
 public class WanderingUnit extends HumanUnit {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private Random RNG;
   public WanderingUnit(RPG game, String name, Posn posn, Player player) {
     super(game, name, posn, player);

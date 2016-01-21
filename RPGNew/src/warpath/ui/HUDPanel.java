@@ -14,6 +14,10 @@ import warpath.ui.components.HealthBar;
  * Represents the player HUD. Contains the health and energy bars.
  */
 public class HUDPanel extends JPanel {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private static final int MARGIN = 16;
   private final RPG game;
   private HealthBar healthBar;

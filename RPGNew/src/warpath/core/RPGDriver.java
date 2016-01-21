@@ -9,7 +9,6 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import warpath.ui.CharacterCreator;
 import warpath.ui.CharacterCreatorNew;
 import warpath.ui.GameWindow;
 

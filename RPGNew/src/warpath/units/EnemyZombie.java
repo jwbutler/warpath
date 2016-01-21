@@ -8,6 +8,10 @@ import warpath.core.Utils;
 import warpath.players.Player;
 
 public class EnemyZombie extends ZombieUnit {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private final static double SLOW_MOVE_SPEED = 0.3;
   private final static double FAST_MOVE_SPEED = 0.7;

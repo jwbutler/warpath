@@ -1,12 +1,15 @@
 package warpath.internals;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 import jwbgl.*;
 /** A Priority Queue that stores entries in the form
  * <weight, (x,y)>.  Used by A* the pathfinding algorithm.
  * What's a good initial capacity? */
 public class PathfinderPQ extends PriorityQueue<PathfinderEntry> {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private static final int INITIAL_CAPACITY = 128;
   /* private static class PathfinderComparator implements Comparator<PathfinderEntry> {
     @Override

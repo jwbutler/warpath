@@ -4,16 +4,13 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
@@ -49,7 +46,6 @@ public class Surface {
     colorkey = null;
     this.imagePath = null;
     transparencyRect = new Rect(0,0,getWidth(),getHeight());
-
   }
   
   public Surface(String imagePath) {
@@ -224,6 +220,9 @@ public class Surface {
     return colorkey;
   }
   
+  /**
+   * NB: DOES apply palette swaps
+   */
   public void setColorkey(Color colorkey) {
     this.colorkey = colorkey;
     applyColorkey();
@@ -276,6 +275,9 @@ public class Surface {
     return transparencyRect;
   }
   
+  /**
+   * NB: Does not apply the palette swaps
+   */
   public void setPaletteSwaps(HashMap<Color,Color> paletteSwaps) {
     this.paletteSwaps = paletteSwaps;
   }
@@ -304,6 +306,16 @@ public class Surface {
   public Surface rotate(double degrees) {
     //return rotate(degrees, 0.5, 0.5);
     return rotate(degrees, 0.5, 0.5);
+  }
+  
+  /**
+   * TODO test me
+   */
+  public void blit(Surface other, Posn posn) {
+    other.draw(getGraphics(), posn);
+  }
+  public void blit(Surface other) {
+    other.draw(getGraphics(), new Posn(0,0));
   }
   
 }

@@ -1,11 +1,14 @@
 package warpath.units;
-import java.util.Random;
 
 import jwbgl.*;
 import warpath.core.RPG;
 import warpath.players.Player;
 
 public class EnemyTargetDummy extends HumanUnit {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static String[] activities = {"walking", "standing", "attacking", "stunned_short"};
   public EnemyTargetDummy(RPG game, String name, Posn posn, Player player) {

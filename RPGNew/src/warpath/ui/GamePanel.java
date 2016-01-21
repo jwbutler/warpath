@@ -12,6 +12,10 @@ import warpath.core.RPG;
   * TODO Learn how AWT/Swing graphics actually work...
   * */
 public class GamePanel extends JPanel {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private final RPG game;
   private KeyboardFocusManager focusManager;
 

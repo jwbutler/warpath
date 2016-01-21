@@ -1,6 +1,5 @@
 package warpath.ui;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
@@ -13,6 +12,7 @@ import warpath.units.Unit;
  * Unused in the current engine.
  */
 public class CardPanel extends JPanel {
+  private static final long serialVersionUID = 1L;
   private final RPG game;
   private static final int MARGIN = 10;
   private final ArrayList<UnitCard> cards;

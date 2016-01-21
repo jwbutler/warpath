@@ -2,7 +2,6 @@ package warpath.units;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import jwbgl.*;
 import warpath.core.RPG;
@@ -14,6 +13,10 @@ import warpath.players.Player;
  * that use Will's original "player" sprite.  It'll be subclassed lots.
  */
 public abstract class HumanUnit extends Unit implements Serializable {
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private static final String[] DEFAULT_ACTIVITIES = {"walking", "standing", "attacking", "falling"};
   private static final String HIT_SOUND = "hit1.wav";
   private static final int Y_OFFSET = -32;

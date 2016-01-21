@@ -1,15 +1,16 @@
 package warpath.animations;
 import java.awt.Color;
-import java.io.File;
 import java.util.HashMap;
 
 import jwbgl.*;
 import warpath.core.Constants;
 import warpath.core.Utils;
 
-/** Represents a single animation of a unit.  Corresponds to a particular
+/**
+ * Represents a single animation of a unit.  Corresponds to a particular
  * activity and direction.  It's basically just a collection of Surface
- * objects. */
+ * objects.
+ */
 
 public class Animation {
   

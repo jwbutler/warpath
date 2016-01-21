@@ -22,7 +22,7 @@ public class GameWindow extends JFrame {
   private final RPGDriver driver;
 
   private final CardLayout cardLayout;
-  private CharacterCreatorNew cc;
+  private CharacterCreator cc;
   private GamePanel gamePanel;
   private HUDPanel hudPanel;
   private MenuPanel menuPanel;
@@ -49,7 +49,7 @@ public class GameWindow extends JFrame {
     panelContainer.setPreferredSize(new Dimension(getWidth(), getHeight()));
     // To be moved to the menuPanel when I'm less lazy. 
 
-    cc = new CharacterCreatorNew(driver, this, getWidth(), getHeight());
+    cc = new CharacterCreator(driver, this, getWidth(), getHeight());
     
     // Make the Menu Panel
     menuPanel = new MenuPanel(this,game,getWidth(),getHeight());
@@ -86,7 +86,7 @@ public class GameWindow extends JFrame {
 	  return gamePanel;
   }
 
-  public CharacterCreatorNew getCharacterCreator() {
+  public CharacterCreator getCharacterCreator() {
     return cc;
   }
 }

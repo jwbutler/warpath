@@ -1,262 +1,564 @@
 package warpath.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jwbgl.*;
 import warpath.core.Constants;
 import warpath.core.RPGDriver;
+import warpath.core.Utils;
+import warpath.internals.TemplateFactory;
+import warpath.items.AccessoryTemplate;
 import warpath.units.UnitTemplate;
 
 /** The menu for creating a new character.
  * TODO support saving female characters
+ * TODO remove slot dialog in favor of just items
  */
 public class CharacterCreator extends JPanel implements ActionListener, ChangeListener {
 
   private static final long serialVersionUID = 1L;
-  private final SurfacePanel unitPanel;
-  private final JPanel sliderPanel;
-  private final JPanel buttonPanel;
+
+  private final static String NEW_SAVE_TEXT = "(New file)";
+  private final static String BASE_MODEL = "Base model";
+  private final static String NO_ITEM = "None";
+  
   private final JFrame window;
-  private final Timer frameTimer;
+  
+  // Top-level panels
+  private final JPanel leftPanel;
+  private final JPanel middlePanel;
+  private final JPanel rightPanel;
+  
+  // Left panel components
+  private final SurfacePanel unitPanel;
+  private final JList<String> savesList;
+  private final JButton genderSelector;
+  private final JScrollPane listPanel;
+  private final JPanel loadSavePanel;
+  private final JButton loadButton;
+  private final JButton saveButton;
+  private final JButton deleteButton;
+  
+  // Middle panel components
+  private final JLabel slotLabel; 
+  private final JPanel slotLabelPanel;
+  private final JComboBox<String> slotComboBox;
+  
+  private final JLabel chooseItemLabel;
+  private final JPanel chooseItemLabelPanel;
+  private final JComboBox<String> itemComboBox;
+  
+  private final JLabel chooseColorLabel;
+  private final JPanel chooseColorLabelPanel;
+  private final JComboBox<String> colorComboBox;
+  
+  private final JButton startButton;
+  private final JPanel startButtonPanel;
+  
+  // Right panel components
+  private final JPanel RPanel;
+  private final JPanel GPanel;
+  private final JPanel BPanel;
+  private final JSlider RSlider;
+  private final JSlider GSlider;
+  private final JSlider BSlider;
+  private final JLabel RLabel;
+  private final JLabel GLabel;
+  private final JLabel BLabel;
+  
+  private final JPanel currentColorPanel;
+  private final JPanel savedColorPanel;
+  
+  private final JButton copyButton;
+  private final JButton pasteButton;
+  
+  private final JPanel saveColorContainerPanel;
+  
+  private final Vector<String> filenames;
+
   private Surface unitSurface;
   private Surface unitSurfaceBase;
-  private Color savedColor;
-  
-  private final String[] colorNames;
-  private final HashMap<String, Color> baseColors;
-  private final HashMap<String, JLabel> colorLabels;
-  private final HashMap<String, JSlider[]> colorSliders;
-  private final HashMap<String, JLabel[]> sliderLabels;
-  private final HashMap<String, JButton> copyButtons;
-  private final HashMap<String, JButton> pasteButtons;
-  private final JButton genderSelector;
-  private final JButton continueButton;
-  private final JButton loadSaveButton;
+  private UnitTemplate template;
+  private AccessoryTemplate currentItemTemplate;
 
-  private HashMap<Color, Color> paletteSwaps;
+  private JPanel copyPasteColorPanel;
+  
   /**
    * TODO: I really don't like passing the Driver as an argument, figure out
    * how to avoid this.
    */
   public CharacterCreator(RPGDriver driver, JFrame window, int width, int height) {
-    copyButtons = new HashMap<String,JButton>();
-    pasteButtons = new HashMap<String,JButton>();
-    paletteSwaps = new HashMap<Color,Color>();
     this.window = window;
-    
     setSize(width, height);
     setPreferredSize(new Dimension(width, height));
     setVisible(true);
-    //gameWindow.add(gamePanel);
     
     setDoubleBuffered(true);
     setBackground(Color.BLACK);
-    setLayout(null);
-    colorNames = new String[] {
-      "Hair", "Face", "Eyes", "Mouth", "Shirt 1", "Shirt 2", "Shirt 3",
-      "Hands", "Belt", "Skirt", "Legs", "Boots 1", "Boots 2"
-    };
-    baseColors = new HashMap<String, Color>();
-    colorSliders = new HashMap<String, JSlider[]>();
-    sliderLabels = new HashMap<String, JLabel[]>();
+    setLayout(new GridLayout(1,3));
+    setAlignmentX(Component.CENTER_ALIGNMENT);
     
-    baseColors.put("Hair", new Color(128,64,0));
-    baseColors.put("Face", new Color(255,128,64));
-    baseColors.put("Eyes", new Color(0,64,64));
-    baseColors.put("Mouth", new Color(128,0,0));
-    baseColors.put("Shirt 1", new Color(128,0,128));
-    baseColors.put("Shirt 2", new Color(255,0,255));
-    baseColors.put("Shirt 3", new Color(0,0,128));
-    baseColors.put("Hands", new Color(0,255,255));
-    baseColors.put("Belt", new Color(0,0,0));
-    baseColors.put("Skirt", new Color(128,128,128));
-    baseColors.put("Legs", new Color(192,192,192));
-    baseColors.put("Boots 1", new Color(0,128,0));
-    baseColors.put("Boots 2", new Color(0,255,0));
-    colorLabels = new HashMap<String,JLabel>();
-    unitSurfaceBase = new Surface("player_standing_E_1.png");
+    // Set up the unit template.
+    template = (UnitTemplate)TemplateFactory.getTemplate("player");
+    
+    
+    // Set up the panels.
+    leftPanel = new JPanel();
+    add(leftPanel);
+    middlePanel = new JPanel();
+    add(middlePanel);
+    rightPanel = new JPanel();
+    add(rightPanel);
+    
+    // =====================
+    // Set up the left panel
+    // =====================
+    leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+    leftPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+    leftPanel.setBorder(BorderFactory.createEmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
+    
+    // Add the unit graphic at the top of the left panel.
+    unitSurfaceBase = new Surface(String.format("%s_standing_E_1.%s", template.getAnimName(), Constants.IMAGE_FORMAT));
+    
     try {
       unitSurface = unitSurfaceBase.clone();
     } catch (CloneNotSupportedException e) {
       e.printStackTrace();
     }
-    
-    savedColor = null;
     unitSurface = unitSurface.scale2x().scale2x();
-    
     unitPanel = new SurfacePanel(unitSurface);
+    //unitPanel.setBackground(Color.RED);
+    leftPanel.add(unitPanel);
+    
+    leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
 
-    unitPanel.setLayout(null);
-    int w = unitSurface.getWidth();
-    int h = unitSurface.getHeight();
-    int l = (int)(getWidth()*0.30 - unitSurface.getWidth())/2;
-    int t = (int)(getHeight()*0.10);
-    unitPanel.setBounds(l, t, w, h);
-    add(unitPanel);
-    
-    buttonPanel = new JPanel();
-    buttonPanel.setBounds((int)0, (int)(getHeight()*0.5), (int)(getWidth()*0.30), (int)(getHeight()*0.5));
-    buttonPanel.setLayout(new GridLayout(3, 0, Constants.MENU_PADDING, Constants.MENU_PADDING));
-    buttonPanel.setAlignmentX(0.5f);
-    buttonPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-    this.add(buttonPanel);
-    
     genderSelector = new JButton("Switch to Female");
     genderSelector.setAlignmentX(CENTER_ALIGNMENT);
-    genderSelector.addActionListener(this);
-    buttonPanel.add(genderSelector);
+    genderSelector.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        doGender();
+      }
+    });
+    leftPanel.add(genderSelector);
+    leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
+    
+    // Set up the load/save interface.
+    File dir = new File(Constants.CHARACTER_SAVE_FOLDER);
+    filenames = new Vector<String>();
+    if (dir.exists() && dir.isDirectory()) {
+      for (String s : dir.list()) {
+        if (Utils.isSaveFile(s)) {
+          filenames.add(s.substring(0, s.length()-4));
+        }
+      }
+    } else {
+      // error stuff
+    }
+    filenames.add(NEW_SAVE_TEXT);
+    savesList = new JList<String>(filenames);
+    savesList.setBackground(Color.WHITE);
+    savesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    listPanel = new JScrollPane(savesList);
+    leftPanel.add(listPanel);
+    
+    leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
+    
+    loadButton = new JButton("Load");
+    loadButton.addActionListener(this);
+    saveButton = new JButton("Save");
+    saveButton.addActionListener(this);
+    deleteButton = new JButton("Delete");
+    deleteButton.addActionListener(this);
+    
+    loadSavePanel = new JPanel(new BorderLayout());
+    loadSavePanel.setOpaque(false);
+    loadSavePanel.setLayout(new GridLayout(1, 2, 10, 10));
+    loadSavePanel.add(loadButton);
+    loadSavePanel.add(saveButton);
+    
+    leftPanel.add(loadSavePanel);
+    
+    // =======================
+    // Set up the middle panel
+    // =======================
+    
+    middlePanel.setBorder(BorderFactory.createEmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
+    //middlePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, Constants.MENU_PADDING));
+    middlePanel.setLayout(new BoxLayout(middlePanel, BoxLayout.Y_AXIS));
+    
+    slotLabel = new JLabel("Choose slot");
+    slotLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    // Swing sucks
+    slotLabelPanel = new JPanel(new BorderLayout());
+    slotLabelPanel.setOpaque(false);
+    slotLabelPanel.add(slotLabel, BorderLayout.CENTER);
+    middlePanel.add(slotLabelPanel);
 
+    //middlePanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
     
-    loadSaveButton = new JButton("Load/Save");
-    loadSaveButton.setAlignmentX(CENTER_ALIGNMENT);
-    loadSaveButton.addActionListener(this);
-    buttonPanel.add(loadSaveButton);
+    // Set up the slot chooser and item chooser
+    Vector<String> slotList = new Vector<String>();
+    slotList.add(BASE_MODEL);
+    for (String slot : Constants.SLOT_LIST) {
+      slotList.add(slot);
+    }
+    slotComboBox = new JComboBox<String>(slotList);
+    slotComboBox.addItemListener(new ItemListener() {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        refreshItemComboBox();
+        refreshColorComboBox();
+      }
+    });
     
-    // When the continue button is pressed, export color swaps and move to game panel
-    continueButton = new JButton("Continue");
-    continueButton.setAlignmentX(CENTER_ALIGNMENT);
-    continueButton.addActionListener(driver);
-    buttonPanel.add(continueButton);
+    middlePanel.add(slotComboBox);
     
-    // add the surface
-    sliderPanel = new JPanel();
-    sliderPanel.setLayout(new GridLayout(colorNames.length, 5, 5, 5));
-    sliderPanel.setBounds((int)(getWidth()*0.30), 0, (int)(getWidth()*0.70), (int)(getHeight()*1));
-    sliderPanel.setBorder(new EmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
+    middlePanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
     
-    populateSliderPanel();
+    chooseItemLabel = new JLabel("Choose item");
+    chooseItemLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    // Swing sucks
+    chooseItemLabelPanel = new JPanel(new BorderLayout());
+    chooseItemLabelPanel.setOpaque(false);
+    chooseItemLabelPanel.add(chooseItemLabel, BorderLayout.CENTER);
+    middlePanel.add(chooseItemLabelPanel);
+    itemComboBox = new JComboBox<String>();
     
-    add(sliderPanel);
-    frameTimer = new Timer(50, this);
-    frameTimer.start();
+    // NB: This fires even when contents are updated as part of
+    // slotComboBox#itemStateChanged().
+    itemComboBox.addItemListener(new ItemListener() {
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        String slot = (String)(slotComboBox.getSelectedItem());
+        String item = (String)(itemComboBox.getSelectedItem());
+        if (slot != null && !slot.equals(BASE_MODEL)) {
+          if (item != null && !item.equals(NO_ITEM))
+          equipItem();
+        }
+        refreshColorComboBox();
+      }
+    });
+    
+    middlePanel.add(itemComboBox);
+    
+    middlePanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
+    
+    chooseColorLabel = new JLabel("Choose color");
+    chooseColorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    // Swing sucks
+    chooseColorLabelPanel = new JPanel(new BorderLayout());
+    chooseColorLabelPanel.add(chooseColorLabel, BorderLayout.CENTER);
+    middlePanel.add(chooseColorLabelPanel);
+    
+    colorComboBox = new JComboBox<String>();
+    colorComboBox.addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent arg0) {
+        updateSliders();
+      }
+    });
+    middlePanel.add(colorComboBox);
+    
+    middlePanel.add(Box.createVerticalStrut(400));
+    
+    startButton = new JButton("Start Game");
+    startButton.addActionListener(this);
+    startButtonPanel = new JPanel(new BorderLayout());
+    startButtonPanel.add(startButton, BorderLayout.CENTER);
+    middlePanel.add(startButtonPanel);
+    
+    // ======================
+    // Set up the right panel
+    // ======================
+    
+    rightPanel.setBorder(BorderFactory.createEmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
+    //middlePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, Constants.MENU_PADDING));
+    rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+
+    RSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+    RSlider.addChangeListener(this);
+    GSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+    GSlider.addChangeListener(this);
+    BSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
+    BSlider.addChangeListener(this);
+    RLabel = new JLabel("Red");
+    RLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    GLabel = new JLabel("Green");
+    GLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    BLabel = new JLabel("Blue");
+    BLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    RPanel = new JPanel(new BorderLayout());
+    GPanel = new JPanel(new BorderLayout());
+    BPanel = new JPanel(new BorderLayout());
+    RPanel.add(RSlider, BorderLayout.NORTH);
+    RPanel.add(RLabel, BorderLayout.SOUTH);
+    GPanel.add(GSlider, BorderLayout.NORTH);
+    GPanel.add(GLabel, BorderLayout.SOUTH);
+    BPanel.add(BSlider, BorderLayout.NORTH);
+    BPanel.add(BLabel, BorderLayout.SOUTH);
+    rightPanel.add(RPanel);
+    rightPanel.add(GPanel);
+    rightPanel.add(BPanel);
+    rightPanel.add(Box.createVerticalStrut(10));
+    
+    saveColorContainerPanel = new JPanel();
+    saveColorContainerPanel.setLayout(new GridLayout(1,3));
+    currentColorPanel = new JPanel();
+    currentColorPanel.setBackground(Color.RED);
+    saveColorContainerPanel.add(currentColorPanel);
+    copyPasteColorPanel = new JPanel(new GridLayout(2,1));
+    copyButton = new JButton("-->");
+    copyButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        copyColor();
+      }
+    });
+    pasteButton = new JButton("<--");
+    pasteButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        pasteColor();
+      }
+    });
+    copyPasteColorPanel.add(copyButton);
+    copyPasteColorPanel.add(pasteButton);
+    saveColorContainerPanel.add(copyPasteColorPanel);
+    savedColorPanel = new JPanel();
+    savedColorPanel.setBackground(Color.BLUE);
+    saveColorContainerPanel.add(savedColorPanel);
+    rightPanel.add(saveColorContainerPanel);
+    rightPanel.add(Box.createVerticalStrut(400));
+    
+    
+    // Logic
+    refreshItemComboBox();
+    refreshColorComboBox();
+    revalidate();
   }
-  
+
   /**
-   * For each color, make an R/G/B slider with number labels, plus copy/paste
-   * buttons.
+   * I think this needs to be protected so that anonymous classes can call it.
+   * TODO add automatic sprite name fetching to combo boxes
    */
-  private void populateSliderPanel() {
-    for (String name : colorNames) {
-      Color c = baseColors.get(name);
-      paletteSwaps.put(c, c);
-      JLabel colorLabel = createColorLabel(name, c);
-      colorLabels.put(name, colorLabel);
-      sliderPanel.add(colorLabel);
-      JSlider RSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getRed());
-      JSlider GSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getGreen());
-      JSlider BSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, c.getBlue());
-      JSlider sliders[] = new JSlider[3];
-      sliders[0] = RSlider;
-      sliders[1] = GSlider;
-      sliders[2] = BSlider;
-      colorSliders.put(name, sliders);
-      RSlider.setOpaque(false);
-      GSlider.setOpaque(false);
-      BSlider.setOpaque(false);
-      
-      RSlider.addChangeListener(this);
-      GSlider.addChangeListener(this);
-      BSlider.addChangeListener(this);
-      JLabel RLabel = new JLabel();
-      RLabel.setText(Integer.toString(RSlider.getValue()));
-      RLabel.setHorizontalAlignment(SwingConstants.CENTER);
-      JLabel GLabel = new JLabel();
-      GLabel.setText(Integer.toString(GSlider.getValue()));
-      GLabel.setHorizontalAlignment(SwingConstants.CENTER);
-      JLabel BLabel = new JLabel();
-      BLabel.setText(Integer.toString(BSlider.getValue()));
-      BLabel.setHorizontalAlignment(SwingConstants.CENTER);
-      JLabel[] labels = {RLabel, GLabel, BLabel};
-      sliderLabels.put(name, labels);
-      JPanel rp = new JPanel();
-      JPanel gp = new JPanel();
-      JPanel bp = new JPanel();
-      rp.setLayout(new BorderLayout());
-      gp.setLayout(new BorderLayout());
-      bp.setLayout(new BorderLayout());
-      rp.add(RSlider, BorderLayout.NORTH);
-      rp.add(RLabel, BorderLayout.SOUTH);
-      gp.add(GSlider, BorderLayout.NORTH);
-      gp.add(GLabel, BorderLayout.SOUTH);
-      bp.add(BSlider, BorderLayout.NORTH);
-      bp.add(BLabel, BorderLayout.SOUTH);
-      sliderPanel.add(rp);
-      sliderPanel.add(gp);
-      sliderPanel.add(bp);
-      
-      JButton copyButton = new JButton("Copy");
-      copyButton.setActionCommand("Copy_"+name);
-      copyButton.addActionListener(this);
-      copyButtons.put(name, copyButton);
-      sliderPanel.add(copyButton);
-      copyButton.setFont(new Font("Arial",Font.PLAIN, 9));
-      JButton pasteButton = new JButton("Paste");
-      pasteButton.setActionCommand("Paste_"+name);
-      pasteButton.addActionListener(this);
-      pasteButtons.put(name, pasteButton);
-      sliderPanel.add(pasteButton);
-      pasteButton.setFont(new Font("Arial",Font.PLAIN, 9));
+  private void equipItem() {
+    String slot = (String)(slotComboBox.getSelectedItem());
+    String animName = getAnimName();
+    if (animName != null && !animName.equals(template.getAnimName())) {
+      template.addItem(slot, (AccessoryTemplate)TemplateFactory.getTemplate(animName));
+      updateUnitSurface();
+    } else {
+      System.out.println("fox");
     }
   }
 
-  private JLabel createColorLabel(String name, Color c) {
-    JLabel colorLabel = new JLabel();
-    colorLabel.setForeground(Color.WHITE);
-    colorLabel.setBackground(c);
-    colorLabel.setText(name);
-    colorLabel.setOpaque(true);
-    colorLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    colorLabel.setFont(new Font("Arial",Font.PLAIN, 9));
-    return colorLabel;
+  // TODO: OOP
+  private void refreshColorComboBox() {
+    String animName = getAnimName();
+    if (animName != null) {
+      // TODO store current item template somewhere
+      colorComboBox.removeAllItems();
+      for (String colorName : TemplateFactory.getTemplate(animName).getColorList()) {
+        colorComboBox.addItem(colorName);
+      }
+    } else {
+      colorComboBox.removeAllItems();
+      colorComboBox.addItem(NO_ITEM);
+    }
+  }
+
+  /**
+   * Returns the animName of the active model/item.
+   * "Intelligently" identifies the item or model.
+   */
+  private String getAnimName() {
+    String slot = (String)(slotComboBox.getSelectedItem());
+    String item = (String)(itemComboBox.getSelectedItem());
+    if (slot.equals("Base model")) {
+      return "player";
+    } else if (slot != null && item != null) {
+      switch(item) {
+      case "Sword":
+        return "sword";
+      case "Shield":
+        return "shield2";
+      default:
+        return null;
+      }
+    } else {
+      // e.g. NO_ITEM
+      return null;
+    }
+  }
+
+  private void updateSliders() {
+    //String slot = (String)(slotComboBox.getSelectedItem());
+    //String itemName = (String)(itemComboBox.getSelectedItem());
+    String colorName = (String)(colorComboBox.getSelectedItem());
+    String animName = getAnimName();
+    if (animName != null) {
+      HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
+      Color c = colorMap.get(colorName);
+      // TODO fine-tune this validation
+      if (c == null) {
+        RSlider.setEnabled(false);
+        GSlider.setEnabled(false);
+        BSlider.setEnabled(false);
+        RSlider.setValue(0);
+        GSlider.setValue(0);
+        BSlider.setValue(0);
+      } else {
+        RSlider.setEnabled(true);
+        GSlider.setEnabled(true);
+        BSlider.setEnabled(true);
+        RSlider.setValue(c.getRed());
+        GSlider.setValue(c.getGreen());
+        BSlider.setValue(c.getBlue());
+      }
+    }
   }
 
   /**
    * Called when a button is pressed.
+   * Handles events from any of the buttons on the page.
+   * TODO: maybe move these to anonymous handlers?
    * @param e - the ActionEvent from the button press
    */
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (e.getActionCommand() != null) {
-      if (e.getActionCommand().equals("Switch to Male")) {
-        doGender();
-      } else if (e.getActionCommand().equals("Switch to Female")) {
-        doGender();
-      } else if (e.getActionCommand().startsWith("Copy")) {
-        String name = e.getActionCommand().substring(5, e.getActionCommand().length());
-        copyColor(name);
-      } else if (e.getActionCommand().startsWith("Paste")) {
-        String name = e.getActionCommand().substring(6, e.getActionCommand().length());
-        pasteColor(name);
-      } else if (e.getActionCommand().equals("Load/Save")) {
-        showLoadSaveDialog();
+    String selection = savesList.getSelectedValue();
+    
+    switch (e.getActionCommand()) {
+    case "Load":
+      if ((selection != null) && !selection.isEmpty() && !selection.equals(NEW_SAVE_TEXT)) { 
+        String filename = String.format("%s%s%s.%s",
+          Constants.CHARACTER_SAVE_FOLDER,
+          File.separator,
+          savesList.getSelectedValue(),
+          Constants.CHARACTER_SAVE_FORMAT
+        );
+        File f = new File(filename);
+        if (f.exists()) {
+          try {
+            FileInputStream fis = new FileInputStream(f);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            UnitTemplate template = (UnitTemplate)ois.readObject();
+            ois.close();
+            fis.close();
+            loadTemplate(template);
+          } catch (IOException e1) {
+            System.out.println("IOException (Load): "+filename);
+          } catch (ClassNotFoundException e2) {
+            System.out.println("ClassNotFoundException (Load): "+filename);
+          }
+        } else {
+          System.out.println("fux!"+filename);
+        }
+      } else if (selection.equals(NEW_SAVE_TEXT)) {
+        JOptionPane.showMessageDialog(this, "Cannot load empty file");
       }
-    } else {
+      break;
+    case "Save":
+      if (selection != null) {
+        if (!selection.isEmpty() && !selection.equals(NEW_SAVE_TEXT)) { 
+          int choice = JOptionPane.showConfirmDialog(
+            this,
+            "Do you want to overwrite?",
+            "Overwrite?",
+            JOptionPane.YES_NO_OPTION
+          );
+          if (choice == 0) {
+            deleteCharacterFile(selection);
+            String saveName = JOptionPane.showInputDialog(this, "Enter a name for your save file:");
+            
+            // If a file with this name already exists (other than the one
+            // we're currently overwriting), cancel the save.
+            boolean fileExists = false;
+            if (!saveName.equals(selection)) {
+              for (int i=0; i<filenames.size()-1; i++) {
+                if (i != savesList.getSelectedIndex()) {
+                  String s = filenames.get(i);
+                  if (s.equals(saveName)) {
+                    JOptionPane.showMessageDialog(this, "Error: File exists");
+                  }
+                }
+              }
+            }
+
+            if (!fileExists && doSave(saveName)) {
+              filenames.set(savesList.getSelectedIndex(), saveName);
+              savesList.setListData(filenames);
+            }
+          }
+        } else if (selection.equals(NEW_SAVE_TEXT)) {
+          String saveName = JOptionPane.showInputDialog(this, "Enter a name for your save file:");
+          for (int i=0; i<filenames.size()-1; i++) {
+            if (i != savesList.getSelectedIndex()) {
+              String s = filenames.get(i);
+              if (s.equals(saveName)) {
+                JOptionPane.showMessageDialog(this, "Error: File exists");
+              }
+            }
+          }
+          if (doSave(saveName)) {
+            updateSaveFilenames();
+          }
+        }
+      }
+      break;
+    case "Delete":
+      if (!selection.equals(NEW_SAVE_TEXT)) {
+        int choice = JOptionPane.showConfirmDialog(
+          this,
+          "Are you sure you want to delete?",
+          "Delete?",
+          JOptionPane.YES_NO_OPTION
+        );
+        if (choice == 0) {
+          deleteCharacterFile(selection);
+          updateSaveFilenames();
+        }
+      }
+      break;
+    default:
+      // Why?
       repaint();
+      break;
     }
-  }
-  
-  private void showLoadSaveDialog() {
-    UnitTemplate template = new UnitTemplate("player", paletteSwaps);
-    //LoadSaveCharacterDialog loadSaveDialog = new LoadSaveCharacterDialog(this, template);
-    //loadSaveDialog.setVisible(true);
   }
   
   /**
@@ -272,17 +574,20 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * Copies the given color to the clipboard.
    * @param name - the name of the color (e.g. "Shirt 1")
    */
-  private void copyColor(String name) {
-    Color c = paletteSwaps.get(baseColors.get(name));
-    savedColor = new Color(c.getRGB());
+  private void copyColor() {
+    savedColorPanel.setBackground(currentColorPanel.getBackground());
   }
   
   /**
    * Sets the specified color sliders to the stored value, if it exists.
    * @param name - the name of the color (e.g. "Shirt 1") 
    */
-  private void pasteColor(String name) {
-    if (savedColor != null) {
+  private void pasteColor() {
+    Color c = savedColorPanel.getBackground();
+    RSlider.setValue(c.getRed());
+    GSlider.setValue(c.getGreen());
+    BSlider.setValue(c.getBlue());
+    /*if (savedColor != null) {
       JSlider RSlider = colorSliders.get(name)[0];
       RSlider.setValue(savedColor.getRed());
       JSlider GSlider = colorSliders.get(name)[1];
@@ -290,49 +595,44 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       JSlider BSlider = colorSliders.get(name)[2];
       BSlider.setValue(savedColor.getBlue());
     }
-    updateColors();
+    updateColors();*/
   }
   
   /**
    * Perform palette swaps for each of the color sliders.
    */
   public void updateColors() {
-    for (String label : colorNames) {
-      Color src = baseColors.get(label);
-      int r = colorSliders.get(label)[0].getValue();
-      int g = colorSliders.get(label)[1].getValue();
-      int b = colorSliders.get(label)[2].getValue();
+    String slot = (String)(slotComboBox.getSelectedItem());
+    String itemName = (String)(itemComboBox.getSelectedItem());
+    String colorName = (String)(colorComboBox.getSelectedItem());
+    String animName = getAnimName();
+    HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
+    Color c = colorMap.get(colorName);
+    if (c != null) {
+      int r = RSlider.getValue();
+      int g = GSlider.getValue();
+      int b = BSlider.getValue();
       Color dest = new Color(r,g,b);
-      paletteSwaps.put(src, dest);
-      colorLabels.get(label).setBackground(dest);
-      sliderLabels.get(label)[0].setText(Integer.toString(r));
-      sliderLabels.get(label)[1].setText(Integer.toString(g));
-      sliderLabels.get(label)[2].setText(Integer.toString(b));
+      
+      // double validation :(
+      if (!slot.equals(BASE_MODEL) && (itemName != null) & (!itemName.equals(NO_ITEM))) {
+        AccessoryTemplate item = template.getEquipment().get(slot);
+        item.getPaletteSwaps().put(c, dest);
+      } else {
+        template.getPaletteSwaps().put(c, dest);
+      }
+      //colorLabels.get(label).setBackground(dest);
+      RLabel.setText(Integer.toString(r));
+      GLabel.setText(Integer.toString(g));
+      BLabel.setText(Integer.toString(b));
+      updateUnitSurface();
+      currentColorPanel.setBackground(dest);
     }
-    try {
-      unitSurface = unitSurfaceBase.clone();
-    } catch (CloneNotSupportedException e) {
-      e.printStackTrace();
-    }
-    
-    
-    /* KLUDGE, TELL WILL TO FIX ALL THESE */
-    /*if (genderSelector.getText().equals("Switch to Male")) {
-      HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
-      tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
-      unitSurface.setPaletteSwaps(tmpSwaps);
-      unitSurface.applyPaletteSwaps();
-    }*/
-    /*END KLUDGE */
-    
-    unitSurface.setPaletteSwaps(paletteSwaps);
-    unitSurface.applyPaletteSwaps();
-    unitSurface = unitSurface.scale2x().scale2x();
-    unitPanel.setSurface(unitSurface);
   }
   
   /**
    * Swap between male and female creation.
+   * TODO extend this to making zombies, other sprites
    **/
   private void doGender() {
     if (genderSelector.getText().equals("Switch to Female")) {
@@ -351,49 +651,149 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    /* KLUDGE, TELL WILL TO FIX ALL THESE */
-    /*
-    if (genderSelector.getText().equals("Switch to Male")) {
-      HashMap<Color,Color> tmpSwaps = new HashMap<Color,Color>();
-      tmpSwaps.put(new Color(79,39,0), new Color(128,64,0));
-      unitSurface.setPaletteSwaps(tmpSwaps);
-      unitSurface.applyPaletteSwaps();
-    }*/
-    /* END KLUDGE */
-    
-    unitSurface.setPaletteSwaps(paletteSwaps);
-    unitSurface.applyPaletteSwaps();
-    unitSurface = unitSurface.scale2x().scale2x();
-    unitPanel.setSurface(unitSurface);
   }
   
   /** Returns the set of palette swaps that the user has created. */
   public HashMap<Color, Color> exportPaletteSwaps() {
-    return paletteSwaps;
+    return template.getPaletteSwaps();
   }
 
   public void loadTemplate(UnitTemplate template) {
-    paletteSwaps = template.getPaletteSwaps();
-    for (String label : colorNames) {
-      Color src = baseColors.get(label);
-      Color dest = paletteSwaps.get(src);
-      int r = dest.getRed();
-      int g = dest.getGreen();
-      int b = dest.getBlue();
-      colorLabels.get(label).setBackground(dest);
-      sliderLabels.get(label)[0].setText(Integer.toString(r));
-      sliderLabels.get(label)[1].setText(Integer.toString(g));
-      sliderLabels.get(label)[2].setText(Integer.toString(b));
+    this.template = template;
+    updateUnitSurface();
+  }
+  
+  private boolean doSave(String saveName) {
+    String filename = String.format(
+      "%s%s%s.%s",
+      Constants.CHARACTER_SAVE_FOLDER,
+      File.separatorChar,
+      saveName,
+      Constants.CHARACTER_SAVE_FORMAT
+    );
+    File f = new File(filename);
+    try {
+      FileOutputStream fos = new FileOutputStream(f);
+      ObjectOutputStream oos = new ObjectOutputStream(fos);
+      oos.writeObject(template);
+      oos.close();
+      fos.close();
+      return true;
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return false;
     }
+  }
+  
+  private void deleteCharacterFile(String saveName) {
+    String filename = String.format(
+        "%s%s%s.%s",
+        Constants.CHARACTER_SAVE_FOLDER,
+        File.separatorChar,
+        saveName,
+        Constants.CHARACTER_SAVE_FORMAT
+      );
+      File f = new File(filename);
+      f.delete();
+  }
+  
+  /**
+   * Refresh the list of save files.
+   * Don't call this when overwriting a file.
+   */
+  private void updateSaveFilenames() {
+    File dir = new File(Constants.CHARACTER_SAVE_FOLDER);
+    if (dir.exists() && dir.isDirectory()) {
+      filenames.clear();
+      for (String s : dir.list()) {
+        if (Utils.isSaveFile(s)) {
+          filenames.add(s.substring(0, s.length()-4));
+        }
+      }
+    } else {
+      // error stuff
+    }
+    filenames.add(NEW_SAVE_TEXT);
+    savesList.setListData(filenames);
+  }
+
+  private void refreshItemComboBox() {
+    String slot = (String)(slotComboBox.getSelectedItem());
+    String[] items = new String[]{};
+    switch (slot) {
+    case "Head":
+      break;
+    case "Hair":
+      break;
+    case "Beard":
+      break;
+    case "Chest":
+      break;
+    case "Legs":
+      break;
+    case "Mainhand":
+      items = new String[]{"Sword"};
+      break;
+    case "Offhand":
+      items = new String[]{"Shield"};
+      break;
+    default:
+      //System.out.println("fux");
+      break;
+    }
+    
+    itemComboBox.removeAllItems();
+    itemComboBox.addItem(NO_ITEM);
+    for (String item : items) {
+      itemComboBox.addItem(item);
+    }
+  }
+  
+  /**
+   * TODO handle nonstandard naming (e.g. wizard)
+   * TODO correct overlap
+   */
+  private void updateUnitSurface() {
+    unitSurfaceBase = new Surface(String.format("%s_standing_E_1.%s", template.getAnimName(), Constants.IMAGE_FORMAT));
+    
+    unitSurfaceBase.setPaletteSwaps(template.getPaletteSwaps());
+    unitSurfaceBase.applyPaletteSwaps();
+    
+    for (AccessoryTemplate item : template.getEquipment().values()) {
+      Surface itemSurface = getItemSurface(item);
+      if (itemSurface != null) {
+        itemSurface.setColorkey(Color.WHITE);
+        itemSurface.setPaletteSwaps(item.getPaletteSwaps());
+        itemSurface.applyPaletteSwaps();
+        // itemSurface.applyColorkey();
+        unitSurfaceBase.blit(itemSurface);
+      }
+    }
+    
     try {
       unitSurface = unitSurfaceBase.clone();
     } catch (CloneNotSupportedException e) {
       e.printStackTrace();
     }
-    
-    unitSurface.setPaletteSwaps(paletteSwaps);
-    unitSurface.applyPaletteSwaps();
     unitSurface = unitSurface.scale2x().scale2x();
     unitPanel.setSurface(unitSurface);
+    unitPanel.repaint();
+  }
+
+  private Surface getItemSurface(AccessoryTemplate item) {
+    String imageFilename = String.format("%s_standing_E_1", item.getAnimName());
+    Surface itemSurface = null;
+    if (Utils.imageExists(imageFilename)) {
+      itemSurface = new Surface(String.format("%s.%s", imageFilename, Constants.IMAGE_FORMAT));
+    } else {
+      String behindFilename = String.format("%s_standing_E_1_B", item.getAnimName());
+      if (Utils.imageExists(behindFilename)) {
+        itemSurface = new Surface(String.format("%s.%s", behindFilename, Constants.IMAGE_FORMAT));
+      } else {
+        System.out.println("fux the itemz");
+      }
+    }
+    return itemSurface;
   }
 }

@@ -32,6 +32,17 @@ public class TemplateFactory {
       colorMap.put("Boots 2", new Color(0,255,0));
       HashMap<Color, Color> paletteSwaps = getDefaultPaletteSwaps(colorMap);
       return new UnitTemplate(animName, colorList, colorMap, paletteSwaps);
+    } else if (animName.equals("zombie")) {
+      String[] colorNames = { "Hair/Feet", "Eyes", "Skin 1", "Skin 2", "Shirt", "Pants", "Blood" };
+      colorMap.put("Hair/Feet", new Color(128, 64, 0));
+      colorMap.put("Eyes", new Color(0, 128, 128));
+      colorMap.put("Skin 1", new Color(186, 183, 120));
+      colorMap.put("Skin 2", new Color(128, 128, 64));
+      colorMap.put("Shirt", new Color(128, 128, 128));
+      colorMap.put("Pants", new Color(0, 0, 0));
+      colorMap.put("Blood", new Color(128, 0, 0));
+      HashMap<Color, Color> paletteSwaps = getDefaultPaletteSwaps(colorMap);
+      return new UnitTemplate(animName, colorList, colorMap, paletteSwaps);
     } else if (animName.equals("sword") || animName.equals("shield2")) {
       String[] colorNames = { "Color 1", "Color 2", "Color 3" };
       for (String c : colorNames) colorList.add(c);

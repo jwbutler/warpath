@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -54,6 +55,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final static String BASE_MODEL = "Base model";
   private final static String NO_ITEM = "None";
   
+  private final static String[] MODEL_NAMES = {"player", "female", "zombie"};
+  
   private final JFrame window;
   
   // Top-level panels
@@ -64,7 +67,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   // Left panel components
   private final SurfacePanel unitPanel;
   private final JList<String> savesList;
-  private final JButton genderSelector;
+  private final JButton modelSelector;
   private final JScrollPane listPanel;
   private final JPanel loadSavePanel;
   private final JButton loadButton;
@@ -100,9 +103,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   
   private final JPanel currentColorPanel;
   private final JPanel savedColorPanel;
-  
   private final JButton copyButton;
   private final JButton pasteButton;
+  private JPanel copyPasteColorPanel;
   
   private final JPanel saveColorContainerPanel;
   
@@ -111,9 +114,18 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private Surface unitSurface;
   private Surface unitSurfaceBase;
   private UnitTemplate template;
-  private AccessoryTemplate currentItemTemplate;
+  private AccessoryTemplate currentItemTemplate; // Unused
+  
+  private int modelIndex;
 
-  private JPanel copyPasteColorPanel;
+  private JPanel copyButtonPanel;
+
+  private JPanel savedColorPanelContainer;
+
+  private JPanel currentColorPanelContainer;
+
+  private JLabel currentColorLabel; 
+
   
   /**
    * TODO: I really don't like passing the Driver as an argument, figure out
@@ -131,8 +143,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     setAlignmentX(Component.CENTER_ALIGNMENT);
     
     // Set up the unit template.
-    template = (UnitTemplate)TemplateFactory.getTemplate("player");
-    
+    modelIndex = 0;
+    template = (UnitTemplate)TemplateFactory.getTemplate(MODEL_NAMES[modelIndex]);
     
     // Set up the panels.
     leftPanel = new JPanel();
@@ -164,15 +176,15 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
 
-    genderSelector = new JButton("Switch to Female");
-    genderSelector.setAlignmentX(CENTER_ALIGNMENT);
-    genderSelector.addActionListener(new ActionListener() {
+    modelSelector = new JButton("Switch Model");
+    modelSelector.setAlignmentX(CENTER_ALIGNMENT);
+    modelSelector.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        doGender();
+        changeModel();
       }
     });
-    leftPanel.add(genderSelector);
+    leftPanel.add(modelSelector);
     leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
     
     // Set up the load/save interface.
@@ -230,12 +242,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     //middlePanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
     
     // Set up the slot chooser and item chooser
-    Vector<String> slotList = new Vector<String>();
-    slotList.add(BASE_MODEL);
-    for (String slot : Constants.SLOT_LIST) {
-      slotList.add(slot);
-    }
-    slotComboBox = new JComboBox<String>(slotList);
+
+    slotComboBox = new JComboBox<String>();
+    refreshSlotComboBox();
     slotComboBox.addItemListener(new ItemListener() {
       @Override
       public void itemStateChanged(ItemEvent e) {
@@ -264,11 +273,20 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       public void itemStateChanged(ItemEvent e) {
         String slot = (String)(slotComboBox.getSelectedItem());
         String item = (String)(itemComboBox.getSelectedItem());
+        // TODO better validation
         if (slot != null && !slot.equals(BASE_MODEL)) {
-          if (item != null && !item.equals(NO_ITEM))
-          equipItem();
+          if (item == null) {
+            // why?
+            //System.out.println("fuux");
+          } else if (item.equals(NO_ITEM)) {
+            template.removeItem(slot);
+            updateUnitSurface();
+          } else {
+            equipItem();
+          }
+          refreshColorComboBox();
+          updateSliders();
         }
-        refreshColorComboBox();
       }
     });
     
@@ -324,11 +342,11 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     RPanel = new JPanel(new BorderLayout());
     GPanel = new JPanel(new BorderLayout());
     BPanel = new JPanel(new BorderLayout());
-    RPanel.add(RSlider, BorderLayout.NORTH);
+    RPanel.add(RSlider, BorderLayout.CENTER);
     RPanel.add(RLabel, BorderLayout.SOUTH);
-    GPanel.add(GSlider, BorderLayout.NORTH);
+    GPanel.add(GSlider, BorderLayout.CENTER);
     GPanel.add(GLabel, BorderLayout.SOUTH);
-    BPanel.add(BSlider, BorderLayout.NORTH);
+    BPanel.add(BSlider, BorderLayout.CENTER);
     BPanel.add(BLabel, BorderLayout.SOUTH);
     rightPanel.add(RPanel);
     rightPanel.add(GPanel);
@@ -339,7 +357,12 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     saveColorContainerPanel.setLayout(new GridLayout(1,3));
     currentColorPanel = new JPanel();
     currentColorPanel.setBackground(Color.RED);
-    saveColorContainerPanel.add(currentColorPanel);
+    currentColorLabel = new JLabel("Current color");
+    currentColorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    currentColorPanelContainer = new JPanel(new BorderLayout());
+    currentColorPanelContainer.add(currentColorPanel, BorderLayout.CENTER);
+    currentColorPanelContainer.add(currentColorLabel, BorderLayout.SOUTH);
+    saveColorContainerPanel.add(currentColorPanelContainer);
     copyPasteColorPanel = new JPanel(new GridLayout(2,1));
     copyButton = new JButton("-->");
     copyButton.addActionListener(new ActionListener() {
@@ -348,6 +371,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         copyColor();
       }
     });
+    copyButtonPanel = new JPanel(new BorderLayout());
+    copyButtonPanel.add(copyButton, BorderLayout.CENTER);
+    copyButtonPanel.add(new JLabel("Current color"), BorderLayout.SOUTH);
     pasteButton = new JButton("<--");
     pasteButton.addActionListener(new ActionListener() {
       @Override
@@ -360,7 +386,14 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     saveColorContainerPanel.add(copyPasteColorPanel);
     savedColorPanel = new JPanel();
     savedColorPanel.setBackground(Color.BLUE);
-    saveColorContainerPanel.add(savedColorPanel);
+
+    JLabel savedColorLabel = new JLabel("Saved color");
+    savedColorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    
+    savedColorPanelContainer = new JPanel(new BorderLayout());
+    savedColorPanelContainer.add(savedColorPanel, BorderLayout.CENTER);
+    savedColorPanelContainer.add(savedColorLabel, BorderLayout.SOUTH);
+    saveColorContainerPanel.add(savedColorPanelContainer);
     rightPanel.add(saveColorContainerPanel);
     rightPanel.add(Box.createVerticalStrut(400));
     
@@ -408,7 +441,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private String getAnimName() {
     String slot = (String)(slotComboBox.getSelectedItem());
     String item = (String)(itemComboBox.getSelectedItem());
-    if (slot.equals("Base model")) {
+    if (slot == null) {
+      return null;
+    } else if (slot.equals("Base model")) {
       return "player";
     } else if (slot != null && item != null) {
       switch(item) {
@@ -448,6 +483,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         RSlider.setValue(c.getRed());
         GSlider.setValue(c.getGreen());
         BSlider.setValue(c.getBlue());
+        currentColorPanel.setBackground(c);
       }
     }
   }
@@ -480,6 +516,13 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
             ois.close();
             fis.close();
             loadTemplate(template);
+            refreshSlotComboBox();
+            refreshItemComboBox();
+            refreshColorComboBox();
+            slotComboBox.setSelectedIndex(0);
+            itemComboBox.setSelectedIndex(0);
+            colorComboBox.setSelectedIndex(0);
+            updateSliders();
           } catch (IOException e1) {
             System.out.println("IOException (Load): "+filename);
           } catch (ClassNotFoundException e2) {
@@ -616,7 +659,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       
       // double validation :(
       if (!slot.equals(BASE_MODEL) && (itemName != null) & (!itemName.equals(NO_ITEM))) {
-        AccessoryTemplate item = template.getEquipment().get(slot);
+        AccessoryTemplate item = template.getItem(slot);
         item.getPaletteSwaps().put(c, dest);
       } else {
         template.getPaletteSwaps().put(c, dest);
@@ -634,25 +677,39 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * Swap between male and female creation.
    * TODO extend this to making zombies, other sprites
    **/
-  private void doGender() {
-    if (genderSelector.getText().equals("Switch to Female")) {
-      genderSelector.setText("Switch to Male");
-      unitSurfaceBase = new Surface("female_standing_E_1.png");
-    } else if (genderSelector.getText().equals("Switch to Male")) {
-      genderSelector.setText("Switch to Female");
-      unitSurfaceBase = new Surface("player_standing_E_1.png");
-    } else {
-      System.out.println("FUck you");
-    }
-    
-    try {
-      unitSurface = unitSurfaceBase.clone();
-    } catch (CloneNotSupportedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+  private void changeModel() {
+    modelIndex = (modelIndex+1) % MODEL_NAMES.length;
+    String modelName = MODEL_NAMES[modelIndex];
+    template = (UnitTemplate)TemplateFactory.getTemplate(modelName);
+    updateUnitSurface();
+    refreshSlotComboBox();
+    refreshItemComboBox();
+    refreshColorComboBox();
   }
   
+  private void refreshSlotComboBox() {
+    String modelName = MODEL_NAMES[modelIndex];
+    ArrayList<String> slots = new ArrayList<String>();
+    slots.add(BASE_MODEL);
+    
+    switch (modelName) {
+    case "player":
+      for (String slot : Constants.SLOT_LIST) {
+        slots.add(slot);
+      }
+    case "female":
+      break;
+    case "zombie":
+      break;
+    default:
+      break;
+    }
+    slotComboBox.removeAllItems();
+    for (String item : slots) {
+      slotComboBox.addItem(item);
+    }
+  }
+
   /** Returns the set of palette swaps that the user has created. */
   public HashMap<Color, Color> exportPaletteSwaps() {
     return template.getPaletteSwaps();
@@ -720,33 +777,54 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
 
   private void refreshItemComboBox() {
     String slot = (String)(slotComboBox.getSelectedItem());
-    String[] items = new String[]{};
-    switch (slot) {
-    case "Head":
-      break;
-    case "Hair":
-      break;
-    case "Beard":
-      break;
-    case "Chest":
-      break;
-    case "Legs":
-      break;
-    case "Mainhand":
-      items = new String[]{"Sword"};
-      break;
-    case "Offhand":
-      items = new String[]{"Shield"};
-      break;
-    default:
-      //System.out.println("fux");
-      break;
+    String[] items = {};
+    // TODO why do we need this validation?
+    if (slot != null) {
+      switch (slot) {
+      case "Head":
+        break;
+      case "Hair":
+        break;
+      case "Beard":
+        break;
+      case "Chest":
+        break;
+      case "Legs":
+        break;
+      case "Mainhand":
+        items = new String[]{"Sword"};
+        break;
+      case "Offhand":
+        items = new String[]{"Shield"};
+        break;
+      default:
+        break;
+      }
     }
-    
     itemComboBox.removeAllItems();
     itemComboBox.addItem(NO_ITEM);
     for (String item : items) {
       itemComboBox.addItem(item);
+    }
+    if (template.getItem(slot) != null) {
+      
+      // TODO this sux
+      String animName = template.getItem(slot).getAnimName();
+      String displayName;
+      switch (animName) {
+      case "sword":
+        displayName = "Sword";
+        break;
+      case "shield2":
+        displayName = "Shield";
+        break;
+      default:
+        displayName = null;
+        break;
+      }
+      if (displayName != null) {
+        itemComboBox.setSelectedItem(displayName);
+      }
     }
   }
   

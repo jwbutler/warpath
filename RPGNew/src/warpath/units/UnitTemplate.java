@@ -12,7 +12,6 @@ import warpath.items.AccessoryTemplate;
  * Used by the character creator (especially its save/load functionality).
  * Contains the information needed to make a sprite: animation name and
  * palette swaps.
- * TODO think of a more descriptive name that includes equipment
  */
 public class UnitTemplate extends SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 2L;
@@ -23,15 +22,23 @@ public class UnitTemplate extends SpriteTemplate implements Serializable {
     this.equipment = new HashMap<String, AccessoryTemplate>();
   }
   
-  public HashMap<String, AccessoryTemplate> getEquipment() {
-    return equipment;
-  }
-  
   /**
    * NB: overwites existing items
    */
   public void addItem(String slot, AccessoryTemplate item) {
     equipment.put(slot, item);
+  }
+
+  public void removeItem(String slot) {
+    equipment.remove(slot);
+  }
+  
+  public AccessoryTemplate getItem(String slot) {
+    return equipment.get(slot);
+  }
+
+  public HashMap<String, AccessoryTemplate> getEquipment() {
+    return equipment;
   }
   
 }

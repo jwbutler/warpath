@@ -22,6 +22,8 @@ import warpath.objects.Tile;
 import warpath.players.AIPlayer;
 import warpath.players.HumanPlayer;
 import warpath.players.Player;
+import warpath.templates.TemplateFactory;
+import warpath.templates.UnitTemplate;
 import warpath.ui.GameWindow;
 import warpath.ui.InputHandler;
 import warpath.ui.SoundPlayer;
@@ -46,8 +48,8 @@ public class RPG implements ActionListener {
   private final ArrayList<GameObject> objects; // Non-units
   private final ArrayList<Level> levels;
   
-  /* These are kinda hacks to get around concurrent modification exceptions.
-   * Maybe there is a better solution. */
+  // These are kinda hacks to get around concurrent modification exceptions.
+  // Maybe there is a better solution.
   private final ArrayList<Unit> unitsToAdd;
   private final ArrayList<Unit> unitsToRemove;
   
@@ -67,7 +69,8 @@ public class RPG implements ActionListener {
   
   private boolean redrawFloor;
 
-  /** Constructor for the main RPG class.
+  /**
+   * Constructor for the main RPG class.
    * @param gameWindow
    */
   public RPG(GameWindow gameWindow) {
@@ -103,11 +106,12 @@ public class RPG implements ActionListener {
 
   }
   
-  /** Start the timer.  We might also use this to restart/unpause
+  /**
+   * Start the timer.  We might also use this to restart/unpause
    * This seems like a REALLY weird place to put the palette swaps (as a parameter).
    * @param playerUnitPaletteSwaps
    */
-  public void start(HashMap<Color, Color> playerUnitPaletteSwaps) {
+  public void start(UnitTemplate template) {
     // handlers, etc.
     gameWindow.getGamePanel().init();
     // Add some player units.
@@ -116,7 +120,8 @@ public class RPG implements ActionListener {
     // This is a dumb workaround.
     setFloor(new Floor(this, 1,1));
     getFloor().setTile(0,0, new Tile(this, new Posn(0,0), "tile_48x24_grass.png"));
-    SwordGuy u = new SwordGuy(this, "u", new Posn(0,0), getHumanPlayer(), playerUnitPaletteSwaps);
+    SwordGuy u = new SwordGuy(this, "u", new Posn(0,0), getHumanPlayer(), template.getPaletteSwaps());
+    
     //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
     addUnit(u);
     
@@ -135,17 +140,18 @@ public class RPG implements ActionListener {
    * Start the game without going through the character creator.
    */
   public void start() {
-    HashMap<Color, Color> emptyPaletteSwaps = new HashMap<Color, Color>();
-    start(emptyPaletteSwaps);
+    UnitTemplate t = (UnitTemplate)TemplateFactory.getTemplate("player");
+    start(t);
   }
   
-  /** Called every time the frame timer fires.
+  /**
+   * Called every time the frame timer fires.
    * Redraws everything, then increments the tick counter.
-   * IS THIS THE RIGHT ORDER OF OPERATIONS?
+   * TODO: IS THIS THE RIGHT ORDER OF OPERATIONS?
    * @param e - the Action event
    */
   public void actionPerformed(ActionEvent e) {
-    /* Do blocking event code.  Should this go to Upkeep? */
+    // Do blocking event code.  Should this go to Upkeep?
     doBlockUpkeep();
     
     for (Unit u: units) {
@@ -156,8 +162,8 @@ public class RPG implements ActionListener {
       u.doEvents();
     }
     
-    /* Kill units that have been queued for death. (This happens during
-     * nextActivity(), which happens during doUpkeep()... */
+    // Kill units that have been queued for death. (This happens during
+    // nextActivity(), which happens during doUpkeep()...
     for (Unit u : unitsToRemove) {
       removeUnit(u);
     }
@@ -171,17 +177,19 @@ public class RPG implements ActionListener {
     gameWindow.repaint();
     incrementTicks();
     
-    /* WHERE DOES THIS BELONG IN THE ORDER? */
+    // WHERE DOES THIS BELONG IN THE ORDER?
     if (levels.get(levelIndex).checkVictory()) {
       levelIndex++;
       openLevel();
     }
   }
 
-  /** Handle persistent actions (i.e. bash, block, slash):
+  /**
+   * Handle persistent actions (i.e. bash, block, slash):
    * every upkeep, we check if the SHIFT / CTRL keys are held down and queue
    * up activities accordingly.
-   * TODO the whole newSlashDirection thing seems inconsistent and awkward. */
+   * TODO the whole newSlashDirection thing seems inconsistent and awkward.
+   */
   public void doBlockUpkeep() {
     String currentActivity = getPlayerUnit().getCurrentActivity();
     String nextActivity = getPlayerUnit().getNextActivity();
@@ -330,7 +338,9 @@ public class RPG implements ActionListener {
     }
   }
 
-  /** Make the human player and return it.  I'm not sure we need this. */
+  /**
+   * Make the human player and return it.  I'm not sure we need this.
+   */
   public Player addHumanPlayer() {
     HumanPlayer player = new HumanPlayer(1);
     addPlayer(1, player);
@@ -343,8 +353,9 @@ public class RPG implements ActionListener {
     ticks++;
   }
   
-  /** Add a player with the specified player number.
-  /* TODO The whole playerNumber field is oddly handled.
+  /**
+   * Add a player with the specified player number.
+   * TODO The whole playerNumber field is oddly handled.
    * @param playerNumber - the index to be used to retrieve this player
    * @param player - the Player object
    */
@@ -352,11 +363,13 @@ public class RPG implements ActionListener {
     players.put(playerNumber, player);
   }
   
-  /** Add the specified unit to all relevant lists (depth tree, floor units,
+  /**
+   * Add the specified unit to all relevant lists (depth tree, floor units,
    * HUD panel).
    * Note that the unit is initialized with its controller established.
    * (I forget why :( )
-   * @param u - The unit to add */
+   * @param u - The unit to add
+   */
   public void addUnit(Unit u) {
     units.add(u);
     u.getPlayer().getUnits().add(u);
@@ -368,13 +381,14 @@ public class RPG implements ActionListener {
     u.updateFloorOverlay();
   }
   
-  /** Removes the specified unit from all relevant lists.
+  /**
+   * Removes the specified unit from all relevant lists.
    * Specifically, each floor tile's list of units, and the RPG's units list,
    * as well as the RPG's depth tree.
    * Also removes its floor overlay from all relevant lists.
    * I don't think we need to check contains(), but it feels wrong...
    * @param u - The unit to remove
-  */
+   */
   public void removeUnit(Unit u) {
     units.remove(u);
     depthTree.remove(u);
@@ -434,7 +448,8 @@ public class RPG implements ActionListener {
     return gridToPixel(new Posn(x,y));
   }
   
-  /** Finds the nearest tile to a given pixel.  Returns null if it's outside
+  /**
+   * Finds the nearest tile to a given pixel.  Returns null if it's outside
    * the map.
    * It works by checking EVERY floor tile, finding the coordinates at which
    * it's being drawn, and checking the transparency at the given point.
@@ -494,7 +509,8 @@ public class RPG implements ActionListener {
     centerCamera(getPlayerUnit().getPosn());
   }
   
-  /** Draw everything! Start with the floor, then draw all of the objects and
+  /**
+   * Draw everything! Start with the floor, then draw all of the objects and
    * units in the order in which they appear in the DepthTree.
    * @param g the Graphics object of the game panel.
    */
@@ -552,12 +568,13 @@ public class RPG implements ActionListener {
     u.setNextActivity("walking");
   }
   
-  /** Give an order to the player unit (usually attack).
+  /**
+   * Give an order to the player unit (usually attack).
    * If the targeted tile is not adjacent to the player unit, some kind of
    * pathing stuff will be initiated.
    * @param pixel The mouse coordinates
    * @param activity The ordered activity 
-   *  */
+   */
   public void doRightClick(Posn pixel, String activity) {
     Posn posn = pixelToGrid(pixel);
     Unit u = getPlayerUnit();
@@ -648,8 +665,10 @@ public class RPG implements ActionListener {
     return posns;
   }
   
-  /* Given (dx, dy), return the (dx, dy) pairs corresponding to 45 degrees CW and CCW.
-   * Should it return the input? Yes for now. */ 
+  /**
+   * Given (dx, dy), return the (dx, dy) pairs corresponding to 45 degrees CW and CCW.
+   * Should it return the input? Yes for now.
+   */ 
   public ArrayList<Posn> getAdjacentDirections(Posn p) {
     ArrayList<Posn> rtn = new ArrayList<Posn>();
     rtn.add(rotateClockwise(p));
@@ -657,7 +676,10 @@ public class RPG implements ActionListener {
     return rtn;
   }
   
-  /* 45 degrees */
+  /**
+   * Given a direction, rotate it 45 degrees counterclockwise.
+   * @param p - a <u>DIRECTIONAL</u> Posn.
+   */
   public Posn rotateClockwise(Posn p) {
     if (p.equals(new Posn(-1,-1))) {
       return new Posn(0,-1);
@@ -680,7 +702,10 @@ public class RPG implements ActionListener {
     }
   }
   
-  /* 45 degrees */
+  /**
+   * Given a direction, rotate it 45 degrees clockwise.
+   * @param p - a <u>DIRECTIONAL</u> Posn.
+   */
   public Posn rotateCounterclockwise(Posn p) {
     if (p.equals(new Posn(-1,-1))) {
       return new Posn(-1,0);
@@ -703,7 +728,8 @@ public class RPG implements ActionListener {
     }
   }
   
-  /* An A* pathfinding attempt.
+  /**
+   * An A* pathfinding attempt.
    * Basically just stealing the pseudocode from 
    * http://www.policyalmanac.org/games/aStarTutorial.htm
    * Most of the comments are copy&pasted from that site too.
@@ -711,7 +737,10 @@ public class RPG implements ActionListener {
    * to all of our AI.
    * 
    * Notes: p2 is allowed to be an obstacle, since we're using this to path
-   * to units/other blocking stuff. */
+   * to units/other blocking stuff.
+   * 
+   * TODO: make sure you understand this whole algorithm
+   */
   public LinkedList<Posn> findPath(Posn p1, Posn p2) {
   
     // We're not using these HashMaps and I'm kind of concerned. Check on
@@ -960,35 +989,39 @@ public class RPG implements ActionListener {
   
   public void openLevel() {
     Level level = levels.get(levelIndex);
-    level.init();
-    floor = level.getFloor();
-    redrawFloor = true;
-    depthTree.clear();
-    units.clear();
-    for (Unit u: level.getUnits()) {
-      depthTree.add(u.getFloorOverlay());
-      if (u.getTargetPosnOverlay() != null) {
-        System.out.println("zomg");
+    if (level != null) {
+      level.init();
+      floor = level.getFloor();
+      redrawFloor = true;
+      depthTree.clear();
+      units.clear();
+      for (Unit u: level.getUnits()) {
+        depthTree.add(u.getFloorOverlay());
+        if (u.getTargetPosnOverlay() != null) {
+          System.out.println("zomg");
+        }
+        addUnit(u);
+        // This is a dumb hack to correct the depth tree.
+        u.moveTo(u.getPosn());
       }
-      addUnit(u);
-      /* This is a dumb hack to correct the depth tree. */
-      u.moveTo(u.getPosn());
+      objects.clear();
+      for (GameObject o: level.getObjects()) {
+        addObject(o);
+      }
+      centerCamera();
     }
-    objects.clear();
-    for (GameObject o: level.getObjects()) {
-      addObject(o);
-    }
-    centerCamera();
   }
 
   public void playSound(String string) {
     soundPlayer.playSoundThread(string);
   }
 
-  /* I'm not crazy about this solution, but there was a concurrent modification
+  /**
+   *  I'm not crazy about this solution, but there was a concurrent modification
    * exception thing happening.  Basically we add the unit to the deadUnits
    * array list now, and then after we finish iterating through we'll remove it
-   * from both. */
+   * from both.
+   */
   public void queueRemoveUnit(Unit unit) {
     unitsToRemove.add(unit);
   }

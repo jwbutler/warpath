@@ -10,7 +10,8 @@ import warpath.items.Sword;
 import warpath.players.Player;
 /**
  * Warrior-type player unit class.
- * Sword/shield.*/
+ * Sword/shield.
+ */
 public class SwordGuy extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage, bashDamage, slashDamage;
@@ -18,10 +19,8 @@ public class SwordGuy extends HumanUnit {
     "walking", "standing", "attacking", "blocking_1", "blocking_2", "blocking_3",
     "bashing", "slashing_1", "slashing_2", "slashing_3", "falling"};
 
-  public SwordGuy(RPG game, String name, Posn posn, Player player, HashMap<Color, Color> playerUnitPaletteSwaps) {
-    /*public HumanUnit(RPG game, String name, String animationName,
-        String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {*/
-    super(game, name, activities, playerUnitPaletteSwaps, posn, player);
+  public SwordGuy(RPG game, String name, Posn posn, Player player, HashMap<Color, Color> paletteSwaps) {
+    super(game, name, activities, paletteSwaps, posn, player);
     currentHP = maxHP = 200;
     currentEP = maxEP = 100;
     minDamage = 6;

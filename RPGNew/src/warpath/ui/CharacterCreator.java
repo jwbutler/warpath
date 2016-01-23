@@ -39,9 +39,9 @@ import jwbgl.*;
 import warpath.core.Constants;
 import warpath.core.RPGDriver;
 import warpath.core.Utils;
-import warpath.internals.TemplateFactory;
-import warpath.items.AccessoryTemplate;
-import warpath.units.UnitTemplate;
+import warpath.templates.AccessoryTemplate;
+import warpath.templates.TemplateFactory;
+import warpath.templates.UnitTemplate;
 
 /** The menu for creating a new character.
  * TODO support saving female characters
@@ -56,8 +56,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final static String NO_ITEM = "None";
   
   private final static String[] MODEL_NAMES = {"player", "female", "zombie"};
-  
-  private final JFrame window;
   
   // Top-level panels
   private final JPanel leftPanel;
@@ -105,8 +103,12 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final JPanel savedColorPanel;
   private final JButton copyButton;
   private final JButton pasteButton;
-  private JPanel copyPasteColorPanel;
+  private final JPanel copyPasteColorPanel;
   
+  private final JPanel copyButtonPanel;
+  private final JPanel savedColorPanelContainer;
+  private final JPanel currentColorPanelContainer;
+  private final JLabel currentColorLabel; 
   private final JPanel saveColorContainerPanel;
   
   private final Vector<String> filenames;
@@ -118,21 +120,12 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   
   private int modelIndex;
 
-  private JPanel copyButtonPanel;
-
-  private JPanel savedColorPanelContainer;
-
-  private JPanel currentColorPanelContainer;
-
-  private JLabel currentColorLabel; 
-
   
   /**
    * TODO: I really don't like passing the Driver as an argument, figure out
    * how to avoid this.
    */
   public CharacterCreator(RPGDriver driver, JFrame window, int width, int height) {
-    this.window = window;
     setSize(width, height);
     setPreferredSize(new Dimension(width, height));
     setVisible(true);
@@ -268,6 +261,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     // NB: This fires even when contents are updated as part of
     // slotComboBox#itemStateChanged().
+    // TODO set currentItemTemplate
     itemComboBox.addItemListener(new ItemListener() {
       @Override
       public void itemStateChanged(ItemEvent e) {
@@ -303,7 +297,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     colorComboBox = new JComboBox<String>();
     colorComboBox.addItemListener(new ItemListener() {
-
       @Override
       public void itemStateChanged(ItemEvent arg0) {
         updateSliders();
@@ -314,7 +307,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     middlePanel.add(Box.createVerticalStrut(400));
     
     startButton = new JButton("Start Game");
-    startButton.addActionListener(this);
+    startButton.addActionListener(driver);
     startButtonPanel = new JPanel(new BorderLayout());
     startButtonPanel.add(startButton, BorderLayout.CENTER);
     middlePanel.add(startButtonPanel);
@@ -710,9 +703,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     }
   }
 
-  /** Returns the set of palette swaps that the user has created. */
-  public HashMap<Color, Color> exportPaletteSwaps() {
-    return template.getPaletteSwaps();
+  public UnitTemplate exportTemplate() {
+    return template;
   }
 
   public void loadTemplate(UnitTemplate template) {

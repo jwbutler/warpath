@@ -1,4 +1,4 @@
-package warpath.internals;
+package warpath.templates;
 
 import java.awt.Color;
 import java.io.Serializable;

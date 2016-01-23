@@ -35,7 +35,8 @@ public class Animation {
     return direction;
   }
 
-  /** Creates a new Animation object.  Before loading a new image file, try
+  /**
+   * Creates a new Animation object.  Before loading a new image file, try
    * to retrieve from the frame cache object to avoid duplication.
    * @param animName - The name of the sprite used.
    * @param filenames - The list of filenames (not including extension or folder)
@@ -68,14 +69,6 @@ public class Animation {
   public Animation(String animName, String[] filenames, String activity, String direction) {
     this(animName, filenames, activity, direction, null);
   }
-  
-  /*public static Animation createFixed(String animName, String[] filenames, String activity, String direction) {
-    String[] filenames2 = new String[filenames.length];
-    for (int i=0; i<filenames.length; i++) {
-      filenames2[i] = fixFilename(animName, filenames[i], direction);
-    }
-    return new Animation(animName, filenames2, activity, direction);
-  }*/
 
   public int getLength() {
     return frames.length;
@@ -118,8 +111,7 @@ public class Animation {
    *  - appending the file type (.png) to the end.
    */
   public static String fixAccessoryFilename(String filename) {
-    String path = String.format("%s.%s", filename, Constants.IMAGE_FORMAT);
-    if (Utils.imageExists(path)) {
+    if (Utils.imageExists(filename)) {
       return String.format("%s.%s", filename, Constants.IMAGE_FORMAT);
     } else {
       String behindPath = filename + "_B";

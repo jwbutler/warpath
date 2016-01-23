@@ -108,8 +108,10 @@ public abstract class Accessory {
     return getCurrentAnimation().drawBehind(getCurrentAnimation().getIndex());
   }
   
-  /** Load animations in the expected format used by Units.
-   * C&P from Unit! */
+  /**
+   * Load animations in the expected format used by Units.
+   * C&P from Unit!
+   */
   protected void loadGenericAnimations(String activity) {
     String[] filenames = AnimationTemplates.getTemplate(activity);
     for (int i = 0; i < Constants.DIRECTIONS.length; i++) {
@@ -122,11 +124,13 @@ public abstract class Accessory {
       animations.add(new Animation(animationName, filenames2, activity, Constants.DIRECTIONS[i], frames));
     }
   }
-  /** Falling animations follow different rules than the usual Unit falling
+  /**
+   * Falling animations follow different rules than the usual Unit falling
    * animations, so we will define them separately.
    * C&P from Unit.
    * TODO: Some of the equipment will have its own falling animations.
-   * Need to override this. */
+   * Need to override this.
+   */
   protected void loadFallingAnimations() {
     for (int i=0; i<Constants.DIRECTIONS.length; i++) {
       String dir = Constants.DIRECTIONS[i];

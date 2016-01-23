@@ -1,11 +1,9 @@
-package warpath.items;
+package warpath.templates;
 
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import warpath.internals.SpriteTemplate;
 
 public class AccessoryTemplate extends SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 1L;

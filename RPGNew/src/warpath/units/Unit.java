@@ -257,7 +257,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
       // If we're currently blocking, either continue the block or terminate it
       // based on whether we've queued up additional blocking; also, check
       // whether we have enough EPs to continue blocking.
-      if (nextActivity.equals("blocking_2") && currentEP >= getBlockCost()) {
+      if (nextActivity != null && nextActivity.equals("blocking_2") && currentEP >= getBlockCost()) {
         pointAt(nextTargetPosn);
         setCurrentActivity("blocking_2");
       } else {

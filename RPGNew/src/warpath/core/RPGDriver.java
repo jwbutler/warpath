@@ -16,7 +16,7 @@ import warpath.ui.GameWindow;
    * This is the file where we actually create the game parameters: adding
    * players, units, etc. to the game.  We can define different ones for
    * various levels, modes, whatever.
-   **/
+   */
 
 public class RPGDriver extends WindowAdapter implements ActionListener {
   private final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
@@ -30,10 +30,10 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent e) {
     // continue button
-    if (e.getActionCommand().equals("Continue")) {
+    if (e.getActionCommand().equals("Start Game")) {
       CharacterCreator cc = window.getCharacterCreator();
       window.setCardLayout("Game");
-      game.start(cc.exportPaletteSwaps());
+      game.start(cc.exportTemplate());
     }
   }
   

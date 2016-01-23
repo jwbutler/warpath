@@ -1,11 +1,8 @@
-package warpath.internals;
+package warpath.templates;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import warpath.items.AccessoryTemplate;
-import warpath.units.UnitTemplate;
 
 public class TemplateFactory {
   public static SpriteTemplate getTemplate(String animName) {

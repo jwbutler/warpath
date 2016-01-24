@@ -5,6 +5,7 @@ import java.awt.Graphics;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
 
 /**
  * A JPanel that contains a Surface object.
@@ -28,7 +29,8 @@ public class SurfacePanel extends JPanel {
     this.setMaximumSize(new Dimension(surface.getWidth()+2*hpad, surface.getHeight()+2*vpad));
     
     // doesn't respect vpad
-    this.setBorder(BorderFactory.createLineBorder(Color.BLACK, hpad));
+    //this.setBorder(BorderFactory.createLineBorder(Color.BLACK, hpad));
+    this.setBorder(BorderFactory.createLoweredBevelBorder());
   }
   public SurfacePanel(Surface surface) {
     this(surface, DEFAULT_PADDING, DEFAULT_PADDING);

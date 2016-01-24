@@ -210,9 +210,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     loadSavePanel = new JPanel(new BorderLayout());
     loadSavePanel.setOpaque(false);
-    loadSavePanel.setLayout(new GridLayout(1, 2, 10, 10));
+    loadSavePanel.setLayout(new GridLayout(1, 3, Constants.MENU_PADDING, Constants.MENU_PADDING));
     loadSavePanel.add(loadButton);
     loadSavePanel.add(saveButton);
+    loadSavePanel.add(deleteButton);
     
     leftPanel.add(loadSavePanel);
     
@@ -389,7 +390,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     saveColorContainerPanel.add(savedColorPanelContainer);
     rightPanel.add(saveColorContainerPanel);
     rightPanel.add(Box.createVerticalStrut(400));
-    
     
     // Logic
     refreshItemComboBox();

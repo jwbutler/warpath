@@ -8,10 +8,11 @@ import javax.swing.JPanel;
 import warpath.layouts.StretchLayout;
 
 public class ColorPicker extends JPanel {
+  private static final long serialVersionUID = 1L;
   private final ColorPanel colorPanel;
   private final ValuePanel valuePanel;
-  public ColorPicker() {
-    setBackground(Color.LIGHT_GRAY);
+  private final CharacterCreator cc;
+  public ColorPicker(CharacterCreator cc) {
     setBorder(BorderFactory.createEmptyBorder(10,10,10,20));
     colorPanel = new ColorPanel(this);
     colorPanel.setBackground(Color.WHITE);
@@ -19,8 +20,9 @@ public class ColorPicker extends JPanel {
     valuePanel = new ValuePanel(this);
     valuePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
     setLayout(new StretchLayout(StretchLayout.X_AXIS));
-    add(colorPanel, 8.0);
+    add(colorPanel, 7.0);
     add(valuePanel, 1.0);
+    this.cc = cc;
     //validate();
   }
   
@@ -34,6 +36,10 @@ public class ColorPicker extends JPanel {
   
   public float getSaturation() {
     return colorPanel.getSaturation();
+  }
+  
+  public Color getColor() {
+    return Color.getHSBColor(getHue(), getSaturation(), getValue());
   }
   
   @Override
@@ -52,6 +58,16 @@ public class ColorPicker extends JPanel {
       3
     );
     g.setColor(oldColor);
+  }
+
+  /**
+   * Called by both child panels when the selected color is changed, as part
+   * of their mouse listeners.  Call repaint(), and tell the game to update
+   * its color.
+   */
+  public void updateColor() {
+    repaint();
+    cc.updateColors();
   }
 
 }

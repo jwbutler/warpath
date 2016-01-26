@@ -25,7 +25,6 @@ public class ValuePanel extends JPanel implements MouseListener, MouseMotionList
     
     int left = getInsets().left;
     int right = getWidth() - getInsets().right - 1;
-    int width = right - left + 1;
     int top = getInsets().top;
     int bottom = getHeight() - getInsets().bottom - 1;
     int height = bottom - top + 1;
@@ -54,7 +53,7 @@ public class ValuePanel extends JPanel implements MouseListener, MouseMotionList
     if (newValue >= 0 && newValue <= 1) {
       value = newValue; 
       repaint();
-      parent.repaint();
+      parent.updateColor();
     }
   }
   

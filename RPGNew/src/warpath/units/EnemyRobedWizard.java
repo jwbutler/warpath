@@ -12,16 +12,13 @@ import warpath.players.Player;
  * Represents the first type of robed wizard enemy, with behavior including
  * teleporting and zombie-resurrecting.
  * TODO The value of teleport_chance is not used.
- **/
+ */
 public class EnemyRobedWizard extends RobedWizardUnit {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
 
   private static final String[] ACTIVITIES = {"walking", "standing", "falling", "teleporting", "appearing", "rezzing", "stunned_long"};
   
-  /* These two percentages are additive */
+  // These two percentages are additive
   private static final double WANDER_CHANCE = 0.025;
   private static final double TELEPORT_CHANCE = 0.75;
   

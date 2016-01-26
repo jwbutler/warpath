@@ -18,6 +18,7 @@ public class EnemyTargetDummy extends HumanUnit {
     maxDamage = 10;
   }
 
+  @Override
   public void nextActivity() {
     super.nextActivity();
     /*if (currentActivity.equals("standing")) {

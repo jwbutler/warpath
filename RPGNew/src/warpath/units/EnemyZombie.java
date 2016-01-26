@@ -2,15 +2,11 @@ package warpath.units;
 import java.util.Random;
 
 import jwbgl.*;
-/* A basic enemy unit for testing! */
 import warpath.core.RPG;
 import warpath.core.Utils;
 import warpath.players.Player;
 
 public class EnemyZombie extends ZombieUnit {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private final static double SLOW_MOVE_SPEED = 0.3;
@@ -28,6 +24,7 @@ public class EnemyZombie extends ZombieUnit {
     //minDamage = maxDamage = 0;
   }
 
+  @Override
   public void nextActivity() {
     super.nextActivity();
     Random RNG = game.getRNG();
@@ -84,6 +81,7 @@ public class EnemyZombie extends ZombieUnit {
     }
   }
   
+  @Override
   public void doAttackHit(Unit u) {
     int dmg = game.getRNG().nextInt(maxDamage - minDamage + 1) + minDamage;
     // soundFX

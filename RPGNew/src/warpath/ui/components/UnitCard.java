@@ -9,13 +9,11 @@ import javax.swing.JButton;
 import warpath.core.RPG;
 import warpath.units.Unit;
 
-/** Shows information about a player unit (name and health bar).
+/**
+ * Shows information about a player unit (name and health bar).
  * Not used in the current game implementation.
  */
 public class UnitCard extends JButton implements ActionListener {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
   private HealthBar healthBar;
   private static final int MARGIN = 10;

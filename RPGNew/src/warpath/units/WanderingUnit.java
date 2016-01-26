@@ -2,15 +2,14 @@ package warpath.units;
 import java.util.Random;
 
 import jwbgl.*;
-/* Just a "fun" little AI unit that picks a random (non-blocked) floor tile
- * and paths to it. */
 import warpath.core.RPG;
 import warpath.players.Player;
 
+/**
+ * Just a "fun" little AI unit that picks a random (non-blocked) floor tile
+ * and paths to it.
+ */
 public class WanderingUnit extends HumanUnit {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
   private Random RNG;
   public WanderingUnit(RPG game, String name, Posn posn, Player player) {

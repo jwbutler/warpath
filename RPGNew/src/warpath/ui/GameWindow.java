@@ -45,7 +45,9 @@ public class GameWindow extends JFrame {
     setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
   }
 
-  // Sets up the Card Layout and the panelContainer.
+  /**
+   * Sets up the card layout and the panel container.
+   */
   public void initCardLayout(RPG game) {
     panelContainer.setPreferredSize(new Dimension(getWidth(), getHeight()));
     // To be moved to the menuPanel when I'm less lazy. 
@@ -73,7 +75,9 @@ public class GameWindow extends JFrame {
     pack();
   }
 
-  // This will be used to set the current display from other classes. 
+  /**
+   * This will be used to set the current display from other classes.
+   */ 
   public void setCardLayout(String panel) {
     cardLayout.show(panelContainer, panel);
     pack();

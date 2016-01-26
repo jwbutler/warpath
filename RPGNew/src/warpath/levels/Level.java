@@ -15,7 +15,8 @@ import warpath.units.EnemySwordGuy;
 import warpath.units.EnemyZombie;
 import warpath.units.Unit;
 
-/** Represents a level.  Initialized from a bitmap where colors represent
+/**
+ * Represents a level.  Initialized from a bitmap where colors represent
  * different types of tile, objects and units.  Contains constants
  * representing these colors.
  */

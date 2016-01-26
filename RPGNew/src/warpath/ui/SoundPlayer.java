@@ -10,8 +10,10 @@ import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-/** Used to play sounds.
- * TODO Music */
+/**
+ * Used to play sounds.
+ * TODO Music
+ */
 public class SoundPlayer {
   private final static String SOUNDS_FOLDER = "sounds";
   public SoundPlayer() {

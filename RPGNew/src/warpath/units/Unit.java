@@ -1,7 +1,6 @@
 package warpath.units;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,8 +22,8 @@ import warpath.ui.components.TransHealthBar;
 /**
  * Class representing any type of unit.  This class should be extended by any
  * subsequent unit classes we define.  Not to be used by itself (abstract).
- **/
-public abstract class Unit extends BasicObject implements GameObject, Serializable {
+ */
+public abstract class Unit extends BasicObject implements GameObject {
   private static final long serialVersionUID = 1L;
   protected final static int WALK_MOVE_FRAME = 2;
   protected final static int ATTACK_HIT_FRAME = 2;
@@ -87,8 +86,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     dx = 0;
     dy = -1;
     setXOffset(0);
-    /* Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8 pixel space 
-     * at bottom of player sprites. */
+    // Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8
+    // pixel space at bottom of player sprites. */
     setYOffset(-32);
     frameCache = new HashMap<String, Surface>();
     animations = new ArrayList<Animation>();
@@ -103,7 +102,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     //System.out.printf("%s has %d frames\n",getClass(), frames.keySet().size());
   }
   
-  /** Apply each of the palette swaps to each animation. */
+  /**
+   * Apply each of the palette swaps to each animation.
+   */
   public void applyPaletteSwaps() {
     for (Animation anim: animations) {
       for (Surface s: anim.getFrames()) {
@@ -113,7 +114,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
-  /** Face the unit toward the specified point.
+  /**
+   * Face the unit toward the specified point.
    * That is, make (dx,dy) into an integer unit vector.
    * We're using Pythagorean distance rather than Civ distance here,
    * should we change?
@@ -130,18 +132,24 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
-  /** @see #pointAt(int, int) */
+  /**
+   * @see #pointAt(int, int)
+   */
   public void pointAt(Posn posn) {
     pointAt(posn.getX(), posn.getY());
   }
   
-  /** @see #pointAt(int, int) */
+  /**
+   * @see #pointAt(int, int)
+   */
   public void pointAt(GameObject target) {
     pointAt(target.getX(), target.getY());
   }
 
-  /** Loads all of the animations for this unit.
-   * Calls {@link #loadActivityAnimations()} for each activity. */
+  /**
+   * Loads all of the animations for this unit.
+   * Calls {@link #loadActivityAnimations()} for each activity.
+   */
   public void loadAnimations() {
     long t = System.currentTimeMillis();
     for (int i = 0; i < activities.length; i++) {
@@ -343,8 +351,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         } else {
           setPath(game.findPath(getPosn(), targetPosn));
           
-          /* The pathing algorithm is configured to ignore units that are currently moving.
-           * This is for the case where the first tile in the path contains a moving unit. */
+          // The pathing algorithm is configured to ignore units that are
+          // currently moving.  This is for the case where the first tile in
+          // the path contains a moving unit.
           if (game.getFloor().getTile(path.peekFirst()).isBlocked()) {
             // System.out.println("fux");
           } else {
@@ -355,7 +364,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             setNextTargetUnit(null);
           }
         }
-      /* If next activity is attacking, we might have to path to the unit first. */
+      // If next activity is attacking, we might have to path to the unit first.
       } else if (nextActivity.equals("attacking")) {
         if (Utils.distance2(this, targetUnit) == 1) {
           if (currentEP >= ATTACK_COST) {
@@ -376,7 +385,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
           setPath(game.findPath(getPosn(), targetPosn));
           pointAt(path.peekFirst());
           setCurrentActivity("walking");
-          /* Don't clear nextActivity/nextTargetUnit */ 
+          // Don't clear nextActivity/nextTargetUnit 
         }
       } else if (nextActivity.equals("bashing")) {
         if (Utils.distance2(this, targetUnit) == 1) {
@@ -403,7 +412,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
             pointAt(path.peekFirst());          
             setCurrentActivity("walking");
           }
-          /* Don't clear nextActivity/nextTargetUnit */ 
+          // Don't clear nextActivity/nextTargetUnit 
         }
       } else if (nextActivity.equals("blocking_1")) {
         setTargetPosn(getNextTargetPosn());
@@ -425,11 +434,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         setCurrentActivity("rezzing");
         setNextActivity(null);
       }
-      /* Shouldn't need to do this anymore now that setters do it for us automatically. 
-      if (targetUnit != null) {
-        targetUnit.updateFloorOverlay();
-      }*/
-    /* no nextactivity */
+      // Shouldn't need to do this anymore now that setters do it for us automatically. 
+      //if (targetUnit != null) {
+      //  targetUnit.updateFloorOverlay();
+      //}
+    // no nextactivity
     } else { // if (nextActivity == null) {
       if (currentActivity.equals("walking")) {
         refreshWalk();
@@ -440,26 +449,28 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
-  /** This is the code that loops the walking! */
+  /**
+   * This is the code that loops the walking!
+   */
   public void refreshWalk() {
-    /* This is the case where the next tile is non-empty but we're only
-     * pausing for one turn. */ 
+    // This is the case where the next tile is non-empty but we're only
+    // pausing for one turn. 
     if (targetPosn == null) {
       // System.out.println("Fuck!!!");
       //clearTargets();
       
-    /* These two cases basically represent the same thing: we've arrived, or
-     * we're otherwise out of path for some reason. */ 
+    // These two cases basically represent the same thing: we've arrived, or
+    // we're otherwise out of path for some reason. 
     } else if (path == null || path.size() == 0) {
       setCurrentActivity("standing");
       clearTargets();
     } else if (getPosn().equals(targetPosn)) {
       setCurrentActivity("standing");
       clearTargets();
-    /* Proceed. */
+    // Proceed.
     } else {
-      /* We're NOT calling checkNextTile here. It's OK, we'll check it before doing anything else
-       * in doEvents() or something. */
+      // We're NOT calling checkNextTile here. It's OK, we'll check it before
+      // doing anything else in doEvents() or something.
       if (game.getFloor().getTile(path.peekFirst()).isBlocked()) {
         //System.out.println("fux4");
       } else {
@@ -473,7 +484,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return getPlayer().isHostile(u.getPlayer());
   }
 
-  /** Performs various maintenance tasks at the beginning of each "turn".
+  /**
+   * Performs various maintenance tasks at the beginning of each "turn".
    * TODO Think hard about the order of execution.
    */
   public void doUpkeep() {
@@ -495,7 +507,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     this.nextFrame();
   }
   
-  public void clearTargets() {
+  protected void clearTargets() {
     setTargetPosn(null);
     setTargetUnit(null);
     setNextTargetPosn(null);
@@ -504,12 +516,14 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     setTargetPosnOverlay(null);
   }
 
-  /** So this is an important method.
+  /**
+   * So this is an important method.
    * It's a big mess.
    * The idea here is to handle ALL the activities for ALL unit types here,
    * so we won't have to copy and paste it into all the unit subclasses.
    * (They will each have their own nextActivity() logic.)
-   * TODO figure out a way to split this method up. */
+   * TODO figure out a way to split this method up.
+   */
   public void doEvents() {
     
     if (getCurrentActivity().equals("walking")) {
@@ -564,7 +578,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
         }
       }
     } else if (getCurrentActivity().equals("blocking_2")) {
-      /* WTF? */
+      // WTF?
       if (currentHP == 0) {
         setNextActivity(null);
         setNextTargetPosn(null);
@@ -601,7 +615,8 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   /**
    * Moves the unit by the specified amount.
    * Does NOT validate the tile we're moving to. You have to do that yourself!
-   * checkNextTile() was supposed to do that but it kind of grew in scope. */
+   * checkNextTile() was supposed to do that but it kind of grew in scope.
+   */
   public void move(int dx, int dy) {
     //System.out.printf("move: %s %s\n", getPosn(), new Posn(getX() + dx, getY() + dy));
     game.getDepthTree().remove(this);
@@ -616,9 +631,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     updateFloorOverlay();
   }
   
-  /** Moves the unit to an absolute location, in Posn form.
+  /**
+   * Moves the unit to an absolute location, in Posn form.
    * Like {@link #move(int, int)}, this method does not validate.
-   * @param p - the Posn to move to */
+   * @param p - the Posn to move to
+   */
   public void moveTo(Posn p) {
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
@@ -632,7 +649,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     updateFloorOverlay();
   }
   
-  /** We can call this on any GameObject for differentiation purposes. */
+  /**
+   * We can call this on any GameObject for differentiation purposes.
+   */
   @Override
   public boolean isUnit() {
     return true;
@@ -650,8 +669,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return "<Unit("+getName()+")>";
   }
   
-  /** Possibly poorly named.  This function will look at the tile directly in front of the unit,
-   * and do one of three things:<br>
+  /**
+   * Possibly poorly named.  This function will look at the tile directly in
+   * front of the unit, and do one of three things:<br>
    * 1) Nothing, if the tile is open;<br>
    *    - currentActivity = walking<br>
    *    - nextActivity = null or attacking<br>
@@ -873,19 +893,12 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return animationName;
   }
   
-  /** Source of confusion: this one returns "N", "NE" etc. while getDirection() uses coords. */
+  /**
+   * Source of confusion: this one returns "N", "NE" etc. while getDirection()
+   * uses coords.
+   */
   public String getCurrentDirection() {
     return Utils.coordsToDir(dx, dy);
-  }
-  
-  /** Return the drawable area of the sprite. (?) */
-  public Rect getRect() {
-    Posn pixel = game.gridToPixel(getPosn()); // returns top left
-    int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + getXOffset();
-    int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + getYOffset();
-    Rect transparencyRect = getSurface().getTransparencyRect().clone();
-    transparencyRect.move(left,top);
-    return transparencyRect; 
   }
   
   public Player getPlayer() {
@@ -935,12 +948,14 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
   
-  /* Source is a GameObject, not a unit - allows for stuff like projectiles,
-   * floor fire, etc. */
+  /**
+   * Source is a GameObject, not a unit - allows for stuff like projectiles,
+   * floor fire, etc.
+   */
   public void takeHit(GameObject src, int dmg) {
     Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
-      /* Do we want to take partial damage? Do we want to block adjacent angles? */
+      // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
       takeDamage(dmg);
     }
@@ -949,7 +964,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void takeBashHit(GameObject src, int dmg) {
     Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
-      /* Do we want to take partial damage? Do we want to block adjacent angles? */
+      // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
       setCurrentActivity("stunned_short");
       clearTargets();
@@ -960,7 +975,7 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
   public void takeSlashHit(GameObject src, int dmg) {
     Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
-      /* Do we want to take partial damage? Do we want to block adjacent angles? */
+      // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
       setCurrentActivity("standing");
       clearTargets();
@@ -968,9 +983,11 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     }
   }
 
-  /* For the time being, we're treating the different blocking animations as
+  /**
+   * For the time being, we're treating the different blocking animations as
    * equivalent for mitigation purposes. Think about whether this is what
-   * we want. */
+   * we want.
+   */
   public boolean isBlocking() {
     if (getCurrentActivity().equals("blocking_1")) return true;
     else if (getCurrentActivity().equals("blocking_2")) return true;
@@ -994,7 +1011,9 @@ public abstract class Unit extends BasicObject implements GameObject, Serializab
     return maxEP;
   }
 
-  /* Perhaps confusing: doesn't return "NE" etc., but returns Posn<-1, -1> etc. */
+  /**
+   * Perhaps confusing: doesn't return "NE" etc., but returns Posn<-1, -1> etc.
+   */
   public Posn getDirection() {
     return new Posn(dx, dy);
   }

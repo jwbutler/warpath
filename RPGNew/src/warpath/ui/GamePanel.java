@@ -12,9 +12,6 @@ import warpath.core.RPG;
   * TODO Learn how AWT/Swing graphics actually work...
   * */
 public class GamePanel extends JPanel {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
   private final RPG game;
   private KeyboardFocusManager focusManager;
@@ -45,6 +42,9 @@ public class GamePanel extends JPanel {
     //game.drawAll(g);
   }
   
+  /**
+   * Do we need this?
+   */
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     game.drawAll(g);

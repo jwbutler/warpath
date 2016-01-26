@@ -5,6 +5,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Contains info needed to save any created object (unit or accessory).
+ * Extended by UnitTemplate, AccessoryTemplate.
+ */
 public class SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 1L;
   private final String animName;

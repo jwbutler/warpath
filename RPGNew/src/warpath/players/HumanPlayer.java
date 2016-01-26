@@ -3,7 +3,9 @@ import java.util.ArrayList;
 
 import warpath.units.Unit;
 
-/* The human player.  There will only be one. */
+/**
+ * The human player.  There will only be one.
+ */
 
 public class HumanPlayer implements Player {
   private final int playerNumber;
@@ -14,7 +16,7 @@ public class HumanPlayer implements Player {
   
   /**
    * Instantiates the player with the given player number index.
-   **/
+   */
   public HumanPlayer(int playerNumber) {
     this.playerNumber = playerNumber;
     units = new ArrayList<Unit>();

@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager2;
-import java.util.ArrayList;
 
 /**
  * This is a custom container layout based on the BoxLayout, but hopefully
@@ -51,6 +50,7 @@ public class StackLayout implements LayoutManager2 {
   }
   
   private void layoutHorizontal(Container parent) {
+    int parentWidth = parent.getWidth() - parent.getInsets().left - parent.getInsets().right;
     int parentHeight = parent.getHeight() - parent.getInsets().top - parent.getInsets().bottom;
     int left = parent.getInsets().left;
     for (int i=0; i<parent.getComponents().length; i++) {
@@ -65,11 +65,25 @@ public class StackLayout implements LayoutManager2 {
   
   private void layoutVertical(Container parent) {
     int parentWidth = parent.getWidth() - parent.getInsets().left - parent.getInsets().right;
+    int parentHeight = parent.getHeight() - parent.getInsets().top - parent.getInsets().bottom;
     int top = parent.getInsets().top;
     for (int i=0; i<parent.getComponents().length; i++) {
       Component c = parent.getComponents()[i];
-      int width = (int)(c.getPreferredSize().getWidth());
-      int height = (int)(c.getPreferredSize().getHeight());
+      int width, height;
+      if (c.getPreferredSize().getWidth() == 0) {
+        width = parentWidth;
+      } else {
+        width = (int)(c.getPreferredSize().getWidth());
+      }
+
+      height = (int)(c.getPreferredSize().getHeight());
+      if (c.getPreferredSize().getHeight() == 0) {
+        // What is a reasonable default value?
+        System.out.println("z");
+        height = (int)(parentHeight*0.1);
+      } else {
+        height = (int)(c.getPreferredSize().getHeight());
+      }
       int left = parent.getInsets().left + (int)((parentWidth - width)*c.getAlignmentX());
       c.setBounds(left, top, width, height);
       top += height + gap;
@@ -94,14 +108,16 @@ public class StackLayout implements LayoutManager2 {
   public void addLayoutComponent(Component c, Object o) {
   }
 
+  /** FIXME */
   @Override
   public float getLayoutAlignmentX(Container parent) {
-    return parent.getAlignmentX();
+    return 0.5f;
   }
 
+  /** FIXME */
   @Override
   public float getLayoutAlignmentY(Container parent) {
-    return parent.getAlignmentY();
+    return 0.5f;
   }
 
   @Override

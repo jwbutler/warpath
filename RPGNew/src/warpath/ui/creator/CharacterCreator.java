@@ -29,7 +29,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
@@ -39,13 +38,15 @@ import jwbgl.*;
 import warpath.core.Constants;
 import warpath.core.RPGDriver;
 import warpath.core.Utils;
+import warpath.layouts.StackLayout;
+import warpath.layouts.StretchLayout;
 import warpath.templates.AccessoryTemplate;
 import warpath.templates.TemplateFactory;
 import warpath.templates.UnitTemplate;
 
-/** The menu for creating a new character.
+/**
+ * The menu for creating a new character.
  * TODO support saving female characters
- * TODO remove slot dialog in favor of just items
  */
 public class CharacterCreator extends JPanel implements ActionListener, ChangeListener {
 
@@ -66,8 +67,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final SurfacePanel unitPanel;
   private final JList<String> savesList;
   private final JButton modelSelector;
+  private final JPanel loadSaveContainerPanel;
   private final JScrollPane listPanel;
-  private final JPanel loadSavePanel;
+  private final JPanel loadSaveButtonPanel;
   private final JButton loadButton;
   private final JButton saveButton;
   private final JButton deleteButton;
@@ -89,7 +91,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final JPanel startButtonPanel;
   
   // Right panel components
-  private final JPanel RPanel;
+  private final ColorPicker colorPicker;
+  
+  /*private final JPanel RPanel;
   private final JPanel GPanel;
   private final JPanel BPanel;
   private final JSlider RSlider;
@@ -109,7 +113,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final JPanel savedColorPanelContainer;
   private final JPanel currentColorPanelContainer;
   private final JLabel currentColorLabel; 
-  private final JPanel saveColorContainerPanel;
+  private final JPanel saveColorContainerPanel;*/
   
   private final Vector<String> filenames;
 
@@ -150,7 +154,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     // =====================
     // Set up the left panel
     // =====================
-    leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+    leftPanel.setLayout(new StackLayout(StackLayout.Y_AXIS));
     leftPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
     leftPanel.setBorder(BorderFactory.createEmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
     
@@ -164,10 +168,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     }
     unitSurface = unitSurface.scale2x().scale2x();
     unitPanel = new SurfacePanel(unitSurface);
-    //unitPanel.setBackground(Color.RED);
-    leftPanel.add(unitPanel);
-    
-    leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
 
     modelSelector = new JButton("Switch Model");
     modelSelector.setAlignmentX(CENTER_ALIGNMENT);
@@ -177,29 +177,16 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         changeModel();
       }
     });
+    leftPanel.add(unitPanel);
     leftPanel.add(modelSelector);
-    leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
     
     // Set up the load/save interface.
-    File dir = new File(Constants.CHARACTER_SAVE_FOLDER);
     filenames = new Vector<String>();
-    if (dir.exists() && dir.isDirectory()) {
-      for (String s : dir.list()) {
-        if (Utils.isSaveFile(s)) {
-          filenames.add(s.substring(0, s.length()-4));
-        }
-      }
-    } else {
-      // error stuff
-    }
-    filenames.add(NEW_SAVE_TEXT);
     savesList = new JList<String>(filenames);
     savesList.setBackground(Color.WHITE);
     savesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    updateSaveFilenames();
     listPanel = new JScrollPane(savesList);
-    leftPanel.add(listPanel);
-    
-    leftPanel.add(Box.createVerticalStrut(Constants.MENU_PADDING));
     
     loadButton = new JButton("Load");
     loadButton.addActionListener(this);
@@ -208,14 +195,16 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     deleteButton = new JButton("Delete");
     deleteButton.addActionListener(this);
     
-    loadSavePanel = new JPanel(new BorderLayout());
-    loadSavePanel.setOpaque(false);
-    loadSavePanel.setLayout(new GridLayout(1, 3, Constants.MENU_PADDING, Constants.MENU_PADDING));
-    loadSavePanel.add(loadButton);
-    loadSavePanel.add(saveButton);
-    loadSavePanel.add(deleteButton);
+    loadSaveButtonPanel = new JPanel();
+    loadSaveButtonPanel.setLayout(new GridLayout(1, 3, Constants.MENU_PADDING, Constants.MENU_PADDING));
+    loadSaveButtonPanel.add(loadButton);
+    loadSaveButtonPanel.add(saveButton);
+    loadSaveButtonPanel.add(deleteButton);
     
-    leftPanel.add(loadSavePanel);
+    loadSaveContainerPanel = new JPanel(new StretchLayout(StretchLayout.Y_AXIS));
+    loadSaveContainerPanel.add(listPanel, 3.0);
+    loadSaveContainerPanel.add(loadSaveButtonPanel, 1.0);
+    leftPanel.add(loadSaveContainerPanel);
     
     // =======================
     // Set up the middle panel
@@ -319,77 +308,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     rightPanel.setBorder(BorderFactory.createEmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
     //middlePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, Constants.MENU_PADDING));
-    rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-
-    RSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
-    RSlider.addChangeListener(this);
-    GSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
-    GSlider.addChangeListener(this);
-    BSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
-    BSlider.addChangeListener(this);
-    RLabel = new JLabel("Red");
-    RLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    GLabel = new JLabel("Green");
-    GLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    BLabel = new JLabel("Blue");
-    BLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    RPanel = new JPanel(new BorderLayout());
-    GPanel = new JPanel(new BorderLayout());
-    BPanel = new JPanel(new BorderLayout());
-    RPanel.add(RSlider, BorderLayout.CENTER);
-    RPanel.add(RLabel, BorderLayout.SOUTH);
-    GPanel.add(GSlider, BorderLayout.CENTER);
-    GPanel.add(GLabel, BorderLayout.SOUTH);
-    BPanel.add(BSlider, BorderLayout.CENTER);
-    BPanel.add(BLabel, BorderLayout.SOUTH);
-    rightPanel.add(RPanel);
-    rightPanel.add(GPanel);
-    rightPanel.add(BPanel);
-    rightPanel.add(Box.createVerticalStrut(10));
+    rightPanel.setLayout(new StretchLayout(StretchLayout.Y_AXIS));
+    colorPicker = new ColorPicker(this);
+    rightPanel.add(colorPicker);
     
-    saveColorContainerPanel = new JPanel();
-    saveColorContainerPanel.setLayout(new GridLayout(1,3));
-    currentColorPanel = new JPanel();
-    currentColorPanel.setBackground(Color.RED);
-    currentColorLabel = new JLabel("Current color");
-    currentColorLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    currentColorPanelContainer = new JPanel(new BorderLayout());
-    currentColorPanelContainer.add(currentColorPanel, BorderLayout.CENTER);
-    currentColorPanelContainer.add(currentColorLabel, BorderLayout.SOUTH);
-    saveColorContainerPanel.add(currentColorPanelContainer);
-    copyPasteColorPanel = new JPanel(new GridLayout(2,1));
-    copyButton = new JButton("-->");
-    copyButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        copyColor();
-      }
-    });
-    copyButtonPanel = new JPanel(new BorderLayout());
-    copyButtonPanel.add(copyButton, BorderLayout.CENTER);
-    copyButtonPanel.add(new JLabel("Current color"), BorderLayout.SOUTH);
-    pasteButton = new JButton("<--");
-    pasteButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        pasteColor();
-      }
-    });
-    copyPasteColorPanel.add(copyButton);
-    copyPasteColorPanel.add(pasteButton);
-    saveColorContainerPanel.add(copyPasteColorPanel);
-    savedColorPanel = new JPanel();
-    savedColorPanel.setBackground(Color.BLUE);
-
-    JLabel savedColorLabel = new JLabel("Saved color");
-    savedColorLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    
-    savedColorPanelContainer = new JPanel(new BorderLayout());
-    savedColorPanelContainer.add(savedColorPanel, BorderLayout.CENTER);
-    savedColorPanelContainer.add(savedColorLabel, BorderLayout.SOUTH);
-    saveColorContainerPanel.add(savedColorPanelContainer);
-    rightPanel.add(saveColorContainerPanel);
-    rightPanel.add(Box.createVerticalStrut(400));
     
     // Logic
     refreshItemComboBox();
@@ -456,7 +378,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private void updateSliders() {
     //String slot = (String)(slotComboBox.getSelectedItem());
     //String itemName = (String)(itemComboBox.getSelectedItem());
-    String colorName = (String)(colorComboBox.getSelectedItem());
+    /*String colorName = (String)(colorComboBox.getSelectedItem());
     String animName = getAnimName();
     if (animName != null) {
       HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
@@ -478,7 +400,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         BSlider.setValue(c.getBlue());
         currentColorPanel.setBackground(c);
       }
-    }
+    }*/
   }
 
   /**
@@ -611,7 +533,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * @param name - the name of the color (e.g. "Shirt 1")
    */
   private void copyColor() {
-    savedColorPanel.setBackground(currentColorPanel.getBackground());
+    //savedColorPanel.setBackground(currentColorPanel.getBackground());
   }
   
   /**
@@ -619,10 +541,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * @param name - the name of the color (e.g. "Shirt 1") 
    */
   private void pasteColor() {
-    Color c = savedColorPanel.getBackground();
+    /*Color c = savedColorPanel.getBackground();
     RSlider.setValue(c.getRed());
     GSlider.setValue(c.getGreen());
-    BSlider.setValue(c.getBlue());
+    BSlider.setValue(c.getBlue());*/
     /*if (savedColor != null) {
       JSlider RSlider = colorSliders.get(name)[0];
       RSlider.setValue(savedColor.getRed());
@@ -645,10 +567,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
     Color c = colorMap.get(colorName);
     if (c != null) {
-      int r = RSlider.getValue();
-      int g = GSlider.getValue();
-      int b = BSlider.getValue();
-      Color dest = new Color(r,g,b);
+      Color dest = colorPicker.getColor();
       
       // double validation :(
       if (!slot.equals(BASE_MODEL) && (itemName != null) & (!itemName.equals(NO_ITEM))) {
@@ -658,11 +577,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         template.getPaletteSwaps().put(c, dest);
       }
       //colorLabels.get(label).setBackground(dest);
-      RLabel.setText(Integer.toString(r));
-      GLabel.setText(Integer.toString(g));
-      BLabel.setText(Integer.toString(b));
       updateUnitSurface();
-      currentColorPanel.setBackground(dest);
+      //currentColorPanel.setBackground(dest);
     }
   }
   

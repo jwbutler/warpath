@@ -90,6 +90,7 @@ public class StretchLayout implements LayoutManager2 {
       int width = parentWidth;
       int left = parent.getInsets().left + (int)((parentWidth - width)*c.getAlignmentX());
       c.setPreferredSize(new Dimension(width, height));
+      c.revalidate();
       c.setBounds(left, top, width, height);
       top += height + gap;
     }
@@ -121,15 +122,17 @@ public class StretchLayout implements LayoutManager2 {
       weights.add(1.0);
     }
   }
-
+  
+  /** FIXME */
   @Override
   public float getLayoutAlignmentX(Container parent) {
-    return parent.getAlignmentX();
+    return 0.5f;
   }
 
+  /** FIXME */
   @Override
   public float getLayoutAlignmentY(Container parent) {
-    return parent.getAlignmentY();
+    return 0.5f;
   }
 
   @Override

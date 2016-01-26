@@ -1,6 +1,5 @@
 package warpath.units;
 import java.awt.Color;
-import java.io.Serializable;
 import java.util.HashMap;
 
 import jwbgl.*;
@@ -12,10 +11,7 @@ import warpath.players.Player;
  * This class is used to represent humanoid units.  Particularly the ones
  * that use Will's original "player" sprite.  It'll be subclassed lots.
  */
-public abstract class HumanUnit extends Unit implements Serializable {
-  /**
-   * 
-   */
+public abstract class HumanUnit extends Unit {
   private static final long serialVersionUID = 1L;
   private static final String[] DEFAULT_ACTIVITIES = {"walking", "standing", "attacking", "falling"};
   private static final String HIT_SOUND = "hit1.wav";

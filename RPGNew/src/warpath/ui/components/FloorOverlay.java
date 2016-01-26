@@ -8,8 +8,10 @@ import warpath.core.RPG;
 import warpath.objects.GameObject;
 import warpath.objects.NonBlockingObject;
 
-/** Represents a floor overlay for units with customizable colors 
- * representing the unit's alignment, targeting status, etc. */
+/**
+ * Represents a floor overlay for units with customizable colors 
+ * representing the unit's alignment, targeting status, etc.
+ */
 public class FloorOverlay extends NonBlockingObject {
   private final String FLOOR_OVERLAY_PATH = "floor_overlay_96x48";
   private GameObject src;

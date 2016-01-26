@@ -43,7 +43,7 @@ public class ColorPanel extends JPanel implements MouseListener, MouseMotionList
       }
     }
     int x = (int)(hue * width);
-    int y = (int)(saturation * height);
+    int y = (int)((1 - saturation) * height);
     g.setColor(Color.BLACK);
     g.drawRect(x-4, y-4, 8, 8);
     g.setColor(oldColor);
@@ -55,12 +55,12 @@ public class ColorPanel extends JPanel implements MouseListener, MouseMotionList
   private void updateColor(MouseEvent e) {
     float newHue, newSat;
     newHue = (float)e.getX()/(getWidth()-1);
-    newSat = (float)e.getY()/(getHeight()-1);
+    newSat = (float)(getHeight() - 1 - e.getY())/(getHeight()-1);
     if (newHue >= 0 && newHue <= 1 && newSat >= 0 && newSat <= 1) {
       hue = newHue;
       saturation = newSat;
       repaint();
-      parent.repaint();
+      parent.updateColor();
     }
   }
   

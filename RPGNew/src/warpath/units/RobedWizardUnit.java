@@ -13,9 +13,6 @@ import warpath.objects.Corpse;
 import warpath.players.Player;
 
 public abstract class RobedWizardUnit extends Unit implements Serializable {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
   private static final String[] DEFAULT_ACTIVITIES = {
     "standing", "walking", "falling", "teleporting", "appearing", "rezzing", "stunned_short", "stunned_long"
@@ -74,6 +71,7 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     System.out.printf("%s.loadAnimations(): %d ms\n", this.getClass(), t);
   }
   
+  @Override
   public void loadActivityAnimations(String activity) {
     if (activity.equals("falling")) {
       loadFallingAnimations();
@@ -96,8 +94,10 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     }
   }
   
-  /* For now we're just using standing animations. Maybe we can do something better? */
-  public void loadStunnedShortAnimations() {
+  /**
+   * For now we're just using standing animations. Maybe we can do something better?
+   */
+  protected void loadStunnedShortAnimations() {
     for (int i=0; i<Constants.DIRECTIONS.length; i++) {
       String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_STUNNED_SHORT;
@@ -110,7 +110,10 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     }
   }
   
-  public void loadStunnedLongAnimations() {
+  /**
+   * For now we're just using standing animations. Maybe we can do something better?
+   */
+  protected void loadStunnedLongAnimations() {
     for (int i=0; i<Constants.DIRECTIONS.length; i++) {
       String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_STUNNED_LONG;
@@ -150,9 +153,10 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
 
   }
 
+  /** (C&P from ZombieUnit)
+   * Uses the vanishing animation which is directionless.
+   */
   @Override
-  /* (C&P from ZombieUnit)
-   * Uses the vanishing animation which is directionless. */
   public void loadFallingAnimations() {
     for (int i=0; i<Constants.DIRECTIONS.length; i++) {
       String dir = Constants.DIRECTIONS[i];
@@ -166,8 +170,10 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
     }
   }
   
-  /* Long (40-frame) casting animation, all SE. */
-  public void loadRezzingAnimations() {
+  /**
+   * Long (40-frame) casting animation, all SE.
+   */
+  protected void loadRezzingAnimations() {
     for (int i=0; i<Constants.DIRECTIONS.length; i++) {
       String dir = Constants.DIRECTIONS[i];
       String[] filenames = AnimationTemplates.WIZARD_REZZING;

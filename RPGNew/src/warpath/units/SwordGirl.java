@@ -5,11 +5,11 @@ import java.util.HashMap;
 import jwbgl.*;
 import warpath.core.RPG;
 import warpath.players.Player;
-/* Warrior-type player unit class.  Sword/shield.*/
+
+/**
+ * Female unit similar to SwordGuy but with no shield.
+ */ 
 public class SwordGirl extends HumanUnit {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static String[] activities = {

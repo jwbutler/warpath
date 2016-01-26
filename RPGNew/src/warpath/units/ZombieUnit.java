@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import jwbgl.*;
-/* This is the BASE class for all zombie-type units. It'll be subclassed for anything that actually
- * appears in game (to specify combat stats, etc.) */
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
 import warpath.core.Constants;
@@ -13,10 +11,11 @@ import warpath.core.RPG;
 import warpath.objects.Corpse;
 import warpath.players.Player;
 
+/**
+ * This is the BASE class for all zombie-type units. It'll be subclassed for
+ * anything that actually appears in game (to specify combat stats, etc.)
+ */
 public abstract class ZombieUnit extends Unit implements Serializable {
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
   private static final String[] DEFAULT_ACTIVITIES = {"walking", "standing", "attacking", "falling"};
   private static final int X_OFFSET = 0;
@@ -46,17 +45,21 @@ public abstract class ZombieUnit extends Unit implements Serializable {
     this.setYOffset(Y_OFFSET);
   }
   
+  /**
+   * TODO This should be direction-dependent!
+   */
   @Override
   public void die() {
     super.die();
-    /* This should be direction-dependent! */
     game.addObject(new Corpse(game, getPosn(), "zombie_falling_3.png"));
   }
   
+  /**
+   * Zombies have two directions for falling, denoted "falling" and "fallingB"
+   * rather than with directions. Not sure which directions they specifically
+   * should correspond to. (FU Will)
+   */
   @Override
-  /* Zombies have two directions for falling, denoted "falling" and "fallingB" rather
-   * than with directions. Not sure which directions they specifically should correspond to.
-   * (FU will) */
   public void loadFallingAnimations() {
     for (int i=0; i<Constants.DIRECTIONS.length; i++) {
       String dir = Constants.DIRECTIONS[i];

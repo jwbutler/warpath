@@ -9,8 +9,8 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import warpath.ui.CharacterCreator;
 import warpath.ui.GameWindow;
+import warpath.ui.creator.CharacterCreator;
 
   /**
    * This is the file where we actually create the game parameters: adding

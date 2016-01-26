@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 
 import warpath.core.RPG;
 import warpath.core.RPGDriver;
+import warpath.ui.creator.CharacterCreator;
 
 /**
  * The main game window.  Everything else gets rendered inside this;

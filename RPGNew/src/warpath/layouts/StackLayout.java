@@ -67,6 +67,19 @@ public class StackLayout implements LayoutManager2 {
     int parentWidth = parent.getWidth() - parent.getInsets().left - parent.getInsets().right;
     int parentHeight = parent.getHeight() - parent.getInsets().top - parent.getInsets().bottom;
     int top = parent.getInsets().top;
+    // Calculate the amount of extra space, so that we can assign
+    // reasonable values to components that don't have a preferred size.
+    // Extra space will be 
+    int extraSpace = parentHeight - gap * (parent.getComponents().length - 1);
+    int numUnsizedComponents = 0;
+    for (int i=0; i<parent.getComponents().length; i++) {
+      Component c = parent.getComponents()[i];
+      if (c.getPreferredSize().height > 0) {
+        extraSpace -= c.getPreferredSize().height;
+      } else {
+        numUnsizedComponents++;
+      }
+    }
     for (int i=0; i<parent.getComponents().length; i++) {
       Component c = parent.getComponents()[i];
       int width, height;
@@ -79,8 +92,7 @@ public class StackLayout implements LayoutManager2 {
       height = (int)(c.getPreferredSize().getHeight());
       if (c.getPreferredSize().getHeight() == 0) {
         // What is a reasonable default value?
-        System.out.println("z");
-        height = (int)(parentHeight*0.1);
+        height = (int)((double)extraSpace / numUnsizedComponents);
       } else {
         height = (int)(c.getPreferredSize().getHeight());
       }

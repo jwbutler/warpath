@@ -202,7 +202,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     loadSaveButtonPanel.add(deleteButton);
     
     loadSaveContainerPanel = new JPanel(new StretchLayout(StretchLayout.Y_AXIS));
-    loadSaveContainerPanel.add(listPanel, 3.0);
+    loadSaveContainerPanel.add(listPanel, 7.0);
     loadSaveContainerPanel.add(loadSaveButtonPanel, 1.0);
     leftPanel.add(loadSaveContainerPanel);
     
@@ -261,15 +261,16 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         if (slot != null && !slot.equals(BASE_MODEL)) {
           if (item == null) {
             // why?
-            //System.out.println("fuux");
+            System.out.println("fuux");
           } else if (item.equals(NO_ITEM)) {
+            // WHY does this proc when we're populating?
             template.removeItem(slot);
             updateUnitSurface();
           } else {
             equipItem();
           }
           refreshColorComboBox();
-          updateSliders();
+          updateColorPicker();
         }
       }
     });
@@ -289,7 +290,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     colorComboBox.addItemListener(new ItemListener() {
       @Override
       public void itemStateChanged(ItemEvent arg0) {
-        updateSliders();
+        updateColorPicker();
       }
     });
     middlePanel.add(colorComboBox);
@@ -337,6 +338,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   // TODO: OOP
   private void refreshColorComboBox() {
     String animName = getAnimName();
+    ItemListener listener = colorComboBox.getItemListeners()[0];
+    colorComboBox.removeItemListener(listener);
     if (animName != null) {
       // TODO store current item template somewhere
       colorComboBox.removeAllItems();
@@ -347,6 +350,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       colorComboBox.removeAllItems();
       colorComboBox.addItem(NO_ITEM);
     }
+    colorComboBox.addItemListener(listener);
   }
 
   /**
@@ -375,32 +379,33 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     }
   }
 
-  private void updateSliders() {
-    //String slot = (String)(slotComboBox.getSelectedItem());
+  private void updateColorPicker() {
+    String slot = (String)(slotComboBox.getSelectedItem());
     //String itemName = (String)(itemComboBox.getSelectedItem());
-    /*String colorName = (String)(colorComboBox.getSelectedItem());
+    String colorName = (String)(colorComboBox.getSelectedItem());
     String animName = getAnimName();
     if (animName != null) {
-      HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
-      Color c = colorMap.get(colorName);
+      HashMap<String, Color> colorMap;
+      Color c;
+      //HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
+      if (slot == BASE_MODEL) {
+        colorMap = template.getColorMap();
+        c = template.getPaletteSwaps().get(colorMap.get(colorName));
+      } else {
+        colorMap = template.getItem(slot).getColorMap();
+        c = template.getItem(slot).getPaletteSwaps().get(colorMap.get(colorName));
+      }
+      
       // TODO fine-tune this validation
       if (c == null) {
-        RSlider.setEnabled(false);
-        GSlider.setEnabled(false);
-        BSlider.setEnabled(false);
-        RSlider.setValue(0);
-        GSlider.setValue(0);
-        BSlider.setValue(0);
+        colorPicker.setVisible(false);
+        colorPicker.setColor(Color.BLACK);
       } else {
-        RSlider.setEnabled(true);
-        GSlider.setEnabled(true);
-        BSlider.setEnabled(true);
-        RSlider.setValue(c.getRed());
-        GSlider.setValue(c.getGreen());
-        BSlider.setValue(c.getBlue());
-        currentColorPanel.setBackground(c);
+        colorPicker.setVisible(true);
+        colorPicker.setColor(c);
+        //currentColorPanel.setBackground(c);
       }
-    }*/
+    }
   }
 
   /**
@@ -437,7 +442,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
             slotComboBox.setSelectedIndex(0);
             itemComboBox.setSelectedIndex(0);
             colorComboBox.setSelectedIndex(0);
-            updateSliders();
+            updateColorPicker();
           } catch (IOException e1) {
             System.out.println("IOException (Load): "+filename);
           } catch (ClassNotFoundException e2) {
@@ -576,9 +581,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
       } else {
         template.getPaletteSwaps().put(c, dest);
       }
-      //colorLabels.get(label).setBackground(dest);
       updateUnitSurface();
-      //currentColorPanel.setBackground(dest);
     }
   }
   
@@ -613,10 +616,13 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     default:
       break;
     }
+    ItemListener listener = slotComboBox.getItemListeners()[0];
+    slotComboBox.removeItemListener(listener);
     slotComboBox.removeAllItems();
     for (String item : slots) {
       slotComboBox.addItem(item);
     }
+    slotComboBox.addItemListener(listener);
   }
 
   public UnitTemplate exportTemplate() {
@@ -709,11 +715,16 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         break;
       }
     }
+    // Dumb hack
+    ItemListener listener = itemComboBox.getItemListeners()[0];
+    itemComboBox.removeItemListener(listener);
+    
     itemComboBox.removeAllItems();
     itemComboBox.addItem(NO_ITEM);
     for (String item : items) {
       itemComboBox.addItem(item);
     }
+    itemComboBox.addItemListener(listener);
     if (template.getItem(slot) != null) {
       
       // TODO this sux

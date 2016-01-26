@@ -49,6 +49,27 @@ public class ColorPanel extends JPanel implements MouseListener, MouseMotionList
     g.setColor(oldColor);
   }
   
+  public void setColor(Color c) {
+    float[] hsvComponents = new float[3];
+    // This method is dumb.
+    Color.RGBtoHSB(
+      c.getRed(),
+      c.getGreen(),
+      c.getBlue(),
+      hsvComponents
+    );
+    updateColor(hsvComponents[0], hsvComponents[1]);
+  }
+  
+  private void updateColor(float newHue, float newSat) {
+    if (newHue >= 0 && newHue <= 1 && newSat >= 0 && newSat <= 1) {
+      hue = newHue;
+      saturation = newSat;
+      repaint();
+      parent.updateColor();
+    }
+  }
+  
   /**
    * TODO: clamp points rather than disallowing
    */
@@ -56,12 +77,7 @@ public class ColorPanel extends JPanel implements MouseListener, MouseMotionList
     float newHue, newSat;
     newHue = (float)e.getX()/(getWidth()-1);
     newSat = (float)(getHeight() - 1 - e.getY())/(getHeight()-1);
-    if (newHue >= 0 && newHue <= 1 && newSat >= 0 && newSat <= 1) {
-      hue = newHue;
-      saturation = newSat;
-      repaint();
-      parent.updateColor();
-    }
+    updateColor(newHue, newSat);
   }
   
   public void mousePressed(MouseEvent e) {

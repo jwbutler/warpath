@@ -69,5 +69,10 @@ public class ColorPicker extends JPanel {
     repaint();
     cc.updateColors();
   }
+  
+  public void setColor(Color c) {
+    colorPanel.setColor(c);
+    valuePanel.setColor(c);
+  }
 
 }

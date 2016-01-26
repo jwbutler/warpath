@@ -48,13 +48,29 @@ public class ValuePanel extends JPanel implements MouseListener, MouseMotionList
     g.setColor(oldColor);
   }
   
-  private void updateValue(MouseEvent e) {
-    float newValue = 1 - (((float)e.getY())/(getHeight()-1));
+  public void setColor(Color c) {
+    float[] hsvComponents = new float[3];
+    // This method is dumb.
+    Color.RGBtoHSB(
+      c.getRed(),
+      c.getGreen(),
+      c.getBlue(),
+      hsvComponents
+    );
+    updateValue(hsvComponents[2]);
+  }
+  
+  private void updateValue(float newValue) {
     if (newValue >= 0 && newValue <= 1) {
       value = newValue; 
       repaint();
       parent.updateColor();
     }
+  }
+  
+  private void updateValue(MouseEvent e) {
+    float newValue = 1 - (((float)e.getY())/(getHeight()-1));
+    updateValue(newValue);
   }
   
   public float getValue() { return value; }

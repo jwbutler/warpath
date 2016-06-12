@@ -9,4 +9,7 @@ public class Sword extends Accessory {
   public Sword(RPG game, Unit unit, String animationName) {
     super(game, unit, animationName, "mainhand", X_OFFSET, Y_OFFSET);
   }
+  public Sword(RPG game, Unit unit) {
+    this(game, unit, "sword");
+  }
 }

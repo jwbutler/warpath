@@ -10,6 +10,8 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -27,7 +29,6 @@ public class Surface {
   private HashMap<Color,Color> paletteSwaps;
   private final static Color DEFAULT_COLOR = Color.BLACK;
   private final static Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
-
 
   public Surface(int width, int height) {
     image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -51,7 +52,7 @@ public class Surface {
   public Surface(String imagePath) {
     this.imagePath = imagePath;
     try {
-      // Copy the source image into a new image w/ transparency
+      // Copy the source image into a new image with transparency
       BufferedImage tmp = ImageIO.read(new File("png" + File.separator + imagePath));
       int width = tmp.getWidth();
       int height = tmp.getHeight();

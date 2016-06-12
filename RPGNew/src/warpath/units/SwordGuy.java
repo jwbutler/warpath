@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import jwbgl.*;
 import warpath.core.RPG;
+import warpath.items.ItemFactory;
 import warpath.items.Shield;
 import warpath.items.Sword;
 import warpath.players.Player;
@@ -28,8 +29,10 @@ public class SwordGuy extends HumanUnit {
     maxDamage = 12;
     bashDamage = 20;
     slashDamage = 6;
-    addAccessory(new Sword(game, this, "sword"));
-    addAccessory(new Shield(game, this, "Shield of Suck"));
+    addAccessory(ItemFactory.create(game, this, "Sword"));
+    addAccessory(ItemFactory.create(game, this, "Shield"));
+    //addAccessory(new Sword(game, this, "sword"));
+    //addAccessory(new Shield(game, this, "shield2"));
   }
   public SwordGuy(RPG game, String name, Posn posn, Player player) {
     this(game, name, posn, player, new HashMap<Color, Color>());
@@ -78,7 +81,5 @@ public class SwordGuy extends HumanUnit {
   public void doEvents() {
     //printDebug();
     super.doEvents();
-    
   }
-
 }

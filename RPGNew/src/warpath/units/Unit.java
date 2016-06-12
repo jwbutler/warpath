@@ -193,7 +193,8 @@ public abstract class Unit extends BasicObject implements GameObject {
   
   /**
    * Used to load any animation that follows the general pattern without
-   * exceptions, where the filenames are specified in AnimationTemplates. */
+   * exceptions, where the filenames are specified in AnimationTemplates.
+   */
   public void loadGenericAnimations(String activity) {
     String[] filenames = AnimationTemplates.getTemplate(activity);
     loadGenericAnimations(activity, filenames);

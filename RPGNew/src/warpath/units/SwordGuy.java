@@ -2,6 +2,7 @@ package warpath.units;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.HashMap;
+import java.util.Random;
 
 import jwbgl.*;
 import warpath.core.RPG;
@@ -21,30 +22,31 @@ public class SwordGuy extends HumanUnit {
     "walking", "standing", "attacking", "blocking_1", "blocking_2", "blocking_3",
     "bashing", "slashing_1", "slashing_2", "slashing_3", "falling"};
 
-  public SwordGuy(RPG game, String name, Posn posn, Player player, HashMap<Color, Color> paletteSwaps) {
-    super(game, name, activities, paletteSwaps, posn, player);
+  public SwordGuy(String name, Posn posn, Player player, HashMap<Color, Color> paletteSwaps) {
+    super(name, activities, paletteSwaps, posn, player);
     currentHP = maxHP = 200;
     currentEP = maxEP = 100;
     minDamage = 6;
     maxDamage = 12;
     bashDamage = 20;
     slashDamage = 6;
-    addAccessory(ItemFactory.create(game, this, "Sword"));
-    addAccessory(ItemFactory.create(game, this, "Shield"));
+    addAccessory(ItemFactory.create(this, "Sword"));
+    addAccessory(ItemFactory.create(this, "Shield"));
     //addAccessory(new Sword(game, this, "sword"));
     //addAccessory(new Shield(game, this, "shield2"));
   }
-  public SwordGuy(RPG game, String name, Posn posn, Player player) {
-    this(game, name, posn, player, new HashMap<Color, Color>());
+  public SwordGuy(String name, Posn posn, Player player) {
+    this(name, posn, player, new HashMap<Color, Color>());
   }
 
   public void doAttackHit(Unit u) {
-    int dmg = game.getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
+    int dmg = RPG.getInstance().getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
     // soundFX
     u.takeHit(this, dmg);
     playHitSound();
   }
   public void doBashHit(Unit u) {
+    RPG game = RPG.getInstance();
     int dx = u.getX() - getX();
     int dy = u.getY() - getY();
     int x = u.getX()+dx;
@@ -60,6 +62,7 @@ public class SwordGuy extends HumanUnit {
   }
   
   public void doSlashHit(Unit u) {
+    RPG game = RPG.getInstance();
     int dx = u.getX() - getX();
     int dy = u.getY() - getY();
     int x = u.getX()+dx;

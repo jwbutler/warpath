@@ -33,49 +33,47 @@ import warpath.units.Unit;
 /**
  * The main game engine.  Expect this one to be a few thousand lines long.
  */
-  
+
 public class RPG implements ActionListener {
-  
+
+  private static RPG instance;
+
   private final Timer frameTimer;
   private int ticks;
   private int nextEnemyID;
   private Floor floor;
-  
+
   // Using a HashMap for this is pretty strange.  But it lets us access
   // players by number, which I think is useful.
   private final HashMap<Integer, Player> players;
   private final ArrayList<Unit> units;
   private final ArrayList<GameObject> objects; // Non-units
   private final ArrayList<Level> levels;
-  
+
   // These are kinda hacks to get around concurrent modification exceptions.
   // Maybe there is a better solution.
   private final ArrayList<Unit> unitsToAdd;
   private final ArrayList<Unit> unitsToRemove;
-  
-  // Unsure if we should keep this reference, he's always going to be
-  // player 1, right?
+
+  // Unsure if we should keep this reference, he's always going to be player 1, right?
   private HumanPlayer humanPlayer;
 
   private final DepthTree depthTree;
   private final Random RNG;
-  private final GameWindow gameWindow;
   private final SoundPlayer soundPlayer;
-  private final InputHandler inputHandler;  
-  
-  /* Not using anything from this except victory/defeat conditions. */
+  private final InputHandler inputHandler;
+
+  // Not using anything from this except victory/defeat conditions.
   private int levelIndex;
   private Posn cameraPosn;
-  
+
   private boolean redrawFloor;
 
   /**
    * Constructor for the main RPG class.
-   * @param gameWindow
    */
-  public RPG(GameWindow gameWindow) {
-    this.gameWindow = gameWindow;
-    floor = new Floor(this, 15, 15);
+  public RPG() {
+    floor = new Floor(15, 15);
     frameTimer = new Timer(1000/Constants.FPS, this);
     ticks = 0;
     nextEnemyID = 1;
@@ -90,52 +88,51 @@ public class RPG implements ActionListener {
     soundPlayer = new SoundPlayer();
     inputHandler = new InputHandler(this);
     //playSound("crystal.wav");
-    
+
     // Do we need to extend the JFrame class? I'm thinking no.
     //gameWindow = new JFrame();
     //gameWindow.getContentPane().setLayout(null);
     //gameWindow.add(gamePanel);
-    
+
     // Make the Char Creator
     //getContentPane().setLayout(null);
     //getContentPane().add(gamePanel); 
-	
+
     depthTree = new DepthTree();
     cameraPosn = null;
     redrawFloor = true;
-
   }
-  
+
   /**
    * Start the timer.  We might also use this to restart/unpause
    * This seems like a REALLY weird place to put the palette swaps (as a parameter).
-   * @param playerUnitPaletteSwaps
+   * @param template
    */
   public void start(UnitTemplate template) {
-    // handlers, etc.
-    gameWindow.getGamePanel().init();
+    // eugh
+    GameWindow.getInstance().getGamePanel().init();
     // Add some player units.
     //HumanUnit u = new HumanUnit(me, "u", new Posn(3,4), me.getHumanPlayer());
-    
+
     // This is a dumb workaround.
-    setFloor(new Floor(this, 1,1));
-    getFloor().setTile(0,0, new Tile(this, new Posn(0,0), "tile_48x24_grass.png"));
-    SwordGuy u = new SwordGuy(this, "u", new Posn(0,0), getHumanPlayer(), template.getPaletteSwaps());
-    
+    setFloor(new Floor(1,1));
+    getFloor().setTile(0,0, new Tile(new Posn(0,0), "tile_48x24_grass.png"));
+    SwordGuy u = new SwordGuy("u", new Posn(0,0), getHumanPlayer(), template.getPaletteSwaps());
+
     //SwordGirl u = new SwordGirl(me, "u", new Posn(3,4), me.getHumanPlayer());
     addUnit(u);
-    
+
     // Make a hostile AI player
     addPlayer(2, new AIPlayer());
     getHumanPlayer().setHostile(getPlayer(2));
     getPlayer(2).setHostile(getPlayer(1));
-    
+
     loadLevels();
     openLevel();
     frameTimer.start();
     centerCamera();
   }
-  
+
   /**
    * Start the game without going through the character creator.
    */
@@ -143,7 +140,7 @@ public class RPG implements ActionListener {
     UnitTemplate t = (UnitTemplate)TemplateFactory.getTemplate("player");
     start(t);
   }
-  
+
   /**
    * Called every time the frame timer fires.
    * Redraws everything, then increments the tick counter.
@@ -153,7 +150,7 @@ public class RPG implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     // Do blocking event code.  Should this go to Upkeep?
     doBlockUpkeep();
-    
+
     for (Unit u: units) {
       u.doUpkeep();
     }
@@ -161,7 +158,7 @@ public class RPG implements ActionListener {
     for (Unit u: units) {
       u.doEvents();
     }
-    
+
     // Kill units that have been queued for death. (This happens during
     // nextActivity(), which happens during doUpkeep()...
     for (Unit u : unitsToRemove) {
@@ -172,11 +169,11 @@ public class RPG implements ActionListener {
       addUnit(u);
     }
     unitsToAdd.clear();
-    
+
     // Repaint() includes a call to drawAll().
-    gameWindow.repaint();
+    GameWindow.getInstance().repaint();
     incrementTicks();
-    
+
     // WHERE DOES THIS BELONG IN THE ORDER?
     if (levels.get(levelIndex).checkVictory()) {
       levelIndex++;
@@ -193,7 +190,7 @@ public class RPG implements ActionListener {
   public void doBlockUpkeep() {
     String currentActivity = getPlayerUnit().getCurrentActivity();
     String nextActivity = getPlayerUnit().getNextActivity();
-    
+
     // If CTRL is down, queue up a block.
     if (ctrlIsDown()) {
       if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
@@ -268,7 +265,7 @@ public class RPG implements ActionListener {
           getPlayerUnit().setNewSlashDirection(true);
         }
       }
-      
+
       if (currentActivity.equals("standing") || currentActivity.equals("walking")) {
         if (nextActivity != null && nextActivity.equals("bashing")) {
           // Bashing is queued up, let that happen.
@@ -326,7 +323,7 @@ public class RPG implements ActionListener {
 
       //System.out.println(getPlayerUnit().newSlashDirection);
     } else {
-      
+
       // Neither SHIFT nor CTRL is down; cancel blocks, bashes, slashes.
       if (getPlayerUnit().getNextActivity() != null) {
         if (getPlayerUnit().getNextActivity().equals("blocking_1") || getPlayerUnit().getNextActivity().equals("blocking_2")) {
@@ -347,12 +344,12 @@ public class RPG implements ActionListener {
     humanPlayer = player;
     return player;
   }
-  
+
   //
   public void incrementTicks() {
     ticks++;
   }
-  
+
   /**
    * Add a player with the specified player number.
    * TODO The whole playerNumber field is oddly handled.
@@ -362,7 +359,7 @@ public class RPG implements ActionListener {
   public void addPlayer(int playerNumber, Player player) {
     players.put(playerNumber, player);
   }
-  
+
   /**
    * Add the specified unit to all relevant lists (depth tree, floor units,
    * HUD panel).
@@ -374,13 +371,13 @@ public class RPG implements ActionListener {
     units.add(u);
     u.getPlayer().getUnits().add(u);
     if (u.getPlayer().equals(getHumanPlayer())) {
-      gameWindow.getHudPanel().init();
+      GameWindow.getInstance().getHudPanel().init();
     }
     depthTree.add(u);
     floor.getTile(u.getX(),u.getY()).setUnit(u);
     u.updateFloorOverlay();
   }
-  
+
   /**
    * Removes the specified unit from all relevant lists.
    * Specifically, each floor tile's list of units, and the RPG's units list,
@@ -395,7 +392,7 @@ public class RPG implements ActionListener {
 
     // Remove the unit from its floor tile's list.
     floor.getTile(u.getX(),u.getY()).setUnit(null);
-    
+
     // Remove the unit from its owner player's list.
     for (int i = 1; i < players.size()+1; i++) {
       Player p = players.get(i);
@@ -403,7 +400,7 @@ public class RPG implements ActionListener {
         p.getUnits().remove(u);
       }
     }
-    
+
     // Find any units targeting this unit and clear their target.
     for (int i = 0; i < units.size(); i++) {
       if (units.get(i).getTargetUnit() != null && units.get(i).getTargetUnit().equals(u)) {
@@ -412,13 +409,13 @@ public class RPG implements ActionListener {
         units.get(i).setTargetPosn(null);
       }
     }
-    
+
     // Remove this unit's floor overlay.
     removeObject(u.getFloorOverlay());
     u.setFloorOverlay(null);
   }
-  
-  /** 
+
+  /**
    * This returns the upper left corner of the grid tile.  Note that the
    * origin (0,0) is actually inside the menu bar; the playable area is
    * smaller than it "should" be
@@ -426,7 +423,7 @@ public class RPG implements ActionListener {
    * @return a Posn representing the pixel
    */
   public Posn gridToPixel(Posn posn) {
-    
+
     int left, top;
     // Offsets are to make it so that pixel (0,0) is at the very top left of the floor
     int xOffset = floor.getHeight() * Constants.TILE_WIDTH / 2;
@@ -438,7 +435,7 @@ public class RPG implements ActionListener {
     top = (x * Constants.TILE_HEIGHT / 2) + (y * Constants.TILE_HEIGHT / 2) - getCameraY() - yOffset;
     return new Posn(left, top);
   }
-  
+
   /**
    * @see #gridToPixel(Posn)
    * @param x - the x coordinate of the grid tile
@@ -447,7 +444,7 @@ public class RPG implements ActionListener {
   public Posn gridToPixel(int x, int y) {
     return gridToPixel(new Posn(x,y));
   }
-  
+
   /**
    * Finds the nearest tile to a given pixel.  Returns null if it's outside
    * the map.
@@ -456,7 +453,7 @@ public class RPG implements ActionListener {
    * TODO If the coordinates are off the grid, find the closest valid grid
    * tile instead of returning null.
    * @param pixel - The (x,y) coordinates of the pixel
-   * @return The corresponding grid tile 
+   * @return The corresponding grid tile
    */
   public Posn pixelToGrid(Posn pixel) {
     // We need to restrict the range of X and Y, but... later
@@ -483,7 +480,7 @@ public class RPG implements ActionListener {
     }
     return null;
   }
-  
+
   /**
    * @see #pixelToGrid(Posn)
    * @param x - the x coordinate of the pixel
@@ -492,7 +489,7 @@ public class RPG implements ActionListener {
   public Posn pixelToGrid(int x, int y) {
     return pixelToGrid(new Posn(x,y));
   }
-  
+
   /**
    * Centers the camera on a given posn.
    * @param p
@@ -500,15 +497,15 @@ public class RPG implements ActionListener {
   public void centerCamera(Posn p) {
     int x = p.getX();
     int y = p.getY();
-    int xx = Constants.TILE_WIDTH/2 * (x + (floor.getHeight()-y)) - gameWindow.getGamePanel().getWidth()/2;
-    int yy = Constants.TILE_HEIGHT/2 * (x+y) - gameWindow.getGamePanel().getHeight()/2;
+    int xx = Constants.TILE_WIDTH/2 * (x + (floor.getHeight()-y)) - GameWindow.getInstance().getGamePanel().getWidth()/2;
+    int yy = Constants.TILE_HEIGHT/2 * (x+y) - GameWindow.getInstance().getGamePanel().getHeight()/2;
     setCameraPos(xx, yy);
   }
 
   public void centerCamera() {
     centerCamera(getPlayerUnit().getPosn());
   }
-  
+
   /**
    * Draw everything! Start with the floor, then draw all of the objects and
    * units in the order in which they appear in the DepthTree.
@@ -528,7 +525,7 @@ public class RPG implements ActionListener {
     floor.draw(g);
     depthTree.drawAll(g);
   }
-  
+
   /** Left click stuff - just movement for now (Doesn't include modifiers)
    * @param pixel The (x,y) coordinates of the pixel */
   public void doLeftClick(Posn pixel) {
@@ -567,13 +564,13 @@ public class RPG implements ActionListener {
     u.setTargetPosnOverlay(posn);
     u.setNextActivity("walking");
   }
-  
+
   /**
    * Give an order to the player unit (usually attack).
    * If the targeted tile is not adjacent to the player unit, some kind of
    * pathing stuff will be initiated.
    * @param pixel The mouse coordinates
-   * @param activity The ordered activity 
+   * @param activity The ordered activity
    */
   public void doRightClick(Posn pixel, String activity) {
     Posn posn = pixelToGrid(pixel);
@@ -613,40 +610,40 @@ public class RPG implements ActionListener {
     u.setTargetPosnOverlay(posn);
     u.setNextActivity("walking");
   }
-  
-  
+
+
   public void doAttackOrder(Posn pixel) {
     doRightClick(pixel, "attacking");
   }
 
   public void doBashOrder(Posn pixel) {
     doRightClick(pixel, "bashing");
-    
+
   }
   // Moves the camera posn; x and y are offsets in pixels (not coords).
   public void moveCamera(int x, int y) {
     setCameraPos(getCameraX() + x, getCameraY() + y);
     redrawFloor = true;
   }
-  
+
   public void moveCamera(Posn posn) {
     moveCamera(posn.getX(), posn.getY());
   }
-  
+
   // Add a non-unit object to all relevant lists. 
   public void addObject(GameObject obj) {
     objects.add(obj);
     depthTree.add(obj);
     floor.getTile(obj.getPosn()).getObjects().add(obj);
   }
-  
+
   // Remove non-unit object from all relevant lists. 
   public void removeObject(GameObject obj) {
     objects.remove(obj);
     depthTree.remove(obj);
     floor.getTile(obj.getPosn()).getObjects().remove(obj);
   }
-  
+
   // Returns all Posns directly next to the given Posn.
   // Won't return the input posn, and won't return off-map Posns.
   public ArrayList<Posn> getAdjacentSquares(Posn p) {
@@ -664,18 +661,18 @@ public class RPG implements ActionListener {
     }
     return posns;
   }
-  
+
   /**
    * Given (dx, dy), return the (dx, dy) pairs corresponding to 45 degrees CW and CCW.
    * Should it return the input? Yes for now.
-   */ 
+   */
   public ArrayList<Posn> getAdjacentDirections(Posn p) {
     ArrayList<Posn> rtn = new ArrayList<Posn>();
     rtn.add(rotateClockwise(p));
     rtn.add(rotateCounterclockwise(p));
     return rtn;
   }
-  
+
   /**
    * Given a direction, rotate it 45 degrees counterclockwise.
    * @param p - a <u>DIRECTIONAL</u> Posn.
@@ -701,7 +698,7 @@ public class RPG implements ActionListener {
       return null;
     }
   }
-  
+
   /**
    * Given a direction, rotate it 45 degrees clockwise.
    * @param p - a <u>DIRECTIONAL</u> Posn.
@@ -727,22 +724,22 @@ public class RPG implements ActionListener {
       return null;
     }
   }
-  
+
   /**
    * An A* pathfinding attempt.
-   * Basically just stealing the pseudocode from 
+   * Basically just stealing the pseudocode from
    * http://www.policyalmanac.org/games/aStarTutorial.htm
    * Most of the comments are copy&pasted from that site too.
    * Expect to be optimizing this one for a while, it's fundamental
    * to all of our AI.
-   * 
+   *
    * Notes: p2 is allowed to be an obstacle, since we're using this to path
    * to units/other blocking stuff.
-   * 
+   *
    * TODO: make sure you understand this whole algorithm
    */
   public LinkedList<Posn> findPath(Posn p1, Posn p2) {
-  
+
     // We're not using these HashMaps and I'm kind of concerned. Check on
     // this later.
 
@@ -752,14 +749,14 @@ public class RPG implements ActionListener {
     HashMap<Posn, Integer> costFromCurrent = new HashMap<Posn, Integer>();
     HashMap<Posn, Integer> estCostToEnd = new HashMap<Posn, Integer>();
     HashMap<Posn, Posn> posnParent = new HashMap<Posn, Posn>();
-    
+
     LinkedList<Posn> path = new LinkedList<Posn>();
     int dx, dy;
     int f, g, h;
     PathfinderEntry currentEntry;
     Posn currentPosn;
     int currentWeight;
-    ArrayList<Posn> adjacentSquares = new ArrayList<Posn>(); 
+    ArrayList<Posn> adjacentSquares = new ArrayList<Posn>();
     // 1) Add the starting square (or node) to the open list.
     f = 0;
     costFromCurrent.put(p1, f);
@@ -794,7 +791,7 @@ public class RPG implements ActionListener {
         // Not handling walking units - let's change that soon?
         if (closedList.getPosnEntry(q) == null) {
           //if (!floor.getTile(q).isBlocked()) {
-          
+
           // Conditions for a tile being valid:
           // 1) It's not blocked.
           // 2) It's the destination tile - there are some cases where we
@@ -811,13 +808,13 @@ public class RPG implements ActionListener {
               addIt = true;
             }
           }
-          
+
           if (addIt) {
             // Otherwise do the following.
-    
+
             // Make the current square the parent of this square.
             // Record the F, G, and H costs of the square.
-            
+
             dx = Math.abs(q.getX() - p1.getX());
             dy = Math.abs(q.getY() - p1.getY());
             if (dx+dy == 1) { // straight
@@ -829,7 +826,7 @@ public class RPG implements ActionListener {
             dy = Math.abs(p2.getY() - q.getY());
             g = 10*(dx+dy);
             h = f+g;
-            // If it isn’t on the open list, add it to the open list.
+            // If it isnï¿½t on the open list, add it to the open list.
             PathfinderEntry e = openList.getPosnEntry(q);
             if (e == null) {
               e = new PathfinderEntry(h, q);
@@ -843,7 +840,7 @@ public class RPG implements ActionListener {
              * scores of the square. If you are keeping your open list sorted
              * by F score, you may need to resort the list to account for the
              * change. */
-    
+
             } else {
               if (h <= e.getWeight()) {
                 openList.remove(e);
@@ -862,7 +859,7 @@ public class RPG implements ActionListener {
      * to check this - can we do so more efficiently?
      * 3) Save the path. Working backwards from the target square, go from
      * each square to its parent square until you reach the starting square.
-     * That is your path. */ 
+     * That is your path. */
     if (closedList.getPosnEntry(p2) != null) {
       PathfinderEntry e = closedList.getPosnEntry(p2);
       Posn p = e.getPosn();
@@ -885,14 +882,14 @@ public class RPG implements ActionListener {
       return null;
     }
   }
-  
+
   // Helper method for the above.
   public LinkedList<Posn> findPath(GameObject x, GameObject y) {
     return findPath(x.getPosn(), y.getPosn());
   }
 
   // ===== ACCESSOR METHODS =====
-  
+
   public DepthTree getDepthTree() {
     return depthTree;
   }
@@ -909,44 +906,44 @@ public class RPG implements ActionListener {
     cameraPosn = posn;
     redrawFloor = true;
   }
-  
+
   public void setCameraPos(int x, int y) {
     setCameraPos(new Posn(x,y));
   }
-  
+
   public HumanPlayer getHumanPlayer() {
     return humanPlayer;
   }
-  
+
   public Unit getPlayerUnit() {
     return humanPlayer.getUnits().get(0);
   }
 
-  
+
   public int getTicks() {
     return ticks;
   }
-  
+
   public void setTicks(int ticks) {
     this.ticks = ticks;
   }
-  
+
   public Floor getFloor() {
     return floor;
   }
-  
+
   public void setFloor(Floor floor) {
     this.floor = floor;
   }
-  
+
   public Player getPlayer(int index) {
     return players.get(index);
   }
-  
+
   public ArrayList<Unit> getUnits() {
     return units;
   }
-  
+
   public Random getRNG() {
     return RNG;
   }
@@ -966,15 +963,15 @@ public class RPG implements ActionListener {
     getPlayerUnit().setNextTargetPosn(targetPosn);
     getPlayerUnit().setNextActivity("blocking_1");
   }
-  
+
   public boolean ctrlIsDown() {
     return inputHandler.ctrlIsDown;
   }
-  
+
   public boolean shiftIsDown() {
     return inputHandler.shiftIsDown;
   }
-  
+
   public boolean isObstacle(Posn p) {
     return getFloor().getTile(p).isBlocked();
   }
@@ -983,10 +980,6 @@ public class RPG implements ActionListener {
     return inputHandler.getMousePosn();
   }
 
-  public GameWindow getGameWindow() {
-    return gameWindow;
-  }
-  
   public void openLevel() {
     Level level = levels.get(levelIndex);
     if (level != null) {
@@ -1025,7 +1018,7 @@ public class RPG implements ActionListener {
   public void queueRemoveUnit(Unit unit) {
     unitsToRemove.add(unit);
   }
-  
+
   public void queueAddUnit(Unit unit) {
     unitsToAdd.add(unit);
   }
@@ -1038,12 +1031,12 @@ public class RPG implements ActionListener {
   public ArrayList<GameObject> getObjects() {
     return objects;
   }
-  
+
   public void loadLevels() {
     levels.clear();
-    levels.add(new TestLevel(this));
+    levels.add(new TestLevel());
     //levels.add(new WizardLevel(this));
-    levelIndex=0;
+    levelIndex = 0;
   }
 
   public InputHandler getInputHandler() {
@@ -1057,6 +1050,17 @@ public class RPG implements ActionListener {
         queueRemoveUnit(u);
       }
     }
+  }
+
+  /**
+   * Attempt to convert this to a Singleton.
+   */
+
+  public static RPG getInstance() {
+    if (instance == null) {
+      instance = new RPG();
+    }
+    return instance;
   }
 
 }

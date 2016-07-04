@@ -9,14 +9,14 @@ import warpath.units.Unit;
  * to maintain clarity.
  */
 public class ItemFactory {
-  public static Accessory create(RPG game, Unit unit, String itemName) {
+  public static Accessory create(Unit unit, String itemName) {
     switch (itemName) {
       case "Shield":
-        return new Shield(game, unit, "shield2");
+        return new Shield(unit, "shield2");
       case "Sword":
-        return new Sword(game, unit, "sword");
+        return new Sword(unit, "sword");
       case "Helmet":
-        return new Helmet(game, unit, "helmet");
+        return new Helmet(unit, "helmet");
       default:
         return null;
     }

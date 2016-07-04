@@ -23,24 +23,24 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   private static final String HIT_SOUND = "hit1.wav";
   
   
-  public ZombieUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
+  public ZombieUnit(String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "zombie", activities, new HashMap<Color, Color>(), posn, player);
+    this(name, "zombie", activities, new HashMap<Color, Color>(), posn, player);
   }  
   
-  public ZombieUnit(RPG game, String name, String[] activities, HashMap<Color, Color> paletteSwaps,
+  public ZombieUnit(String name, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "zombie", activities, paletteSwaps, posn, player);
+    this(name, "zombie", activities, paletteSwaps, posn, player);
   }  
   
-  public ZombieUnit(RPG game, String name, Posn posn, Player player) {
-    this(game, name, DEFAULT_ACTIVITIES, posn, player);
+  public ZombieUnit(String name, Posn posn, Player player) {
+    this(name, DEFAULT_ACTIVITIES, posn, player);
   }
   
-  public ZombieUnit(RPG game, String name, String animationName,
+  public ZombieUnit(String name, String animationName,
   String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
-    super(game, name, animationName, activities, paletteSwaps, posn, player);
+    super(name, animationName, activities, paletteSwaps, posn, player);
     this.setXOffset(X_OFFSET);
     this.setYOffset(Y_OFFSET);
   }
@@ -51,7 +51,8 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   @Override
   public void die() {
     super.die();
-    game.addObject(new Corpse(game, getPosn(), "zombie_falling_3.png"));
+    RPG game = RPG.getInstance();
+    game.addObject(new Corpse(getPosn(), "zombie_falling_3.png"));
   }
   
   /**
@@ -82,6 +83,6 @@ public abstract class ZombieUnit extends Unit implements Serializable {
   
   @Override
   public void playHitSound() {
-    game.playSound(HIT_SOUND);
+    RPG.getInstance().playSound(HIT_SOUND);
   }
 }

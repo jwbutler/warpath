@@ -36,6 +36,7 @@ import javax.swing.event.ChangeListener;
 
 import jwbgl.*;
 import warpath.core.Constants;
+import warpath.core.RPG;
 import warpath.core.RPGDriver;
 import warpath.core.Utils;
 import warpath.layouts.StackLayout;
@@ -43,6 +44,7 @@ import warpath.layouts.StretchLayout;
 import warpath.templates.AccessoryTemplate;
 import warpath.templates.TemplateFactory;
 import warpath.templates.UnitTemplate;
+import warpath.ui.GameWindow;
 
 /**
  * The menu for creating a new character.
@@ -93,28 +95,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   // Right panel components
   private final ColorPicker colorPicker;
   
-  /*private final JPanel RPanel;
-  private final JPanel GPanel;
-  private final JPanel BPanel;
-  private final JSlider RSlider;
-  private final JSlider GSlider;
-  private final JSlider BSlider;
-  private final JLabel RLabel;
-  private final JLabel GLabel;
-  private final JLabel BLabel;
-  
-  private final JPanel currentColorPanel;
-  private final JPanel savedColorPanel;
-  private final JButton copyButton;
-  private final JButton pasteButton;
-  private final JPanel copyPasteColorPanel;
-  
-  private final JPanel copyButtonPanel;
-  private final JPanel savedColorPanelContainer;
-  private final JPanel currentColorPanelContainer;
-  private final JLabel currentColorLabel; 
-  private final JPanel saveColorContainerPanel;*/
-  
   private final Vector<String> filenames;
 
   private Surface unitSurface;
@@ -129,7 +109,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * TODO: I really don't like passing the Driver as an argument, figure out
    * how to avoid this.
    */
-  public CharacterCreator(RPGDriver driver, JFrame window, int width, int height) {
+  public CharacterCreator(JFrame window, int width, int height) {
     setSize(width, height);
     setPreferredSize(new Dimension(width, height));
     setVisible(true);
@@ -298,7 +278,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     middlePanel.add(Box.createVerticalStrut(400));
     
     startButton = new JButton("Start Game");
-    startButton.addActionListener(driver);
+    startButton.addActionListener(this);
     startButtonPanel = new JPanel(new BorderLayout());
     startButtonPanel.add(startButton, BorderLayout.CENTER);
     middlePanel.add(startButtonPanel);
@@ -517,6 +497,14 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
         }
       }
       break;
+    case "Start Game":
+      GameWindow window = GameWindow.getInstance();
+      RPG game = RPG.getInstance();
+      if (e.getActionCommand().equals("Start Game")) {
+        CharacterCreator cc = window.getCharacterCreator();
+        window.setCardLayout("Game");
+        game.start(cc.exportTemplate());
+      }
     default:
       // Why?
       repaint();
@@ -535,7 +523,6 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   
   /**
    * Copies the given color to the clipboard.
-   * @param name - the name of the color (e.g. "Shirt 1")
    */
   private void copyColor() {
     //savedColorPanel.setBackground(currentColorPanel.getBackground());
@@ -543,22 +530,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   
   /**
    * Sets the specified color sliders to the stored value, if it exists.
-   * @param name - the name of the color (e.g. "Shirt 1") 
    */
   private void pasteColor() {
-    /*Color c = savedColorPanel.getBackground();
-    RSlider.setValue(c.getRed());
-    GSlider.setValue(c.getGreen());
-    BSlider.setValue(c.getBlue());*/
-    /*if (savedColor != null) {
-      JSlider RSlider = colorSliders.get(name)[0];
-      RSlider.setValue(savedColor.getRed());
-      JSlider GSlider = colorSliders.get(name)[1];
-      GSlider.setValue(savedColor.getGreen());
-      JSlider BSlider = colorSliders.get(name)[2];
-      BSlider.setValue(savedColor.getBlue());
-    }
-    updateColors();*/
   }
   
   /**

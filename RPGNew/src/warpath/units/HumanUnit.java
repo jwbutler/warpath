@@ -17,35 +17,35 @@ public abstract class HumanUnit extends Unit {
   private static final String HIT_SOUND = "hit1.wav";
   private static final int Y_OFFSET = -32;
   
-  public HumanUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
+  public HumanUnit(String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "player", activities, new HashMap<Color, Color>(), posn, player);
+    this(name, "player", activities, new HashMap<Color, Color>(), posn, player);
   }  
   
-  public HumanUnit(RPG game, String name, String[] activities, HashMap<Color, Color> playerUnitPaletteSwaps,
+  public HumanUnit(String name, String[] activities, HashMap<Color, Color> playerUnitPaletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "player", activities, playerUnitPaletteSwaps, posn, player);
+    this(name, "player", activities, playerUnitPaletteSwaps, posn, player);
   }  
   
-  public HumanUnit(RPG game, String name, Posn posn, Player player) {
-    this(game, name, DEFAULT_ACTIVITIES, posn, player);
+  public HumanUnit(String name, Posn posn, Player player) {
+    this(name, DEFAULT_ACTIVITIES, posn, player);
   }
   
-  public HumanUnit(RPG game, String name, String animationName,
+  public HumanUnit(String name, String animationName,
   String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
-    super(game, name, animationName, activities, paletteSwaps, posn, player);
+    super(name, animationName, activities, paletteSwaps, posn, player);
     this.setYOffset(Y_OFFSET);
   }
 
   @Override
   public void playHitSound() {
-    game.playSound(HIT_SOUND);
+    RPG.getInstance().playSound(HIT_SOUND);
   }
   
   @Override
   public void playBashSound() {
-    game.playSound(HIT_SOUND);
+    RPG.getInstance().playSound(HIT_SOUND);
   }
   
   @Override
@@ -56,12 +56,13 @@ public abstract class HumanUnit extends Unit {
   
   @Override
   public void die() {
+    RPG game = RPG.getInstance();
     super.die();
     String dir = getCurrentDirection();
     if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
-      game.addObject(new Corpse(game, getPosn(), "player_falling_NE_4.png"));
+      game.addObject(new Corpse(getPosn(), "player_falling_NE_4.png"));
     } else {
-      game.addObject(new Corpse(game, getPosn(), "player_falling_S_4.png"));
+      game.addObject(new Corpse(getPosn(), "player_falling_S_4.png"));
     }
   }
 }

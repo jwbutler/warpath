@@ -15,8 +15,8 @@ public class EnemyZombie extends ZombieUnit {
   private final static int VISION_RADIUS = 6;
   private final static int SMELL_RADIUS = 12;
   private static String[] activities = {"walking", "standing", "attacking", "stunned_short", "falling"};
-  public EnemyZombie(RPG game, String name, Posn posn, Player player) {
-    super(game, name, activities, posn, player);
+  public EnemyZombie(String name, Posn posn, Player player) {
+    super(name, activities, posn, player);
     currentHP = maxHP = 45;
     currentEP = maxEP = 30;
     minDamage = 2;
@@ -27,6 +27,7 @@ public class EnemyZombie extends ZombieUnit {
   @Override
   public void nextActivity() {
     super.nextActivity();
+    RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
     Unit tu = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
@@ -83,6 +84,7 @@ public class EnemyZombie extends ZombieUnit {
   
   @Override
   public void doAttackHit(Unit u) {
+    RPG game = RPG.getInstance();
     int dmg = game.getRNG().nextInt(maxDamage - minDamage + 1) + minDamage;
     // soundFX
     u.takeHit(this, dmg);

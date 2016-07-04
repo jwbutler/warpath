@@ -9,8 +9,8 @@ public class EnemySwordGuy extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static final String[] ACTIVITIES = {"walking", "standing", "attacking", "stunned_short", "falling"};
-  public EnemySwordGuy(RPG game, String name, Posn posn, Player player) {
-    super(game, name, ACTIVITIES, posn, player);
+  public EnemySwordGuy(String name, Posn posn, Player player) {
+    super(name, ACTIVITIES, posn, player);
     currentHP = maxHP = 100;
     currentEP = maxEP = 40;
     minDamage = 5;
@@ -25,6 +25,7 @@ public class EnemySwordGuy extends HumanUnit {
    * @see Unit#nextActivity
    */
   public void nextActivity() {
+    RPG game = RPG.getInstance();
     super.nextActivity();
     Unit targetUnit = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
@@ -46,6 +47,7 @@ public class EnemySwordGuy extends HumanUnit {
   
   @Override
   public void doAttackHit(Unit u) {
+    RPG game = RPG.getInstance();
     int dmg = game.getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
     // soundFX
     u.takeHit(this, dmg);

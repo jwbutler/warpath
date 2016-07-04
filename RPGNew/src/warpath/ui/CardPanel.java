@@ -8,7 +8,8 @@ import warpath.core.RPG;
 import warpath.ui.components.UnitCard;
 import warpath.units.Unit;
 
-/** Holds a set of unit cards.
+/**
+ * Holds a set of unit cards.
  * Unused in the current engine.
  */
 public class CardPanel extends JPanel {
@@ -26,7 +27,6 @@ public class CardPanel extends JPanel {
     for (Unit u: game.getHumanPlayer().getUnits()) {
       addCard(u);
     }
-
   }
   
   public void addCard(Unit u) {

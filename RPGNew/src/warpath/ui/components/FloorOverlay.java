@@ -21,8 +21,8 @@ public class FloorOverlay extends NonBlockingObject {
   private final int X_OFFSET = 0;
   private final int Y_OFFSET = 0;
   private final int DEPTH_OFFSET = -1;
-  public FloorOverlay(RPG game, GameObject src, Color outerColor, Color innerColor) {
-    super(game, src.getPosn());
+  public FloorOverlay(GameObject src, Color outerColor, Color innerColor) {
+    super(src.getPosn());
     setXOffset(X_OFFSET);
     setYOffset(Y_OFFSET);
     setDepthOffset(DEPTH_OFFSET);
@@ -39,11 +39,12 @@ public class FloorOverlay extends NonBlockingObject {
     updateDepth();
   }
   
-  public FloorOverlay(RPG game, GameObject src, Color color) {
-    this(game, src, color, Color.WHITE);
+  public FloorOverlay(GameObject src, Color color) {
+    this(src, color, Color.WHITE);
   }
   
   public void draw(Graphics g) {
+    RPG game = RPG.getInstance();
     Posn pixel = game.gridToPixel(src.getPosn());
     surface.draw(g, pixel);
   }

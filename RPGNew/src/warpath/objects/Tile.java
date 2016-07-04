@@ -13,8 +13,12 @@ public class Tile extends BasicObject {
   private Surface surface;
   private Unit unit;
   private final ArrayList<GameObject> objects;
-  public Tile(RPG game, Posn posn, String texture) {
-    super(game, posn);
+
+  private String GRASS = "tile_48x24_grass";
+  private String STONE = "tile_48x24_stone";
+
+  public Tile(Posn posn, String texture) {
+    super(posn);
     surface = new Surface(Constants.TILE_WIDTH/2, Constants.TILE_HEIGHT/2);
     surface.load(texture);
     surface = surface.scale2x();
@@ -22,6 +26,7 @@ public class Tile extends BasicObject {
     unit = null;
     objects = new ArrayList<GameObject>();
   }
+
   public Surface getSurface() {
     return surface;
   }

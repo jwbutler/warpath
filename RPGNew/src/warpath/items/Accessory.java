@@ -16,7 +16,6 @@ public abstract class Accessory {
   // going on here - BUT i can't think of a way to do this without multiple
   // inheritance. fuck java
   private final String slot;
-  protected final RPG game;
   protected final Unit unit;
   protected final int xOffset;
   protected final int yOffset;
@@ -30,8 +29,7 @@ public abstract class Accessory {
   
   private Animation currentAnimation;
   
-  public Accessory(RPG game, Unit unit, String animationName, String slot, int xOffset, int yOffset) {
-    this.game = game;
+  public Accessory(Unit unit, String animationName, String slot, int xOffset, int yOffset) {
     this.unit = unit;
     this.slot = slot;
     this.animationName = animationName;
@@ -42,8 +40,8 @@ public abstract class Accessory {
     this.xOffset = xOffset;
     this.yOffset = yOffset;
   }
-  public Accessory(RPG game, Unit unit, String animationName, String slot) {
-    this(game, unit, animationName, slot, 0, 0);
+  public Accessory(Unit unit, String animationName, String slot) {
+    this(unit, animationName, slot, 0, 0);
   }
   
   /** Load all the animations for this object.
@@ -65,7 +63,7 @@ public abstract class Accessory {
   
   /* Why are we subtracting 20 here? */
   public void draw(Graphics g) {
-    Posn pixel = game.gridToPixel(unit.getPosn()); // returns top left
+    Posn pixel = RPG.getInstance().gridToPixel(unit.getPosn()); // returns top left
     int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
     int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
     top -= 20;

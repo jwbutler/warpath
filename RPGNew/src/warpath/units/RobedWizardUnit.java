@@ -20,28 +20,28 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   private static final int X_OFFSET = 0;
   private static final int Y_OFFSET = -32;
   
-  public RobedWizardUnit(RPG game, String name, String animationName,
+  public RobedWizardUnit(String name, String animationName,
   String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
-    super(game, name, animationName, activities, paletteSwaps, posn, player);
+    super(name, animationName, activities, paletteSwaps, posn, player);
     setXOffset(X_OFFSET);
     setYOffset(Y_OFFSET);
     hpBarOffset = -40;
     
   }
   
-  public RobedWizardUnit(RPG game, String name, String[] activities, Posn posn, Player player) {
+  public RobedWizardUnit(String name, String[] activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "robed_wizard", activities, new HashMap<Color, Color>(), posn, player);
+    this(name, "robed_wizard", activities, new HashMap<Color, Color>(), posn, player);
   }  
   
-  public RobedWizardUnit(RPG game, String name, String[] activities, HashMap<Color, Color> paletteSwaps,
+  public RobedWizardUnit(String name, String[] activities, HashMap<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(game, name, "robed_wizard", activities, paletteSwaps, posn, player);
+    this(name, "robed_wizard", activities, paletteSwaps, posn, player);
   }  
   
-  public RobedWizardUnit(RPG game, String name, Posn posn, Player player) {
-    this(game, name, DEFAULT_ACTIVITIES, posn, player);
+  public RobedWizardUnit(String name, Posn posn, Player player) {
+    this(name, DEFAULT_ACTIVITIES, posn, player);
   }
 
   @Override
@@ -53,7 +53,8 @@ public abstract class RobedWizardUnit extends Unit implements Serializable {
   @Override
   public void die() {
     super.die();
-    game.addObject(new Corpse(game, getPosn(), "robed_wizard_dead.png"));
+    RPG game = RPG.getInstance();
+    game.addObject(new Corpse(getPosn(), "robed_wizard_dead.png"));
   
   }
   

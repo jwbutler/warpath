@@ -9,7 +9,6 @@ import warpath.core.RPG;
  * units or otherwise.  We'll be subclassing it a lot. */
 
 public abstract class BasicObject implements GameObject {
-  protected final RPG game;
   private int xOffset;
   private int yOffset;
   private int depthOffset;
@@ -19,8 +18,7 @@ public abstract class BasicObject implements GameObject {
   private Rect rect;
   protected Surface surface;
   
-  public BasicObject(RPG game, Posn posn) {
-    this.game = game;
+  public BasicObject(Posn posn) {
     this.posn = posn;
     //this.xOffset = 0;
     //this.yOffset = 0;
@@ -99,7 +97,7 @@ public abstract class BasicObject implements GameObject {
   @Override
   public void draw(Graphics g) {
     // Offsets have not been figured out yet, need camera shit
-    Posn pixel = game.gridToPixel(posn); // returns top left
+    Posn pixel = RPG.getInstance().gridToPixel(posn); // returns top left
     int left = pixel.getX() + Constants.TILE_WIDTH/2 - getSurface().getWidth()/2 + xOffset;
     int top = pixel.getY() + Constants.TILE_HEIGHT/2 - getSurface().getHeight()/2 + yOffset;
     getSurface().draw(g, left, top);

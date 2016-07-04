@@ -26,8 +26,8 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   private static final int TELEPORT_RADIUS = 6;
   private static final int VISION_RADIUS = 30;
   
-  public EnemyRobedWizard(RPG game, String name, Posn posn, Player player) {
-    super(game, name, ACTIVITIES, posn, player);
+  public EnemyRobedWizard(String name, Posn posn, Player player) {
+    super(name, ACTIVITIES, posn, player);
     currentHP = maxHP = 200;
     currentEP = maxEP = 200;
   }
@@ -35,6 +35,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   @Override
   public void nextActivity() {
     super.nextActivity();
+    RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
     if (currentActivity.equals("standing")) {
       // Set up variables for the flowchart.

@@ -72,9 +72,8 @@ public abstract class Unit extends BasicObject implements GameObject {
   
   protected LinkedList<Posn> path;
   
-  public Unit(RPG game, String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps,
-    Posn posn, Player player) {
-    super(game, posn);
+  public Unit(String name, String animationName, String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
+    super(posn);
     this.name = name;
     this.animationName = animationName;
     this.activities = activities;
@@ -148,7 +147,7 @@ public abstract class Unit extends BasicObject implements GameObject {
 
   /**
    * Loads all of the animations for this unit.
-   * Calls {@link #loadActivityAnimations()} for each activity.
+   * Calls {@link #loadActivityAnimations} for each activity. (or does it...)
    */
   public void loadAnimations() {
     long t = System.currentTimeMillis();
@@ -249,6 +248,7 @@ public abstract class Unit extends BasicObject implements GameObject {
    * it in subclasses.
    */
   public void nextActivity() {
+    RPG game = RPG.getInstance();
     if (currentActivity.equals("falling")) {
       // If we've reached the end of our falling animation, get ready to die.
       game.queueRemoveUnit(this);
@@ -324,7 +324,7 @@ public abstract class Unit extends BasicObject implements GameObject {
             do {
               p = game.getAdjacentSquares(getPosn()).get(game.getRNG().nextInt(8));
             } while (game.getFloor().getTile(p).isBlocked());
-            game.queueAddUnit(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), p, game.getPlayer(2)));
+            game.queueAddUnit(new EnemyZombie(String.format("Zombie %d", game.nextEnemyID()), p, game.getPlayer(2)));
           } else {
             // What should we do if all the tiles are blocked?
             // TODO Make sure there is not an infinite loop here.
@@ -454,6 +454,7 @@ public abstract class Unit extends BasicObject implements GameObject {
    * This is the code that loops the walking!
    */
   public void refreshWalk() {
+    RPG game = RPG.getInstance();
     // This is the case where the next tile is non-empty but we're only
     // pausing for one turn. 
     if (targetPosn == null) {
@@ -490,6 +491,7 @@ public abstract class Unit extends BasicObject implements GameObject {
    * TODO Think hard about the order of execution.
    */
   public void doUpkeep() {
+    RPG game = RPG.getInstance();
     if (getCurrentActivity().equals("blocking_2")) {
       currentEP -= getBlockCost();
     } else if (getCurrentActivity().equals("slashing_2")) {
@@ -526,7 +528,7 @@ public abstract class Unit extends BasicObject implements GameObject {
    * TODO figure out a way to split this method up.
    */
   public void doEvents() {
-    
+    RPG game = RPG.getInstance();
     if (getCurrentActivity().equals("walking")) {
       // If the unit is walking and its target tile is blocked,
       // handle it (cancel, etc. - checkNextTile does a lot.)
@@ -619,6 +621,7 @@ public abstract class Unit extends BasicObject implements GameObject {
    * checkNextTile() was supposed to do that but it kind of grew in scope.
    */
   public void move(int dx, int dy) {
+    RPG game = RPG.getInstance();
     //System.out.printf("move: %s %s\n", getPosn(), new Posn(getX() + dx, getY() + dy));
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
@@ -631,6 +634,10 @@ public abstract class Unit extends BasicObject implements GameObject {
     t.setUnit(this);
     updateFloorOverlay();
   }
+
+  public void move() {
+    move(dx, dy);
+  }
   
   /**
    * Moves the unit to an absolute location, in Posn form.
@@ -638,6 +645,7 @@ public abstract class Unit extends BasicObject implements GameObject {
    * @param p - the Posn to move to
    */
   public void moveTo(Posn p) {
+    RPG game = RPG.getInstance();
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
     t.setUnit(null);
@@ -690,6 +698,7 @@ public abstract class Unit extends BasicObject implements GameObject {
    * just a boolean, define some constants and return one of them.
    */ 
   public void checkNextTile() {
+    RPG game = RPG.getInstance();
     Tile nextTile = game.getFloor().getTile(getX()+dx, getY()+dy); // should match path.first
     if (nextTile.isBlocked()) {
       // If our target posn is next in the path and it's blocked, cancel the movement.
@@ -784,6 +793,7 @@ public abstract class Unit extends BasicObject implements GameObject {
   // Add the appropriate red/green highlight under the unit.
   // Eventually we'll want some other colors for neutral units, NPCs, etc.
   public void updateFloorOverlay() {
+    RPG game = RPG.getInstance();
     if (floorOverlay != null) {
       game.getDepthTree().remove(floorOverlay);
       setFloorOverlay(null);
@@ -791,13 +801,13 @@ public abstract class Unit extends BasicObject implements GameObject {
     if (game.getHumanPlayer().isHostile(getPlayer())) {
       if (game.getPlayerUnit().getTargetUnit() == this) {
         Color transRed = new Color(255,0,0,64);
-        setFloorOverlay(floorOverlay = new FloorOverlay(game, this, Color.RED, transRed));
+        setFloorOverlay(floorOverlay = new FloorOverlay(this, Color.RED, transRed));
       } else {
-        setFloorOverlay(floorOverlay = new FloorOverlay(game, this, Color.RED));
+        setFloorOverlay(floorOverlay = new FloorOverlay(this, Color.RED));
       }
     } else {
       Color transGreen = new Color(0,255,0,64);
-      setFloorOverlay(new FloorOverlay(game, this, Color.GREEN, transGreen));
+      setFloorOverlay(new FloorOverlay(this, Color.GREEN, transGreen));
       //floorOverlay = new FloorOverlay(game, this, Color.GREEN);
     }
     game.getDepthTree().add(floorOverlay);
@@ -828,6 +838,7 @@ public abstract class Unit extends BasicObject implements GameObject {
 
   // Important: this takes a Posn as an argument, not a FloorOverlay
   public void setTargetPosnOverlay(Posn posn) {
+    RPG game = RPG.getInstance();
     if (targetPosnOverlay != null) {
       game.getDepthTree().remove(targetPosnOverlay);
       targetPosnOverlay = null;
@@ -835,7 +846,7 @@ public abstract class Unit extends BasicObject implements GameObject {
     if (posn != null) {
       //Color transCyan = new Color(0,255,255,64);
       //targetPosnOverlay = new FloorOverlay(game, game.getFloor().getTile(posn), Color.CYAN, transCyan);
-      targetPosnOverlay = new FloorOverlay(game, game.getFloor().getTile(posn), Color.CYAN);
+      targetPosnOverlay = new FloorOverlay(game.getFloor().getTile(posn), Color.CYAN);
       game.getDepthTree().add(targetPosnOverlay);
     }
   }
@@ -1027,8 +1038,15 @@ public abstract class Unit extends BasicObject implements GameObject {
   public FloorOverlay getFloorOverlay() {
     return floorOverlay;
   }
-  
+
+  /**
+   * Draw the unit plus all of its equipment.
+   * TODO Apparently this method only handles sword/shield?
+   * @param g - the AWT graphics object used to render it
+   */
   public void draw(Graphics g) {
+    RPG game = RPG.getInstance();
+
     if (equipment.get("mainhand") != null) {
       if (equipment.get("mainhand").drawBehind() ) {
         equipment.get("mainhand").draw(g);
@@ -1050,7 +1068,6 @@ public abstract class Unit extends BasicObject implements GameObject {
         equipment.get("offhand").draw(g);
       }
     }
-    
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
     int left = pixel.getX() + Constants.TILE_WIDTH/2 - healthBar.getWidth()/2 + getXOffset();
     int top = pixel.getY() + Constants.TILE_HEIGHT/2 - healthBar.getHeight()/2 + getYOffset();
@@ -1102,5 +1119,9 @@ public abstract class Unit extends BasicObject implements GameObject {
 
   public void setNewSlashDirection(boolean newSlashDirection) {
     this.newSlashDirection = newSlashDirection;
+  }
+
+  public LinkedList<Posn> getPath() {
+    return path;
   }
 }

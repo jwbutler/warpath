@@ -13,13 +13,11 @@ import warpath.core.RPG;
   * */
 public class GamePanel extends JPanel {
   private static final long serialVersionUID = 1L;
-  private final RPG game;
   private KeyboardFocusManager focusManager;
 
   public GamePanel(RPG game, int width, int height) {
     super();
     setSize(width, height);
-    this.game = game;
     //getContentPane().setBackground(Color.BLACK);
   }
   
@@ -28,6 +26,7 @@ public class GamePanel extends JPanel {
    */
   public void init() {
     focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+    RPG game = RPG.getInstance();
     focusManager.addKeyEventDispatcher(game.getInputHandler());
     addMouseListener(game.getInputHandler());
     addMouseMotionListener(game.getInputHandler());
@@ -47,7 +46,7 @@ public class GamePanel extends JPanel {
    */
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
-    game.drawAll(g);
+    RPG.getInstance().drawAll(g);
   }
   
   public Rect getScreenRect() {

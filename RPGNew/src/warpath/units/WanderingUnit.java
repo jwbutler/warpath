@@ -12,13 +12,13 @@ import warpath.players.Player;
 public class WanderingUnit extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private Random RNG;
-  public WanderingUnit(RPG game, String name, Posn posn, Player player) {
-    super(game, name, posn, player);
+  public WanderingUnit(String name, Posn posn, Player player) {
+    super(name, posn, player);
     RNG = new Random();
   }
 
   public void doEvents() {
-    
+    RPG game = RPG.getInstance();
     if (getCurrentActivity().equals("walking")) {
       if (getCurrentAnimation().getIndex() <= 2) {
         checkNextTile();

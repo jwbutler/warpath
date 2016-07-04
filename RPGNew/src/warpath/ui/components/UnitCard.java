@@ -21,10 +21,8 @@ public class UnitCard extends JButton implements ActionListener {
   private static final Color SELECTED_COLOR = new Color(192,192,224,255);
   private static final Color UNSELECTED_COLOR = new Color(160,160,160,255);
   private Unit unit;
-  private RPG game;
-  public UnitCard(RPG game, Unit unit, int width, int height) {
+  public UnitCard(Unit unit, int width, int height) {
     super();
-    this.game = game;
     this.unit = unit;
     setSize(width,height);
     healthBar = new HealthBar(unit, width-2*MARGIN, HEALTH_BAR_HEIGHT);
@@ -37,6 +35,7 @@ public class UnitCard extends JButton implements ActionListener {
   
   @Override
   public void paint(Graphics g) {
+    RPG game = RPG.getInstance();
     if (game.getHumanPlayer().getSelectedUnits().contains(unit)) {
       this.setBackground(SELECTED_COLOR);
     } else {

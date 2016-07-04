@@ -18,29 +18,9 @@ import warpath.ui.creator.CharacterCreator;
    * various levels, modes, whatever.
    */
 
-public class RPGDriver extends WindowAdapter implements ActionListener {
-  private final int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
-  private final RPG game;
-  private GameWindow window;
-  
+public class RPGDriver {
   public static void main(String[] args) {
     new RPGDriver();
-  }
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    // continue button
-    if (e.getActionCommand().equals("Start Game")) {
-      CharacterCreator cc = window.getCharacterCreator();
-      window.setCardLayout("Game");
-      game.start(cc.exportTemplate());
-    }
-  }
-  
-  public void windowClosed(WindowEvent e) { windowClosing(e); }
-  
-  public void windowClosing(WindowEvent e) {
-    System.exit(0);
   }
   
   public RPGDriver() {
@@ -52,8 +32,8 @@ public class RPGDriver extends WindowAdapter implements ActionListener {
         | IllegalAccessException | UnsupportedLookAndFeelException e) {
       e.printStackTrace();
     }
-    window = new GameWindow(this, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    game = new RPG(window);
+    GameWindow window = GameWindow.getInstance();
+    RPG game = RPG.getInstance();
     window.initCardLayout(game);
   }
 }

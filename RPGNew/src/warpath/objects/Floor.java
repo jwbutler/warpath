@@ -3,20 +3,19 @@ import java.awt.Graphics;
 
 import jwbgl.*;
 import warpath.core.RPG;
+import warpath.ui.GameWindow;
 
 public class Floor {
-
-  private final RPG game;
   private final Tile[][] tiles;
   private final int width, height; // number of grid tiles, NOT pixels
   private Surface floorSurface;
   
-  public Floor(RPG game, int width, int height) {
-    this.game = game;
+  public Floor(int width, int height) {
     this.width = width;
     this.height = height;
     tiles = new Tile[this.width][this.height];
-    floorSurface = new Surface(game.getGameWindow().getWidth(), game.getGameWindow().getHeight());
+    GameWindow gameWindow = GameWindow.getInstance();
+    floorSurface = new Surface(gameWindow.getWidth(), gameWindow.getHeight());
   }
 
   /**
@@ -26,7 +25,7 @@ public class Floor {
   public void redraw() {
     Graphics g = floorSurface.getGraphics();
     g.clearRect(0, 0, floorSurface.getWidth(), floorSurface.getHeight());
-    
+    RPG game = RPG.getInstance();
     for (int y = 0; y < this.height; y++) {
       for (int x = 0; x < this.width; x++) {
         Posn pixel = game.gridToPixel(x, y);

@@ -21,7 +21,6 @@ import warpath.units.Unit;
  * representing these colors.
  */
 public abstract class Level {
-  protected final RPG game;
   protected final ArrayList<Unit> units;
   protected final ArrayList<GameObject> objects;
   private final Surface img;
@@ -37,12 +36,12 @@ public abstract class Level {
   
   protected Floor floor;
   
-  public Level(RPG game, String filename) {
-    this.game = game;
+  public Level(String filename) {
     img = new Surface(filename);
     units = new ArrayList<Unit>();
     objects = new ArrayList<GameObject>();
   }
+
   /**
    * Initializes the map.  This should rightly be part of the constructor, but
    * I Had to split this off because we don't actually load this until
@@ -51,7 +50,8 @@ public abstract class Level {
   public void init() {
     int width = img.getWidth();
     int height = img.getHeight();
-    floor = new Floor(game, width, height);
+    RPG game = RPG.getInstance();
+    floor = new Floor(width, height);
     // Populate tiles, units and objects from the contents of the map filename.
     for (int y=0; y<height; y++) {
       for (int x=0; x<width; x++) {
@@ -59,9 +59,9 @@ public abstract class Level {
         Color c = new Color(rgb);
         Tile t;
         if (c.equals(GRASS_COLOR)) {
-          t = new Tile(game, new Posn(x,y), "tile_48x24_grass.png");
+          t = new Tile(new Posn(x,y), "tile_48x24_grass.png");
         } else if (c.equals(STONE_COLOR)) {
-          t = new Tile(game, new Posn(x,y), "tile_48x24_stone.png");
+          t = new Tile(new Posn(x,y), "tile_48x24_stone.png");
         } else {
           // Check all the surrounding tiles.  Take a consensus for the
           // underlying tile color.
@@ -79,9 +79,9 @@ public abstract class Level {
             }
           }
           if (numGrass >= numStone) {
-            t = new Tile(game, new Posn(x,y), "tile_48x24_grass.png");
+            t = new Tile(new Posn(x,y), "tile_48x24_grass.png");
           } else {
-            t = new Tile(game, new Posn(x,y), "tile_48x24_stone.png");
+            t = new Tile(new Posn(x,y), "tile_48x24_stone.png");
           }
         }
         floor.setTile(x, y, t);
@@ -90,7 +90,7 @@ public abstract class Level {
         if (c.equals(TREE_COLOR)) {
           //objects.add(new GameObject(x,y))
         } else if (c.equals(WALL_COLOR)) {
-          objects.add(new Wall(game, new Posn(x,y), "wall_48x78_1.png"));
+          objects.add(new Wall(new Posn(x,y), "wall_48x78_1.png"));
         } else if (c.equals(WIZARD_COLOR)) {
           addWizard(x,y);
         } else if (c.equals(ZOMBIE_COLOR)) {
@@ -106,22 +106,26 @@ public abstract class Level {
   }
   
   protected void addZombie(int x, int y) {
-    units.add(new EnemyZombie(game, String.format("Zombie %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
+    RPG game = RPG.getInstance();
+    units.add(new EnemyZombie(String.format("Zombie %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
   }
   
   protected void addWizard(int x, int y) {
-    units.add(new EnemyRobedWizard(game, String.format("Wizard %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
+    RPG game = RPG.getInstance();
+    units.add(new EnemyRobedWizard(String.format("Wizard %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
   }
   
   protected void addBandit(int x, int y) {
-    units.add(new EnemySwordGuy(game, String.format("Bandit %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
+    RPG game = RPG.getInstance();
+    units.add(new EnemySwordGuy(String.format("Bandit %d", game.nextEnemyID()), new Posn(x,y), game.getPlayer(2)));
   }
   
   protected void addCorpse(int x, int y) {
+    RPG game = RPG.getInstance();
     if (game.getRNG().nextBoolean()) {
-      objects.add(new Corpse(game, new Posn(x,y), "player_falling_NE_4.png"));
+      objects.add(new Corpse(new Posn(x,y), "player_falling_NE_4.png"));
     } else {
-      objects.add(new Corpse(game, new Posn(x,y), "player_falling_S_4.png"));
+      objects.add(new Corpse(new Posn(x,y), "player_falling_S_4.png"));
     }
   }
   
@@ -129,6 +133,7 @@ public abstract class Level {
    * Placeholder.
    */
   public boolean checkVictory() {
+    RPG game = RPG.getInstance();
     return(game.getPlayer(2).getUnits().size() == 0);
   }
   

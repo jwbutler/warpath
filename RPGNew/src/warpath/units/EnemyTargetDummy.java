@@ -11,8 +11,8 @@ public class EnemyTargetDummy extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static String[] activities = {"walking", "standing", "attacking", "stunned_short"};
-  public EnemyTargetDummy(RPG game, String name, Posn posn, Player player) {
-    super(game, name, activities, posn, player);
+  public EnemyTargetDummy(String name, Posn posn, Player player) {
+    super(name, activities, posn, player);
     currentHP = maxHP = 100;
     minDamage = 5;
     maxDamage = 10;

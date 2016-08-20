@@ -1,15 +1,11 @@
 package warpath.animations;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import jwbgl.*;
-import warpath.core.Constants;
 import warpath.core.Direction;
-import warpath.core.Utils;
 
 /**
  * Represents a single animation of a unit.  Corresponds to a particular
@@ -43,12 +39,12 @@ public class Animation {
   /**
    * Creates a new Animation object.  Before loading a new image file, try
    * to retrieve from the frame cache object to avoid duplication.
-   * @param animName - The name of the sprite used.
+   * @param spriteName - The name of the sprite used.
    * @param filenames - The list of filenames (not including extension or folder)
    * @param direction - The direction of the animation (e.g. "NW")
    * @param frameCache - The parent object's frame cache 
    */
-  public Animation(String animName, String activity, Direction dir, List<String> filenames, Map<String, Surface> frameCache) {
+  public Animation(String spriteName, String activity, Direction direction, List<String> filenames, Map<String, Surface> frameCache) {
     filenames.stream()
       .forEach(filename -> frameCache.computeIfAbsent(filename,
         f -> {
@@ -62,7 +58,7 @@ public class Animation {
       .collect(Collectors.toList());
     drawBehind = filenames.stream().map(filename -> filename.endsWith("_B.png")).collect(Collectors.toList());
     this.activity = activity;
-    this.direction = dir;
+    this.direction = direction;
     index = 0;
   }
 
@@ -93,7 +89,8 @@ public class Animation {
     return index;
   }
   
-  /** For debug purposes; outputs in the form (activity, direction, length)
+  /**
+   * For debug purposes; outputs in the form (activity, direction, length)
    */
   public String toString() {
     return "<Animation("+getActivity()+","+getDirection()+","+getLength()+")>";
@@ -104,10 +101,15 @@ public class Animation {
   }
 
   public static Animation fromTemplate(String spriteName, String activity, Direction direction, List<String> filenames,
-  Map<String, Surface> frameCache) {
+  Map<String, Surface> frameCache, boolean isAccessory) {
     List<String> outFilenames = filenames.stream()
-      .map(filename -> AnimationUtils.formatFilename(spriteName, activity, direction, filename.split("_")[1]))
+      .map(filename -> AnimationUtils.formatFilename(spriteName, filename.split("_")[0], direction, filename.split("_")[1], isAccessory))
       .collect(Collectors.toList());
     return new Animation(spriteName, activity, direction, outFilenames, frameCache);
+  }
+
+  public static Animation fromTemplate(String spriteName, String activity, Direction direction, List<String> filenames,
+    Map<String, Surface> frameCache) {
+    return Animation.fromTemplate(spriteName, activity, direction, filenames, frameCache, false);
   }
 }

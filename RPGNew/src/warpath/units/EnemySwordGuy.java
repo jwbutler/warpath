@@ -32,9 +32,9 @@ public class EnemySwordGuy extends HumanUnit {
   public void nextActivity() {
     RPG game = RPG.getInstance();
     super.nextActivity();
-    BasicUnit targetUnit = getNextTargetUnit();
+    Unit targetUnit = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
-      for (BasicUnit u: game.getUnits()) {
+      for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
           if (targetUnit == null || Utils.distance2(this,u) < Utils.distance2(this,targetUnit)) {
             setNextTargetUnit(u);
@@ -51,7 +51,7 @@ public class EnemySwordGuy extends HumanUnit {
   }
   
   @Override
-  public void doAttackHit(BasicUnit u) {
+  public void doAttackHit(Unit u) {
     RPG game = RPG.getInstance();
     int dmg = game.getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
     // soundFX

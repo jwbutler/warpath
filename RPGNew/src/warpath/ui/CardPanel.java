@@ -26,7 +26,7 @@ public class CardPanel extends JPanel {
     setBackground(Color.DARK_GRAY);
     setLayout(null);
     cards = new ArrayList<>();
-    for (BasicUnit u: game.getHumanPlayer().getUnits()) {
+    for (Unit u: game.getHumanPlayer().getUnits()) {
       addCard(u);
     }
   }

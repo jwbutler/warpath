@@ -51,8 +51,8 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   
   protected int dx;
   protected int dy;
-  protected BasicUnit targetUnit;
-  protected BasicUnit nextTargetUnit;
+  protected Unit targetUnit;
+  protected Unit nextTargetUnit;
   protected Posn targetPosn;
   protected Posn nextTargetPosn;
   protected String currentActivity;
@@ -164,7 +164,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * different units. Eventually that will likely be all of them.
    */
   public void loadActivityAnimations(String activity) {
-    if (activity.equals("falling")) {
+    if (activity.equals(ActivityNames.FALLING)) {
       loadFallingAnimations();
     } else {
       loadGenericAnimations(activity);
@@ -176,7 +176,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * exceptions.
    */
   public void loadGenericAnimations(String activity, List<String> filenames) {
-    for (Direction dir : Direction.values()) {
+    for (Direction dir : Direction.directions()) {
       animations.add(Animation.fromTemplate(spriteName, activity, dir, filenames, frameCache));
     }
   }
@@ -194,7 +194,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * Two directions, NE or S.
    */
   public void loadFallingAnimations() {
-    for (Direction dir : Direction.values()) {
+    for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
         animations.add(Animation.fromTemplate(spriteName, "falling", Direction.NE, AnimationTemplates.FALLING, frameCache));
@@ -316,7 +316,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         game.removeObject(targetCorpse);
       }
     } else if (nextActivity != null) {
-      BasicUnit lastTargetUnit = null;
+      Unit lastTargetUnit = null;
       if (targetUnit != null) {
         lastTargetUnit = targetUnit;
       }
@@ -462,7 +462,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     }
   }
 
-  public boolean isHostile(BasicUnit u) {
+  public boolean isHostile(Unit u) {
     return getPlayer().isHostile(u.getPlayer());
   }
 
@@ -570,8 +570,8 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
       if (getCurrentAnimation().getIndex() == 0) {
         if (getNewSlashDirection()) {
           setNewSlashDirection(false);
-          Posn nextPosn = getPosn().add(getDirection());
-          BasicUnit tu = game.getFloor().getTile(nextPosn).getUnit();
+          Posn nextPosn = getPosn().add(getDirection().toPosn());
+          Unit tu = game.getFloor().getTile(nextPosn).getUnit();
           if (tu != null && isHostile(tu)) {
             doSlashHit(tu);
           }
@@ -683,7 +683,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     if (nextTile.isBlocked()) {
       // If our target posn is next in the path and it's blocked, cancel the movement.
       // Is this good?
-      BasicUnit blockingUnit = nextTile.getUnit();
+      Unit blockingUnit = nextTile.getUnit();
       if (targetPosn != null && nextTile.getPosn().equals(targetPosn)) {
         // note that we're using setCurrentActivity, not setNextActivity
         
@@ -797,8 +797,8 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     return currentActivity.equals("walking");
   }
   
-  public void setTargetUnit(BasicUnit u) {
-    BasicUnit oldTargetUnit = targetUnit;
+  public void setTargetUnit(Unit u) {
+    Unit oldTargetUnit = targetUnit;
     targetUnit = u;
     if (oldTargetUnit != null) {
       oldTargetUnit.updateFloorOverlay();
@@ -808,7 +808,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     }
   }
   
-  public BasicUnit getTargetUnit() {
+  public Unit getTargetUnit() {
     return targetUnit;
   }
   
@@ -856,7 +856,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     setCurrentAnimation(newActivity, getCurrentDirection());
   }
   
-  public void setCurrentAnimation(String activity, String direction) {
+  public void setCurrentAnimation(String activity, Direction direction) {
     int i = 0;
     Animation oldAnimation = currentAnimation;
     currentAnimation = null;
@@ -884,13 +884,9 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   public String getSpriteName() {
     return spriteName;
   }
-  
-  /**
-   * Source of confusion: this one returns "N", "NE" etc. while getDirection()
-   * uses coords.
-   */
-  public String getCurrentDirection() {
-    return Utils.coordsToDir(dx, dy);
+
+  public Direction getCurrentDirection() {
+    return Direction.from(dx, dy);
   }
   
   public Player getPlayer() {
@@ -898,7 +894,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   }
 
   // Overridden by damage mechanics?
-  public void doAttackHit(BasicUnit u) {
+  public void doAttackHit(Unit u) {
     int d = 1; // ...
     u.takeHit(this, d);
     playHitSound();
@@ -907,18 +903,18 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   public abstract void playHitSound();
   public abstract void playBashSound();
 
-  public void doBashHit(BasicUnit u) {
+  public void doBashHit(Unit u) {
     int d = 1; // ...
     u.takeHit(this, d);
   }
   
-  public void doSlashHit(BasicUnit u) {
+  public void doSlashHit(Unit u) {
     int d = 1; // ...
     u.takeHit(this, d);
     playHitSound();
     System.out.println("OMG SLASH HIT");
   }
-  public void setNextTargetUnit(BasicUnit u) {
+  public void setNextTargetUnit(Unit u) {
     nextTargetUnit = u;
     if (u != null) {
       setTargetPosnOverlay(null);
@@ -1003,16 +999,13 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     return maxEP;
   }
 
-  /**
-   * Perhaps confusing: doesn't return "NE" etc., but returns Posn<-1, -1> etc.
-   */
-  public Posn getDirection() {
-    return new Posn(dx, dy);
+  public Direction getDirection() {
+    return Direction.from(dx, dy);
   }
   
-  public void setDirection(Posn p) {
-    dx = p.getX();
-    dy = p.getY();
+  public void setDirection(Direction dir) {
+    dx = dir.dx;
+    dy = dir.dy;
   }
   
   public FloorOverlay getFloorOverlay() {
@@ -1058,14 +1051,14 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   
   public void addAccessory(Accessory e) {
     equipment.put(e.getSlot(), e);
-    e.setCurrentAnimation(this.getCurrentActivity(), Utils.coordsToDir(dx,dy));
+    e.setCurrentAnimation(this.getCurrentActivity(), Direction.from(dx,dy));
   }
 
   public void setNextActivity(String activity) {
     nextActivity = activity;
   }
 
-  public BasicUnit getNextTargetUnit() {
+  public Unit getNextTargetUnit() {
     return nextTargetUnit;
   }
 

@@ -2,8 +2,8 @@ package warpath.templates;
 
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Contains info needed to save any created object (unit or accessory).
@@ -12,26 +12,26 @@ import java.util.HashMap;
 public class SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 1L;
   private final String animName;
-  private final ArrayList<String> colorList;
-  private final HashMap<String, Color> colorMap;
-  private final HashMap<Color, Color> paletteSwaps;
+  private final List<String> colorList;
+  private final Map<String, Color> colorMap;
+  private final Map<Color, Color> paletteSwaps;
   
-  public SpriteTemplate(String animName, ArrayList<String> colorList, HashMap<String, Color> colorMap, HashMap<Color, Color> paletteSwaps) {
+  public SpriteTemplate(String animName, List<String> colorList, Map<String, Color> colorMap, Map<Color, Color> paletteSwaps) {
     this.animName = animName;
     this.colorList = colorList;
     this.colorMap = colorMap;
     this.paletteSwaps = paletteSwaps;
   }
   
-  public ArrayList<String> getColorList() {
+  public List<String> getColorList() {
     return colorList;
   }
   
-  public HashMap<String,Color> getColorMap() {
+  public Map<String,Color> getColorMap() {
     return colorMap;
   }
   
-  public HashMap<Color, Color> getPaletteSwaps() {
+  public Map<Color, Color> getPaletteSwaps() {
     return paletteSwaps;
   }
   

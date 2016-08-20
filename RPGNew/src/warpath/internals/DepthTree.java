@@ -81,7 +81,7 @@ public class DepthTree {
   
   /**
    * Removes an object from the subtree rooted at current.
-   * @param node - The DepthTreeNode containing the object to remove
+   * @param o - The object to remove
    * @param current - The root of the current subtree
    * @return true if the operation succeeds, false otherwise
    */

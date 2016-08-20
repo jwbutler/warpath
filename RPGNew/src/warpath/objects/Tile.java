@@ -1,17 +1,18 @@
 package warpath.objects;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import jwbgl.*;
 import warpath.core.Constants;
-import warpath.units.BasicUnit;
- 
+import warpath.units.Unit;
+
 /** Represents a floor tile.  Contains a list of objects that live on it, as
  * well as its current unit. */
 public class Tile extends BasicObject {
   private Surface surface;
-  private BasicUnit unit;
-  private final ArrayList<GameObject> objects;
+  private Unit unit;
+  private final List<GameObject> objects;
 
   private String GRASS = "tile_48x24_grass";
   private String STONE = "tile_48x24_stone";
@@ -23,18 +24,18 @@ public class Tile extends BasicObject {
     surface = surface.scale2x();
     surface.setColorkey(Color.WHITE); 
     unit = null;
-    objects = new ArrayList<GameObject>();
+    objects = new ArrayList<>();
   }
 
   public Surface getSurface() {
     return surface;
   }
   
-  public BasicUnit getUnit() {
+  public Unit getUnit() {
     return unit;
   }
   
-  public ArrayList<GameObject> getObjects() {
+  public List<GameObject> getObjects() {
     return objects;
   }
   
@@ -59,7 +60,7 @@ public class Tile extends BasicObject {
    * TODO Throw an exception, or maybe make it a boolean?
    * @param u
    */
-  public void setUnit(BasicUnit u) {
+  public void setUnit(Unit u) {
     if (unit != null && u != null) {
       System.out.println("Error: tile already has unit");
     }

@@ -1,8 +1,10 @@
 package warpath.players;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import warpath.units.BasicUnit;
+import warpath.units.Unit;
 
 /**
  * Represents an AI player.  Not necessarily hostile; we'll likely use one
@@ -10,18 +12,18 @@ import warpath.units.BasicUnit;
  */
 
 public class AIPlayer implements Player {
-  private final ArrayList<BasicUnit> units;
-  private final ArrayList<Player> friendlyPlayers;
-  private final ArrayList<Player> hostilePlayers;
+  private final List<Unit> units;
+  private final List<Player> friendlyPlayers;
+  private final List<Player> hostilePlayers;
   
   public AIPlayer() {
-    units = new ArrayList<BasicUnit>();
-    friendlyPlayers = new ArrayList<Player>();
-    hostilePlayers = new ArrayList<Player>();
+    units = new ArrayList<>();
+    friendlyPlayers = new ArrayList<>();
+    hostilePlayers = new ArrayList<>();
   }
 
   @Override
-  public ArrayList<BasicUnit> getUnits() {
+  public List<Unit> getUnits() {
     return units;
   }
 

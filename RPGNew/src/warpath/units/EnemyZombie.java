@@ -33,9 +33,9 @@ public class EnemyZombie extends ZombieUnit {
     super.nextActivity();
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
-    BasicUnit tu = getNextTargetUnit();
+    Unit tu = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
-      for (BasicUnit u: game.getUnits()) {
+      for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
           if (Utils.distance2(this,u) <= SMELL_RADIUS) {
             /* This should be where the "smell" sound is played, but we're losing the target
@@ -87,7 +87,7 @@ public class EnemyZombie extends ZombieUnit {
   }
   
   @Override
-  public void doAttackHit(BasicUnit u) {
+  public void doAttackHit(Unit u) {
     RPG game = RPG.getInstance();
     int dmg = game.getRNG().nextInt(maxDamage - minDamage + 1) + minDamage;
     // soundFX

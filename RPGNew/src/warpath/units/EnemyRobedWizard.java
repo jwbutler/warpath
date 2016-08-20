@@ -46,10 +46,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
     if (currentActivity.equals(ActivityNames.STANDING)) {
       // Set up variables for the flowchart.
       boolean hostileInRange = false;
-      BasicUnit closestEnemy = null;
+      Unit closestEnemy = null;
       Corpse closestCorpse = null;
       
-      for (BasicUnit u : game.getUnits()) {
+      for (Unit u : game.getUnits()) {
         if (isHostile(u) && Utils.distance2(this, u) <= EVASIVE_RADIUS) {
           hostileInRange = true;
           if (closestEnemy == null || Utils.distance2(this, u) < Utils.distance2(this, closestEnemy)) {

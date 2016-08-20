@@ -82,7 +82,7 @@ public abstract class Accessory {
     return currentAnimation;
   }
 
-  public void setCurrentAnimation(String activity, String direction) {
+  public void setCurrentAnimation(String activity, Direction direction) {
     int i = 0;
     while (i < animations.size()) {
       if (!animations.get(i).getActivity().equals(activity)) {
@@ -123,8 +123,8 @@ public abstract class Accessory {
    * C&P from BasicUnit!
    */
   public void loadGenericAnimations(String activity, List<String> filenames) {
-    for (Direction dir : Direction.values()) {
-      animations.add(Animation.fromTemplate(spriteName, activity, dir, filenames, frameCache));
+    for (Direction dir : Direction.directions()) {
+      animations.add(Animation.fromTemplate(spriteName, activity, dir, filenames, frameCache, true));
     }
   }
 
@@ -136,12 +136,12 @@ public abstract class Accessory {
    * Need to override this.
    */
   public void loadFallingAnimations() {
-    for (Direction dir : Direction.values()) {
+    for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.NE, AnimationTemplates.FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.NE, AnimationTemplates.FALLING, frameCache, true));
       } else {
-        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.S, AnimationTemplates.FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.S, AnimationTemplates.FALLING, frameCache, true));
       }
     }
   }

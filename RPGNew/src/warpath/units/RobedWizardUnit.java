@@ -100,7 +100,7 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
   }
 
   public void loadFallingAnimations() {
-    for (Direction dir : Direction.values()) {
+    for (Direction dir : Direction.directions()) {
       animations.add(Animation.fromTemplate(spriteName, "falling", dir, AnimationTemplates.WIZARD_FALLING, frameCache));
     }
   }

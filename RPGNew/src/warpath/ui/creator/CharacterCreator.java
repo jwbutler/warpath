@@ -14,9 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -58,7 +56,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   private final static String BASE_MODEL = "Base model";
   private final static String NO_ITEM = "None";
   
-  private final static String[] MODEL_NAMES = {"player", "female", "zombie"};
+  private final static List<String> MODEL_NAMES = Arrays.asList("player", "female", "zombie");
   
   // Top-level panels
   private final JPanel leftPanel;
@@ -121,7 +119,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     
     // Set up the unit template.
     modelIndex = 0;
-    template = (UnitTemplate)TemplateFactory.getTemplate(MODEL_NAMES[modelIndex]);
+    template = (UnitTemplate)TemplateFactory.getTemplate(MODEL_NAMES.get(modelIndex));
     
     // Set up the panels.
     leftPanel = new JPanel();
@@ -365,7 +363,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     String colorName = (String)(colorComboBox.getSelectedItem());
     String animName = getAnimName();
     if (animName != null) {
-      HashMap<String, Color> colorMap;
+      Map<String, Color> colorMap;
       Color c;
       //HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
       if (slot == BASE_MODEL) {
@@ -542,7 +540,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     String itemName = (String)(itemComboBox.getSelectedItem());
     String colorName = (String)(colorComboBox.getSelectedItem());
     String animName = getAnimName();
-    HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
+    Map<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
     Color c = colorMap.get(colorName);
     if (c != null) {
       Color dest = colorPicker.getColor();
@@ -563,8 +561,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * TODO extend this to making zombies, other sprites
    **/
   private void changeModel() {
-    modelIndex = (modelIndex+1) % MODEL_NAMES.length;
-    String modelName = MODEL_NAMES[modelIndex];
+    modelIndex = (modelIndex+1) % MODEL_NAMES.size();
+    String modelName = MODEL_NAMES.get(modelIndex);
     template = (UnitTemplate)TemplateFactory.getTemplate(modelName);
     updateUnitSurface();
     refreshSlotComboBox();
@@ -573,7 +571,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   }
   
   private void refreshSlotComboBox() {
-    String modelName = MODEL_NAMES[modelIndex];
+    String modelName = MODEL_NAMES.get(modelIndex);
     ArrayList<String> slots = new ArrayList<String>();
     slots.add(BASE_MODEL);
     

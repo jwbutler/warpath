@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
+import warpath.core.Direction;
 import warpath.core.RPG;
 import warpath.objects.Corpse;
 import warpath.players.Player;
@@ -61,8 +62,10 @@ public abstract class HumanUnit extends BasicUnit {
   public void die() {
     RPG game = RPG.getInstance();
     super.die();
-    String dir = getCurrentDirection();
-    if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
+    // TODO put this elsewhere
+    List<Direction> neDirections = Arrays.asList(Direction.N,Direction.NE,Direction.E,Direction.SE);
+    Direction dir = getCurrentDirection();
+    if (neDirections.contains(dir)) {
       game.addObject(new Corpse(getPosn(), "player_falling_NE_4.png"));
     } else {
       game.addObject(new Corpse(getPosn(), "player_falling_S_4.png"));

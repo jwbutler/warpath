@@ -66,7 +66,7 @@ public abstract class ZombieUnit extends BasicUnit implements Serializable {
    */
   @Override
   public void loadFallingAnimations() {
-    for (Direction dir : Direction.values()) {
+    for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
         animations.add(Animation.fromTemplate(spriteName, "falling", null, AnimationTemplates.ZOMBIE_FALLING, frameCache));

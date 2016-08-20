@@ -2,14 +2,14 @@ package warpath.ui.components;
 import java.awt.Color;
 import java.awt.Graphics;
 import jwbgl.*;
-import warpath.units.BasicUnit;
+import warpath.units.Unit;
 
 /** This is just a copy/paste of HealthBar with different colors.
  * TODO Make a superclass for bars. */
 
 public class EnergyBar extends Surface {
-  protected final BasicUnit unit;
-  public EnergyBar(BasicUnit unit, int width, int height) {
+  protected final Unit unit;
+  public EnergyBar(Unit unit, int width, int height) {
     super(width, height);
     this.unit = unit;
   }

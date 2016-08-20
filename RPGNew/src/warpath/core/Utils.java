@@ -7,35 +7,6 @@ import warpath.objects.GameObject;
 
 public class Utils {
 
-  /**
-   * Given an (x,y) pair, returns the corresponding compass direction.
-   */ 
-  public static String coordsToDir(int x, int y) {
-    String rtn = "";
-    if (y == -1) {
-      rtn = "N";
-    } else if (y == 1) {
-      rtn = "S";
-    }
-    if (x == -1) {
-      rtn += "W";
-    } else if (x == 1) {
-      rtn+= "E";
-    }
-    if (rtn.equals("")) {
-      return null; 
-    } else {
-      return rtn;
-    }
-  }
-
-  /**
-   * Given an (x,y) pair, returns the corresponding compass direction.
-   */ 
-  public static String coordsToDir(Posn posn) {
-    return coordsToDir(posn.getX(), posn.getY());
-  }
-
   /** Calculate the distance between two points.
    * IMPORTANT: not Pythagorean distance, but Civ-style (I think) distance.
    * Returns the larger of the x-distance and the y-distance.
@@ -69,13 +40,7 @@ public class Utils {
   }
   
   public static boolean imageExists(String filename) {
-    String fullFilename = String.format(
-      "%s%s%s.%s",
-      Constants.IMAGE_FOLDER,
-      File.separator,
-      filename,
-      Constants.IMAGE_FORMAT
-    );
+    String fullFilename = Constants.IMAGE_FOLDER + File.separator + filename;
     return (new File(fullFilename).exists());
   }
 

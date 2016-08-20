@@ -1,6 +1,7 @@
 package warpath.levels;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import jwbgl.Posn;
 import jwbgl.Surface;
@@ -10,10 +11,7 @@ import warpath.objects.Floor;
 import warpath.objects.GameObject;
 import warpath.objects.Tile;
 import warpath.objects.Wall;
-import warpath.units.EnemyRobedWizard;
-import warpath.units.EnemySwordGuy;
-import warpath.units.EnemyZombie;
-import warpath.units.BasicUnit;
+import warpath.units.*;
 
 /**
  * Represents a level.  Initialized from a bitmap where colors represent
@@ -21,8 +19,8 @@ import warpath.units.BasicUnit;
  * representing these colors.
  */
 public abstract class Level {
-  protected final ArrayList<BasicUnit> units;
-  protected final ArrayList<GameObject> objects;
+  protected final List<Unit> units;
+  protected final List<GameObject> objects;
   private final Surface img;
   
   private final static Color GRASS_COLOR = new Color(0,255,0);
@@ -38,8 +36,8 @@ public abstract class Level {
   
   public Level(String filename) {
     img = new Surface(filename);
-    units = new ArrayList<BasicUnit>();
-    objects = new ArrayList<GameObject>();
+    units = new ArrayList<>();
+    objects = new ArrayList<>();
   }
 
   /**
@@ -137,7 +135,13 @@ public abstract class Level {
     return(game.getPlayer(2).getUnits().size() == 0);
   }
   
-  public ArrayList<BasicUnit> getUnits() { return units; }
-  public ArrayList<GameObject> getObjects() { return objects; }
-  public Floor getFloor() { return floor; }
+  public List<Unit> getUnits() {
+    return units;
+  }
+  public List<GameObject> getObjects() {
+    return objects;
+  }
+  public Floor getFloor() {
+    return floor;
+  }
 }

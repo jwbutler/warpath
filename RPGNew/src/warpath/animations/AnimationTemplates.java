@@ -1,5 +1,8 @@
 package warpath.animations;
 
+import warpath.activities.ActivityNames;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -178,37 +181,39 @@ public class AnimationTemplates {
 
   /**
    * This is a convenience method to load the default Player animations
-   * semi-automatically.
+   * semi-automatically.  Super redundant, will make more sense when we
+   * switch to the Enum.
    */
   public static List<String> getTemplate(String activity) {
-    if (activity.equals("standing")) {
+    if (activity.equals(ActivityNames.STANDING)) {
       return STANDING;
-    } else if (activity.equals("walking")) {
+    } else if (activity.equals(ActivityNames.WALKING)) {
       return WALKING;
-    } else if (activity.equals("attacking")) {
+    } else if (activity.equals(ActivityNames.ATTACKING)) {
       return ATTACKING;
-    } else if (activity.equals("stunned_short")) {
+    } else if (activity.equals(ActivityNames.STUNNED_SHORT)) {
       return STUNNED_SHORT;
-    } else if (activity.equals("stunned_long")) {
+    } else if (activity.equals(ActivityNames.STUNNED_LONG)) {
       return STUNNED_LONG;
-    } else if (activity.equals("bashing")) {
+    } else if (activity.equals(ActivityNames.BASHING)) {
       return BASHING;
-    } else if (activity.equals("blocking_1")) {
+    } else if (activity.equals(ActivityNames.BLOCKING_1)) {
       return BLOCKING_1;
-    } else if (activity.equals("blocking_2")) {
+    } else if (activity.equals(ActivityNames.BLOCKING_2)) {
       return BLOCKING_2;
-    } else if (activity.equals("blocking_3")) {
+    } else if (activity.equals(ActivityNames.BLOCKING_3)) {
       return BLOCKING_3;
-    } else if (activity.equals("slashing_1")) {
+    } else if (activity.equals(ActivityNames.SLASHING_1)) {
       return SLASHING_1;
-    } else if (activity.equals("slashing_2")) {
+    } else if (activity.equals(ActivityNames.SLASHING_2)) {
       return SLASHING_2;
-    } else if (activity.equals("slashing_3")) {
+    } else if (activity.equals(ActivityNames.SLASHING_3)) {
       return SLASHING_3;
-    } else if (activity.equals("falling")) {
+    } else if (activity.equals(ActivityNames.FALLING)) {
       return FALLING;
     } else {
-      return null;
+      System.out.println("fuck fuck fuck " + activity);
+      return new ArrayList<>();
     }
   }
 }

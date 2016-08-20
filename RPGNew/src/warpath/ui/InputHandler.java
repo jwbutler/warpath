@@ -139,7 +139,7 @@ MouseListener, MouseMotionListener  {
 
   @Override
   public void mouseDragged(MouseEvent e) {
-    // Unit selection stuff.
+    // BasicUnit selection stuff.
   }
   
   @Override

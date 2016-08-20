@@ -1,9 +1,14 @@
 package warpath.animations;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import jwbgl.*;
 import warpath.core.Constants;
+import warpath.core.Direction;
 import warpath.core.Utils;
 
 /**
@@ -14,16 +19,16 @@ import warpath.core.Utils;
 
 public class Animation {
   
-  private final Surface[] frames;
+  private final List<Surface> frames;
   
   // Used for items to determine whether they render in front of or behind the
   // main unit sprite.
-  private final boolean[] drawBehind;
+  private final List<Boolean> drawBehind;
   private String activity;
-  private String direction;
+  private Direction direction;
   private int index;
   
-  public Surface[] getFrames() {
+  public List<Surface> getFrames() {
     return frames;
   }
 
@@ -31,7 +36,7 @@ public class Animation {
     return activity;
   }
 
-  public String getDirection() {
+  public Direction getDirection() {
     return direction;
   }
 
@@ -43,39 +48,30 @@ public class Animation {
    * @param direction - The direction of the animation (e.g. "NW")
    * @param frameCache - The parent object's frame cache 
    */
-  public Animation(String animName, String[] filenames, String activity, String direction, HashMap<String, Surface> frameCache) {
-    frames = new Surface[filenames.length];
-    drawBehind = new boolean[filenames.length];
-    for (int i = 0; i < filenames.length; i++) {
-      String filename = filenames[i];
-      drawBehind[i] = (filename.endsWith("_B.png"));
-      if (frameCache != null && frameCache.containsKey(filename)) {
-        frames[i] = frameCache.get(filename);
-      } else {
-        frames[i] = new Surface(filename);
-        frames[i] = frames[i].scale2x();
-        frames[i].setColorkey(Color.WHITE);
-        if (frameCache != null) frameCache.put(filename, frames[i]);
-      }
-    }
+  public Animation(String animName, String activity, Direction dir, List<String> filenames, Map<String, Surface> frameCache) {
+    filenames.stream()
+      .forEach(filename -> frameCache.computeIfAbsent(filename,
+        f -> {
+          Surface surface = new Surface(f).scale2x();
+          surface.setColorkey(Color.WHITE);
+          return surface;
+        })
+      );
+    frames = filenames.stream()
+      .map(filename -> frameCache.get(filename))
+      .collect(Collectors.toList());
+    drawBehind = filenames.stream().map(filename -> filename.endsWith("_B.png")).collect(Collectors.toList());
     this.activity = activity;
-    this.direction = direction;
+    this.direction = dir;
     index = 0;
-  }
-  
-  /** Instantiate a new Animation without using a frame cache.
-   * TODO Is this in use?
-   */
-  public Animation(String animName, String[] filenames, String activity, String direction) {
-    this(animName, filenames, activity, direction, null);
   }
 
   public int getLength() {
-    return frames.length;
+    return frames.size();
   }
   
   public Surface getCurrentFrame() {
-    return frames[index];
+    return frames.get(index);
   }
   
   public void setIndex(int index) {
@@ -90,7 +86,7 @@ public class Animation {
    * @return whether or not there are frames after the current frame
    */
   public boolean hasNextFrame() {
-    return (index < frames.length-1);
+    return (index < frames.size() - 1);
   }
   
   public int getIndex() {
@@ -103,30 +99,15 @@ public class Animation {
     return "<Animation("+getActivity()+","+getDirection()+","+getLength()+")>";
   }
   
-  /**
-   * Load equipment animation filenames dynamically.
-   * Specifically, we're doing three things:
-   *  - loading it from the correct directory (/png),
-   *  - checking for the "_B" suffix, and
-   *  - appending the file type (.png) to the end.
-   */
-  public static String fixAccessoryFilename(String filename) {
-    if (Utils.imageExists(filename)) {
-      return String.format("%s.%s", filename, Constants.IMAGE_FORMAT);
-    } else {
-      String behindPath = filename + "_B";
-      if (Utils.imageExists(behindPath)) {
-        return String.format("%s_B.%s", filename, Constants.IMAGE_FORMAT);
-      } else {
-        return null;
-      }
-    }
-  }
-  
-  
   public boolean drawBehind(int index) {
-    return drawBehind[index];
+    return drawBehind.get(index);
   }
-  
-  
+
+  public static Animation fromTemplate(String spriteName, String activity, Direction direction, List<String> filenames,
+  Map<String, Surface> frameCache) {
+    List<String> outFilenames = filenames.stream()
+      .map(filename -> AnimationUtils.formatFilename(spriteName, activity, direction, filename.split("_")[1]))
+      .collect(Collectors.toList());
+    return new Animation(spriteName, activity, direction, outFilenames, frameCache);
+  }
 }

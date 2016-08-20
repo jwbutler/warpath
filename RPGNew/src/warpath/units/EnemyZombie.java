@@ -1,4 +1,6 @@
 package warpath.units;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import jwbgl.*;
@@ -14,7 +16,9 @@ public class EnemyZombie extends ZombieUnit {
   private final static double ATTACK_CHANCE = 0.75;
   private final static int VISION_RADIUS = 6;
   private final static int SMELL_RADIUS = 12;
-  private static String[] activities = {"walking", "standing", "attacking", "stunned_short", "falling"};
+  private static List<String> activities = Arrays.asList(
+    "walking", "standing", "attacking", "stunned_short", "falling"
+  );
   public EnemyZombie(String name, Posn posn, Player player) {
     super(name, activities, posn, player);
     currentHP = maxHP = 45;
@@ -29,9 +33,9 @@ public class EnemyZombie extends ZombieUnit {
     super.nextActivity();
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
-    Unit tu = getNextTargetUnit();
+    BasicUnit tu = getNextTargetUnit();
     if (currentActivity.equals("standing")) {
-      for (Unit u: game.getUnits()) {
+      for (BasicUnit u: game.getUnits()) {
         if (isHostile(u)) {
           if (Utils.distance2(this,u) <= SMELL_RADIUS) {
             /* This should be where the "smell" sound is played, but we're losing the target
@@ -83,7 +87,7 @@ public class EnemyZombie extends ZombieUnit {
   }
   
   @Override
-  public void doAttackHit(Unit u) {
+  public void doAttackHit(BasicUnit u) {
     RPG game = RPG.getInstance();
     int dmg = game.getRNG().nextInt(maxDamage - minDamage + 1) + minDamage;
     // soundFX

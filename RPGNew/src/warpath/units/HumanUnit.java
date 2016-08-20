@@ -1,6 +1,9 @@
 package warpath.units;
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import jwbgl.*;
 import warpath.core.RPG;
@@ -11,18 +14,18 @@ import warpath.players.Player;
  * This class is used to represent humanoid units.  Particularly the ones
  * that use Will's original "player" sprite.  It'll be subclassed lots.
  */
-public abstract class HumanUnit extends Unit {
+public abstract class HumanUnit extends BasicUnit {
   private static final long serialVersionUID = 1L;
-  private static final String[] DEFAULT_ACTIVITIES = {"walking", "standing", "attacking", "falling"};
+  private static final List<String> DEFAULT_ACTIVITIES = Arrays.asList("walking", "standing", "attacking", "falling");
   private static final String HIT_SOUND = "hit1.wav";
   private static final int Y_OFFSET = -32;
   
-  public HumanUnit(String name, String[] activities, Posn posn, Player player) {
+  public HumanUnit(String name, List<String> activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
-    this(name, "player", activities, new HashMap<Color, Color>(), posn, player);
+    this(name, "player", activities, new HashMap<>(), posn, player);
   }  
   
-  public HumanUnit(String name, String[] activities, HashMap<Color, Color> playerUnitPaletteSwaps,
+  public HumanUnit(String name, List<String> activities, Map<Color, Color> playerUnitPaletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(name, "player", activities, playerUnitPaletteSwaps, posn, player);
@@ -33,7 +36,7 @@ public abstract class HumanUnit extends Unit {
   }
   
   public HumanUnit(String name, String animationName,
-  String[] activities, HashMap<Color, Color> paletteSwaps, Posn posn, Player player) {
+  List<String> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(name, animationName, activities, paletteSwaps, posn, player);
     this.setYOffset(Y_OFFSET);
   }

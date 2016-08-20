@@ -27,8 +27,8 @@ import warpath.templates.UnitTemplate;
 import warpath.ui.GameWindow;
 import warpath.ui.InputHandler;
 import warpath.ui.SoundPlayer;
+import warpath.units.BasicUnit;
 import warpath.units.SwordGuy;
-import warpath.units.Unit;
 
 /**
  * The main game engine.  Expect this one to be a few thousand lines long.
@@ -46,14 +46,14 @@ public class RPG implements ActionListener {
   // Using a HashMap for this is pretty strange.  But it lets us access
   // players by number, which I think is useful.
   private final HashMap<Integer, Player> players;
-  private final ArrayList<Unit> units;
+  private final ArrayList<BasicUnit> units;
   private final ArrayList<GameObject> objects; // Non-units
   private final ArrayList<Level> levels;
 
   // These are kinda hacks to get around concurrent modification exceptions.
   // Maybe there is a better solution.
-  private final ArrayList<Unit> unitsToAdd;
-  private final ArrayList<Unit> unitsToRemove;
+  private final ArrayList<BasicUnit> unitsToAdd;
+  private final ArrayList<BasicUnit> unitsToRemove;
 
   // Unsure if we should keep this reference, he's always going to be player 1, right?
   private HumanPlayer humanPlayer;
@@ -79,11 +79,11 @@ public class RPG implements ActionListener {
     nextEnemyID = 1;
     players = new HashMap<Integer, Player>();
     addHumanPlayer();
-    units = new ArrayList<Unit>();
+    units = new ArrayList<BasicUnit>();
     objects = new ArrayList<GameObject>();
     levels = new ArrayList<Level>();
-    unitsToAdd = new ArrayList<Unit>();
-    unitsToRemove = new ArrayList<Unit>();
+    unitsToAdd = new ArrayList<BasicUnit>();
+    unitsToRemove = new ArrayList<BasicUnit>();
     RNG = new Random();
     soundPlayer = new SoundPlayer();
     inputHandler = new InputHandler(this);
@@ -151,21 +151,21 @@ public class RPG implements ActionListener {
     // Do blocking event code.  Should this go to Upkeep?
     doBlockUpkeep();
 
-    for (Unit u: units) {
+    for (BasicUnit u: units) {
       u.doUpkeep();
     }
 
-    for (Unit u: units) {
+    for (BasicUnit u: units) {
       u.doEvents();
     }
 
     // Kill units that have been queued for death. (This happens during
     // nextActivity(), which happens during doUpkeep()...
-    for (Unit u : unitsToRemove) {
+    for (BasicUnit u : unitsToRemove) {
       removeUnit(u);
     }
     unitsToRemove.clear();
-    for (Unit u : unitsToAdd) {
+    for (BasicUnit u : unitsToAdd) {
       addUnit(u);
     }
     unitsToAdd.clear();
@@ -367,7 +367,7 @@ public class RPG implements ActionListener {
    * (I forget why :( )
    * @param u - The unit to add
    */
-  public void addUnit(Unit u) {
+  public void addUnit(BasicUnit u) {
     units.add(u);
     u.getPlayer().getUnits().add(u);
     if (u.getPlayer().equals(getHumanPlayer())) {
@@ -386,7 +386,7 @@ public class RPG implements ActionListener {
    * I don't think we need to check contains(), but it feels wrong...
    * @param u - The unit to remove
    */
-  public void removeUnit(Unit u) {
+  public void removeUnit(BasicUnit u) {
     units.remove(u);
     depthTree.remove(u);
 
@@ -512,7 +512,7 @@ public class RPG implements ActionListener {
    * @param g the Graphics object of the game panel.
    */
   public void drawAll(Graphics g) {
-    /*Unit u = getPlayerUnit();
+    /*BasicUnit u = getPlayerUnit();
     System.out.printf("%s %s %s, %s\n",
         u.getCurrentActivity(),
         coordsToDir(u.dx, u.dy),
@@ -533,10 +533,10 @@ public class RPG implements ActionListener {
     if (posn == null) return;
 
     // targeting a unit
-    for (Unit v: units) {
+    for (BasicUnit v: units) {
       if (posn.equals(v.getPosn())) {
         /*
-        for (Unit u: getHumanPlayer().getSelectedUnits()) {
+        for (BasicUnit u: getHumanPlayer().getSelectedUnits()) {
           //u.doUnitInteraction(v);
           u.setNextTargetUnit(v);
         }
@@ -559,7 +559,7 @@ public class RPG implements ActionListener {
       }
     }
     // targeting a floor tile
-    Unit u = getPlayerUnit();
+    BasicUnit u = getPlayerUnit();
     u.setNextTargetPosn(posn);
     u.setTargetPosnOverlay(posn);
     u.setNextActivity("walking");
@@ -574,11 +574,11 @@ public class RPG implements ActionListener {
    */
   public void doRightClick(Posn pixel, String activity) {
     Posn posn = pixelToGrid(pixel);
-    Unit u = getPlayerUnit();
+    BasicUnit u = getPlayerUnit();
     if (pixel == null || posn == null) return;
 
     // targeting a unit
-    for (Unit v: units) {
+    for (BasicUnit v: units) {
       if (posn.equals(v.getPosn())) {
         if (v != u) {
           u.setNextTargetUnit(v);
@@ -803,7 +803,7 @@ public class RPG implements ActionListener {
           } else if (q.equals(p2)) {
             addIt = true;
           } else if (floor.getTile(q).getUnit() != null) {
-            Unit blockingUnit = floor.getTile(q).getUnit();
+            BasicUnit blockingUnit = floor.getTile(q).getUnit();
             if (floor.getTile(q).isBlocked() && blockingUnit.isMoving()) {
               addIt = true;
             }
@@ -915,7 +915,7 @@ public class RPG implements ActionListener {
     return humanPlayer;
   }
 
-  public Unit getPlayerUnit() {
+  public BasicUnit getPlayerUnit() {
     return humanPlayer.getUnits().get(0);
   }
 
@@ -940,7 +940,7 @@ public class RPG implements ActionListener {
     return players.get(index);
   }
 
-  public ArrayList<Unit> getUnits() {
+  public ArrayList<BasicUnit> getUnits() {
     return units;
   }
 
@@ -988,7 +988,7 @@ public class RPG implements ActionListener {
       redrawFloor = true;
       depthTree.clear();
       units.clear();
-      for (Unit u: level.getUnits()) {
+      for (BasicUnit u: level.getUnits()) {
         depthTree.add(u.getFloorOverlay());
         if (u.getTargetPosnOverlay() != null) {
           System.out.println("zomg");
@@ -1015,11 +1015,11 @@ public class RPG implements ActionListener {
    * array list now, and then after we finish iterating through we'll remove it
    * from both.
    */
-  public void queueRemoveUnit(Unit unit) {
+  public void queueRemoveUnit(BasicUnit unit) {
     unitsToRemove.add(unit);
   }
 
-  public void queueAddUnit(Unit unit) {
+  public void queueAddUnit(BasicUnit unit) {
     unitsToAdd.add(unit);
   }
 
@@ -1044,7 +1044,7 @@ public class RPG implements ActionListener {
   }
 
   public void killAllEnemies() {
-    for (Unit u : units) {
+    for (BasicUnit u : units) {
       if (u.isHostile(getPlayerUnit())) {
         u.die();
         queueRemoveUnit(u);

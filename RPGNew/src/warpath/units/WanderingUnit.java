@@ -26,7 +26,7 @@ public class WanderingUnit extends HumanUnit {
       
       if (getCurrentAnimation().getIndex() == 2) {
         move(dx, dy);
-        path.removeFirst();
+        path.remove(0);
       }
     } else if (getCurrentActivity().equals("standing")) {
       if (RNG.nextInt(30) == 0) {

@@ -1,7 +1,10 @@
 package warpath.units;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import jwbgl.*;
+import warpath.activities.ActivityNames;
 import warpath.core.RPG;
 import warpath.core.Utils;
 import warpath.objects.Corpse;
@@ -16,7 +19,10 @@ import warpath.players.Player;
 public class EnemyRobedWizard extends RobedWizardUnit {
   private static final long serialVersionUID = 1L;
 
-  private static final String[] ACTIVITIES = {"walking", "standing", "falling", "teleporting", "appearing", "rezzing", "stunned_long"};
+  private static final List<String> ACTIVITIES = Arrays.asList(
+    ActivityNames.APPEARING, ActivityNames.FALLING, ActivityNames.REZZING, ActivityNames.STANDING, ActivityNames.STUNNED_SHORT,
+    ActivityNames.STUNNED_LONG, ActivityNames.TELEPORTING, ActivityNames.WALKING
+  );
   
   // These two percentages are additive
   private static final double WANDER_CHANCE = 0.025;
@@ -37,13 +43,13 @@ public class EnemyRobedWizard extends RobedWizardUnit {
     super.nextActivity();
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
-    if (currentActivity.equals("standing")) {
+    if (currentActivity.equals(ActivityNames.STANDING)) {
       // Set up variables for the flowchart.
       boolean hostileInRange = false;
-      Unit closestEnemy = null;
+      BasicUnit closestEnemy = null;
       Corpse closestCorpse = null;
       
-      for (Unit u : game.getUnits()) {
+      for (BasicUnit u : game.getUnits()) {
         if (isHostile(u) && Utils.distance2(this, u) <= EVASIVE_RADIUS) {
           hostileInRange = true;
           if (closestEnemy == null || Utils.distance2(this, u) < Utils.distance2(this, closestEnemy)) {
@@ -65,7 +71,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       // Execute flowchart.
       // Are we standing on a corpse? Start rezzing, regardless of threats.
       if ((closestCorpse != null) && (Utils.distance2(this, closestCorpse) <= VISION_RADIUS) && (closestCorpse.getPosn().equals(getPosn()))) {
-        setNextActivity("rezzing");
+        setNextActivity(ActivityNames.REZZING);
         // Is there an enemy (player) unit in the danger zone? Teleport or walk away.
       } else if (hostileInRange) {
         int x,y;
@@ -73,10 +79,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         boolean goodPosn = false;
         int moveRadius;
         if (currentEP >= TELEPORT_COST) {
-          setNextActivity("teleporting");
+          setNextActivity(ActivityNames.TELEPORTING);
           moveRadius = TELEPORT_RADIUS;
         } else {
-          setNextActivity("walking");
+          setNextActivity(ActivityNames.WALKING);
           moveRadius = 3;
         }
         // Find a tile to teleport to.
@@ -96,7 +102,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         } while (!goodPosn);
         setNextTargetPosn(p);
       } else if ((closestCorpse != null) && (Utils.distance2(this, closestCorpse) <= VISION_RADIUS)) {
-        setNextActivity("walking");
+        setNextActivity(ActivityNames.WALKING);
         setNextTargetPosn(closestCorpse.getPosn());
       } else {
         double r = RNG.nextDouble();
@@ -108,7 +114,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
             y = RNG.nextInt(game.getFloor().getHeight());
           } while (game.getFloor().getTile(x,y).isBlocked());
           setNextTargetPosn(new Posn(x,y));
-          setNextActivity("walking");
+          setNextActivity(ActivityNames.WALKING);
         }
       }
     }
@@ -125,24 +131,24 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   }
   
   public void takeBashHit(GameObject src, int dmg) {
-    Posn blockedPosn = new Posn(getX()+dx, getY()+dy);
+    Posn blockedPosn = new Posn(getX() + dx, getY() + dy);
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
       // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
       // IMPORTANT: take the damage BEFORE changing the activity, since we don't want to take
       // the multiplied damage on this hit.
       takeDamage(dmg);
-      if (getCurrentActivity().equals("rezzing")) {
-        setCurrentActivity("stunned_long");
+      if (getCurrentActivity().equals(ActivityNames.REZZING)) {
+        setCurrentActivity(ActivityNames.STUNNED_LONG);
       } else {
-        setCurrentActivity("stunned_short");
+        setCurrentActivity(ActivityNames.STUNNED_SHORT);
       }
       clearTargets();
     }
   }
   
   public void takeDamage(int dmg) {
-    if (getCurrentActivity().equals("stunned_long")) {
+    if (getCurrentActivity().equals(ActivityNames.STUNNED_LONG)) {
       super.takeDamage(3*dmg);
     } else {
       super.takeDamage(dmg);

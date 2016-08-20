@@ -1,7 +1,7 @@
 package warpath.players;
 import java.util.ArrayList;
 
-import warpath.units.Unit;
+import warpath.units.BasicUnit;
 
 /**
  * The human player.  There will only be one.
@@ -9,8 +9,8 @@ import warpath.units.Unit;
 
 public class HumanPlayer implements Player {
   private final int playerNumber;
-  private final ArrayList<Unit> units;
-  private final ArrayList<Unit> selectedUnits;
+  private final ArrayList<BasicUnit> units;
+  private final ArrayList<BasicUnit> selectedUnits;
   private final ArrayList<Player> friendlyPlayers;
   private final ArrayList<Player> hostilePlayers;
   
@@ -19,13 +19,13 @@ public class HumanPlayer implements Player {
    */
   public HumanPlayer(int playerNumber) {
     this.playerNumber = playerNumber;
-    units = new ArrayList<Unit>();
-    selectedUnits = new ArrayList<Unit>();
+    units = new ArrayList<BasicUnit>();
+    selectedUnits = new ArrayList<BasicUnit>();
     friendlyPlayers = new ArrayList<Player>();
     hostilePlayers = new ArrayList<Player>();
   }
   
-  public ArrayList<Unit> getSelectedUnits() {
+  public ArrayList<BasicUnit> getSelectedUnits() {
     return selectedUnits;
   }
   
@@ -64,7 +64,7 @@ public class HumanPlayer implements Player {
   }
   
   // ===== ACCESSOR METHODS =====
-  public ArrayList<Unit> getUnits() {
+  public ArrayList<BasicUnit> getUnits() {
     return units;
   }
 

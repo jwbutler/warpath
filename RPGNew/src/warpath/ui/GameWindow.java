@@ -74,7 +74,7 @@ public class GameWindow extends JFrame {
     gamePanel.add(hudPanel, BorderLayout.SOUTH);
 
     // Make the map editor panel
-    mapEditor = new MapMaker(game);
+    mapEditor = new MapMaker();
     mapEditor.setPreferredSize(new Dimension(getWidth(), getHeight()));
     mapEditor.setLayout(new BorderLayout());
 

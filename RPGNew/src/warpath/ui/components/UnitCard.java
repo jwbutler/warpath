@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 
 import warpath.core.RPG;
+import warpath.units.BasicUnit;
 import warpath.units.Unit;
 
 /**
@@ -25,7 +26,7 @@ public class UnitCard extends JButton implements ActionListener {
     super();
     this.unit = unit;
     setSize(width,height);
-    healthBar = new HealthBar(unit, width-2*MARGIN, HEALTH_BAR_HEIGHT);
+    healthBar = new HealthBar(unit, width - 2*MARGIN, HEALTH_BAR_HEIGHT);
     addActionListener(this);
   }
   @Override

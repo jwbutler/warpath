@@ -1,12 +1,13 @@
 package warpath.items;
 import java.awt.Graphics;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 import jwbgl.*;
+import warpath.activities.ActivityNames;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
 import warpath.core.Constants;
+import warpath.core.Direction;
 import warpath.core.RPG;
 import warpath.units.Unit;
 
@@ -19,42 +20,45 @@ public abstract class Accessory {
   protected final Unit unit;
   protected final int xOffset;
   protected final int yOffset;
-  protected final String animationName;
+  protected final String spriteName;
   
-  protected final HashMap<String, Surface> frames;
-  protected final ArrayList<Animation> animations;
-  protected final String[] activities = {
-    "walking", "standing", "attacking", "bashing", "blocking_1", "blocking_2", "blocking_3",
-    "slashing_1", "slashing_2", "slashing_3", "falling"};
+  protected final Map<String, Surface> frameCache;
+
+  protected final List<Animation> animations;
+  protected final List<String> activities = Arrays.asList(
+    ActivityNames.WALKING, ActivityNames.STANDING, ActivityNames.ATTACKING, ActivityNames.BASHING,
+    ActivityNames.BLOCKING_1, ActivityNames.BLOCKING_2, ActivityNames.BLOCKING_3, ActivityNames.SLASHING_1,
+    ActivityNames.SLASHING_2, ActivityNames.SLASHING_3, ActivityNames.FALLING
+  );
   
   private Animation currentAnimation;
   
-  public Accessory(Unit unit, String animationName, String slot, int xOffset, int yOffset) {
+  public Accessory(Unit unit, String spriteName, String slot, int xOffset, int yOffset) {
     this.unit = unit;
     this.slot = slot;
-    this.animationName = animationName;
-    frames = new HashMap<String, Surface>();
+    this.spriteName = spriteName;
+    frameCache = new HashMap<>();
 
-    animations = new ArrayList<Animation>();
+    animations = new ArrayList<>();
     loadAnimations();
     this.xOffset = xOffset;
     this.yOffset = yOffset;
   }
-  public Accessory(Unit unit, String animationName, String slot) {
-    this(unit, animationName, slot, 0, 0);
+  public Accessory(Unit unit, String spriteName, String slot) {
+    this(unit, spriteName, slot, 0, 0);
   }
   
   /** Load all the animations for this object.
    * Calls loadActivityAnimations() for each activity.
    */
   public void loadAnimations() {
-    for (int i = 0; i < activities.length; i++) {
-      loadActivityAnimations(activities[i]);
+    for (String activity : activities) {
+      loadActivityAnimations(activity);
     }
   }
     
   private void loadActivityAnimations(String activity) {
-    if (activity.equals("falling")) {
+    if (activity.equals(ActivityNames.FALLING)) {
       loadFallingAnimations();
     } else {
       loadGenericAnimations(activity);
@@ -108,45 +112,37 @@ public abstract class Accessory {
   
   /**
    * Load animations in the expected format used by Units.
-   * C&P from Unit!
+   * C&P from BasicUnit!
    */
-  protected void loadGenericAnimations(String activity) {
-    String[] filenames = AnimationTemplates.getTemplate(activity);
-    for (int i = 0; i < Constants.DIRECTIONS.length; i++) {
-      String[] filenames2 = new String[filenames.length];
-      for (int j=0; j<filenames.length; j++) {
-        String activityName = filenames[j].split("_")[0];
-        String frameNum = filenames[j].split("_")[1];
-        filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, activityName, Constants.DIRECTIONS[i], frameNum));
-      }
-      animations.add(new Animation(animationName, filenames2, activity, Constants.DIRECTIONS[i], frames));
+  public void loadGenericAnimations(String activity) {
+    loadGenericAnimations(activity, AnimationTemplates.getTemplate(activity));
+  }
+
+  /**
+   * Load animations in the expected format used by Units.
+   * C&P from BasicUnit!
+   */
+  public void loadGenericAnimations(String activity, List<String> filenames) {
+    for (Direction dir : Direction.values()) {
+      animations.add(Animation.fromTemplate(spriteName, activity, dir, filenames, frameCache));
     }
   }
+
   /**
-   * Falling animations follow different rules than the usual Unit falling
+   * Falling animations follow different rules than the usual BasicUnit falling
    * animations, so we will define them separately.
-   * C&P from Unit.
+   * C&P from BasicUnit.
    * TODO: Some of the equipment will have its own falling animations.
    * Need to override this.
    */
-  protected void loadFallingAnimations() {
-    for (int i=0; i<Constants.DIRECTIONS.length; i++) {
-      String dir = Constants.DIRECTIONS[i];
-      String[] filenames = AnimationTemplates.FALLING;
-      String[] filenames2 = new String[filenames.length];
-      if (dir.equals("N") || dir.equals("NE") || dir.equals("E") || dir.equals("SE")) {
-        for (int j=0; j<filenames.length; j++) {
-          String animIndex = filenames[j].split("_")[1];
-          filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, "falling", "NE", animIndex));
-
-        }
+  public void loadFallingAnimations() {
+    for (Direction dir : Direction.values()) {
+      List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
+      if (neDirections.contains(dir)) {
+        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.NE, AnimationTemplates.FALLING, frameCache));
       } else {
-        for (int j=0; j<filenames.length; j++) {
-          String animIndex = filenames[j].split("_")[1];
-          filenames2[j] = Animation.fixAccessoryFilename(String.format("%s_%s_%s_%s", animationName, "falling", "S", animIndex));
-        }
+        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.S, AnimationTemplates.FALLING, frameCache));
       }
-      animations.add(new Animation(animationName, filenames2, "falling", dir, frames));
     }
   }
 

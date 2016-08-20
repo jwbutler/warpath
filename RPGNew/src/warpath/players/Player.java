@@ -1,7 +1,7 @@
 package warpath.players;
 import java.util.ArrayList;
 
-import warpath.units.Unit;
+import warpath.units.BasicUnit;
 
 /**
  * Interface for players.  Can represent a human player or an AI; I'm planning
@@ -12,7 +12,7 @@ import warpath.units.Unit;
  */ 
 
 public interface Player {
-  public ArrayList<Unit> getUnits();
+  public ArrayList<BasicUnit> getUnits();
   public boolean isHuman();
   /**
    * Indicates that this player is hostile toward p.

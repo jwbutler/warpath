@@ -1,10 +1,10 @@
 package warpath.ui.components;
 import java.awt.Graphics;
 
-import warpath.units.Unit;
+import warpath.units.BasicUnit;
 
 public class TransHealthBar extends HealthBar {
-  public TransHealthBar(Unit unit, int width, int height) {
+  public TransHealthBar(BasicUnit unit, int width, int height) {
     super(unit, width, height);
   }
   public void draw(Graphics g, int width, int height) {

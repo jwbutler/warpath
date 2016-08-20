@@ -13,7 +13,7 @@ import warpath.objects.Wall;
 import warpath.units.EnemyRobedWizard;
 import warpath.units.EnemySwordGuy;
 import warpath.units.EnemyZombie;
-import warpath.units.Unit;
+import warpath.units.BasicUnit;
 
 /**
  * Represents a level.  Initialized from a bitmap where colors represent
@@ -21,7 +21,7 @@ import warpath.units.Unit;
  * representing these colors.
  */
 public abstract class Level {
-  protected final ArrayList<Unit> units;
+  protected final ArrayList<BasicUnit> units;
   protected final ArrayList<GameObject> objects;
   private final Surface img;
   
@@ -38,7 +38,7 @@ public abstract class Level {
   
   public Level(String filename) {
     img = new Surface(filename);
-    units = new ArrayList<Unit>();
+    units = new ArrayList<BasicUnit>();
     objects = new ArrayList<GameObject>();
   }
 
@@ -137,7 +137,7 @@ public abstract class Level {
     return(game.getPlayer(2).getUnits().size() == 0);
   }
   
-  public ArrayList<Unit> getUnits() { return units; }
+  public ArrayList<BasicUnit> getUnits() { return units; }
   public ArrayList<GameObject> getObjects() { return objects; }
   public Floor getFloor() { return floor; }
 }

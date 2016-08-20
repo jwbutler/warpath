@@ -1,11 +1,13 @@
 package warpath.ui;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
 import warpath.core.RPG;
 import warpath.ui.components.UnitCard;
+import warpath.units.BasicUnit;
 import warpath.units.Unit;
 
 /**
@@ -16,15 +18,15 @@ public class CardPanel extends JPanel {
   private static final long serialVersionUID = 1L;
   private final RPG game;
   private static final int MARGIN = 10;
-  private final ArrayList<UnitCard> cards;
+  private final List<UnitCard> cards;
   public CardPanel(RPG game, int width, int height) {
     super();
     this.game = game;
     setSize(width, height);
     setBackground(Color.DARK_GRAY);
     setLayout(null);
-    cards = new ArrayList<UnitCard>();
-    for (Unit u: game.getHumanPlayer().getUnits()) {
+    cards = new ArrayList<>();
+    for (BasicUnit u: game.getHumanPlayer().getUnits()) {
       addCard(u);
     }
   }
@@ -32,9 +34,9 @@ public class CardPanel extends JPanel {
   public void addCard(Unit u) {
     int cardWidth = getWidth()/5 - (MARGIN*5/6);
     int cardHeight = getHeight() - 2*MARGIN;
-    int cardX = cardWidth*cards.size() + MARGIN*(cards.size()+1);
+    int cardX = cardWidth * cards.size() + MARGIN * (cards.size() + 1);
     int cardY = MARGIN;
-    UnitCard card = new UnitCard(game, u, cardWidth, cardHeight);
+    UnitCard card = new UnitCard(u, cardWidth, cardHeight);
     //card.setAlignmentX(cardX);
     //card.setAlignmentY(cardY);
     this.add(card);

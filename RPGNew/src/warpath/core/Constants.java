@@ -17,16 +17,6 @@ public class Constants {
   public static final String IMAGE_FOLDER = "png";
   public static final String IMAGE_FORMAT = "png";
 
-  public static final String[] DIRECTIONS = {
-    "N",
-    "NE",
-    "E",
-    "SE",
-    "S",
-    "SW",
-    "W",
-    "NW"
-  };
   public static final String[] SLOT_LIST = {
     "Head",
     //"Hair",

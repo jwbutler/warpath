@@ -1,6 +1,6 @@
 package warpath.items;
 
-import warpath.units.BasicUnit;
+import warpath.units.Unit;
 
 /**
  * Important: this uses "item name" (display name) as its input.
@@ -8,7 +8,7 @@ import warpath.units.BasicUnit;
  * to maintain clarity.
  */
 public class ItemFactory {
-  public static Accessory create(BasicUnit unit, String itemName) {
+  public static Accessory create(Unit unit, String itemName) {
     switch (itemName) {
       case "Shield":
         return new Shield(unit, "shield2");

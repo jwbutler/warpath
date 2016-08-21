@@ -1,6 +1,6 @@
 package warpath.animations;
 
-import warpath.activities.ActivityNames;
+import warpath.activities.Activity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -179,38 +179,47 @@ public class AnimationTemplates {
     "falling_3", "falling_3"
   );
 
+  private static final List<String> ZOMBIE_FALLING_ALT = Arrays.asList(
+    "fallingB_1", "fallingB_1",
+    "fallingB_2", "fallingB_2",
+    "fallingB_3", "fallingB_3",
+    "fallingB_3", "fallingB_3"
+  );
+
   /**
    * This is a convenience method to load the default Player animations
    * semi-automatically.  Super redundant, will make more sense when we
    * switch to the Enum.
    */
-  public static List<String> getTemplate(String activity) {
-    if (activity.equals(ActivityNames.STANDING)) {
+  public static List<String> getTemplate(Activity activity) {
+    if (activity.equals(Activity.STANDING)) {
       return STANDING;
-    } else if (activity.equals(ActivityNames.WALKING)) {
+    } else if (activity.equals(Activity.WALKING)) {
       return WALKING;
-    } else if (activity.equals(ActivityNames.ATTACKING)) {
+    } else if (activity.equals(Activity.ATTACKING)) {
       return ATTACKING;
-    } else if (activity.equals(ActivityNames.STUNNED_SHORT)) {
+    } else if (activity.equals(Activity.STUNNED_SHORT)) {
       return STUNNED_SHORT;
-    } else if (activity.equals(ActivityNames.STUNNED_LONG)) {
+    } else if (activity.equals(Activity.STUNNED_LONG)) {
       return STUNNED_LONG;
-    } else if (activity.equals(ActivityNames.BASHING)) {
+    } else if (activity.equals(Activity.BASHING)) {
       return BASHING;
-    } else if (activity.equals(ActivityNames.BLOCKING_1)) {
+    } else if (activity.equals(Activity.BLOCKING_1)) {
       return BLOCKING_1;
-    } else if (activity.equals(ActivityNames.BLOCKING_2)) {
+    } else if (activity.equals(Activity.BLOCKING_2)) {
       return BLOCKING_2;
-    } else if (activity.equals(ActivityNames.BLOCKING_3)) {
+    } else if (activity.equals(Activity.BLOCKING_3)) {
       return BLOCKING_3;
-    } else if (activity.equals(ActivityNames.SLASHING_1)) {
+    } else if (activity.equals(Activity.SLASHING_1)) {
       return SLASHING_1;
-    } else if (activity.equals(ActivityNames.SLASHING_2)) {
+    } else if (activity.equals(Activity.SLASHING_2)) {
       return SLASHING_2;
-    } else if (activity.equals(ActivityNames.SLASHING_3)) {
+    } else if (activity.equals(Activity.SLASHING_3)) {
       return SLASHING_3;
-    } else if (activity.equals(ActivityNames.FALLING)) {
+    } else if (activity.equals(Activity.FALLING)) {
       return FALLING;
+    } else if (activity.equals(Activity.ZOMBIE_FALLING_ALT)) {
+      return ZOMBIE_FALLING_ALT;
     } else {
       System.out.println("fuck fuck fuck " + activity);
       return new ArrayList<>();

@@ -2,7 +2,6 @@ package warpath.players;
 import java.util.ArrayList;
 import java.util.List;
 
-import warpath.units.BasicUnit;
 import warpath.units.Unit;
 
 /**

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
+import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
-import warpath.core.Constants;
-import warpath.core.Direction;
+import warpath.internals.Direction;
 import warpath.core.RPG;
 import warpath.objects.Corpse;
 import warpath.players.Player;
@@ -21,18 +21,18 @@ import warpath.players.Player;
  */
 public abstract class ZombieUnit extends BasicUnit implements Serializable {
   private static final long serialVersionUID = 1L;
-  private static final List<String> DEFAULT_ACTIVITIES = Arrays.asList("walking", "standing", "attacking", "falling");
+  private static final List<Activity> DEFAULT_ACTIVITIES = Arrays.asList(Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.FALLING);
   private static final int X_OFFSET = 0;
   private static final int Y_OFFSET = -32;
   private static final String HIT_SOUND = "hit1.wav";
   
   
-  public ZombieUnit(String name, List<String> activities, Posn posn, Player player) {
+  public ZombieUnit(String name, List<Activity> activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(name, "zombie", activities, new HashMap<>(), posn, player);
   }  
   
-  public ZombieUnit(String name, List<String> activities, Map<Color, Color> paletteSwaps,
+  public ZombieUnit(String name, List<Activity> activities, Map<Color, Color> paletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(name, "zombie", activities, paletteSwaps, posn, player);
@@ -43,7 +43,7 @@ public abstract class ZombieUnit extends BasicUnit implements Serializable {
   }
   
   public ZombieUnit(String name, String animationName,
-  List<String> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
+  List<Activity> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(name, animationName, activities, paletteSwaps, posn, player);
     this.setXOffset(X_OFFSET);
     this.setYOffset(Y_OFFSET);
@@ -69,9 +69,9 @@ public abstract class ZombieUnit extends BasicUnit implements Serializable {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, "falling", null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
       } else {
-        animations.add(Animation.fromTemplate(spriteName, "fallingB", null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, Activity.ZOMBIE_FALLING_ALT, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
       }
     }
   }

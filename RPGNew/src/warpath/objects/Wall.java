@@ -1,7 +1,6 @@
 package warpath.objects;
 import java.awt.Color;
 import jwbgl.*;
-import warpath.core.RPG;
 
 public class Wall extends BasicObject {
   private final static int X_OFFSET = 0;

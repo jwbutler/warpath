@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import jwbgl.*;
+import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
 import warpath.players.Player;
@@ -16,8 +17,8 @@ public class EnemyZombie extends ZombieUnit {
   private final static double ATTACK_CHANCE = 0.75;
   private final static int VISION_RADIUS = 6;
   private final static int SMELL_RADIUS = 12;
-  private static List<String> activities = Arrays.asList(
-    "walking", "standing", "attacking", "stunned_short", "falling"
+  private static List<Activity> activities = Arrays.asList(
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.STUNNED_SHORT, Activity.FALLING
   );
   public EnemyZombie(String name, Posn posn, Player player) {
     super(name, activities, posn, player);
@@ -34,7 +35,7 @@ public class EnemyZombie extends ZombieUnit {
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
     Unit tu = getNextTargetUnit();
-    if (currentActivity.equals("standing")) {
+    if (currentActivity.equals(Activity.STANDING)) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
           if (Utils.distance2(this,u) <= SMELL_RADIUS) {
@@ -52,33 +53,33 @@ public class EnemyZombie extends ZombieUnit {
         }
       }
       if (getNextTargetUnit() != null) {
-        setNextActivity("attacking");
+        setNextActivity(Activity.ATTACKING);
       }
       if (targetUnit != null) {
         super.nextActivity();
       }
     }
-    if (currentActivity.equals("walking")) {
-      double cancelChance = 1-SLOW_MOVE_SPEED;
+    if (currentActivity.equals(Activity.WALKING)) {
+      double cancelChance = 1 - SLOW_MOVE_SPEED;
       tu = getNextTargetUnit();
       if (tu != null) {
         if (Utils.distance2(this, tu) <= VISION_RADIUS) {
-          cancelChance = 1-FAST_MOVE_SPEED;
+          cancelChance = 1 - FAST_MOVE_SPEED;
         } else {
-          cancelChance = 1-SLOW_MOVE_SPEED;
+          cancelChance = 1 - SLOW_MOVE_SPEED;
         }
       }
       if (RNG.nextDouble() < cancelChance) {
-        setCurrentActivity("standing");
+        setCurrentActivity(Activity.STANDING);
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);
         //setTargetUnit(null);
         //setNextTargetUnit(null);
         //setNextActivity(null);
       }
-    } else if (currentActivity.equals("attacking")) {
+    } else if (currentActivity.equals(Activity.ATTACKING)) {
       if (RNG.nextDouble() > ATTACK_CHANCE) {
-        setCurrentActivity("standing");
+        setCurrentActivity(Activity.STANDING);
         currentEP += ATTACK_COST;
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);

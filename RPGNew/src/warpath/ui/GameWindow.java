@@ -2,8 +2,7 @@ package warpath.ui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import warpath.core.RPG;
 import warpath.ui.creator.CharacterCreator;
@@ -47,7 +46,7 @@ public class GameWindow extends JFrame {
     cardLayout = new CardLayout();
     panelContainer.setLayout(cardLayout);
     add(panelContainer);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
   }
 
   /**

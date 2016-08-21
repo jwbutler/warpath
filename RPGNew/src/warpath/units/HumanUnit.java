@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
-import warpath.core.Direction;
+import warpath.activities.Activity;
+import warpath.internals.Direction;
 import warpath.core.RPG;
 import warpath.objects.Corpse;
 import warpath.players.Player;
@@ -17,16 +18,18 @@ import warpath.players.Player;
  */
 public abstract class HumanUnit extends BasicUnit {
   private static final long serialVersionUID = 1L;
-  private static final List<String> DEFAULT_ACTIVITIES = Arrays.asList("walking", "standing", "attacking", "falling");
+  private static final List<Activity> DEFAULT_ACTIVITIES = Arrays.asList(
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.FALLING
+  );
   private static final String HIT_SOUND = "hit1.wav";
   private static final int Y_OFFSET = -32;
   
-  public HumanUnit(String name, List<String> activities, Posn posn, Player player) {
+  public HumanUnit(String name, List<Activity> activities, Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(name, "player", activities, new HashMap<>(), posn, player);
   }  
   
-  public HumanUnit(String name, List<String> activities, Map<Color, Color> playerUnitPaletteSwaps,
+  public HumanUnit(String name, List<Activity> activities, Map<Color, Color> playerUnitPaletteSwaps,
     Posn posn, Player player) {
     //super(game, name, "player", activities, posn, player);
     this(name, "player", activities, playerUnitPaletteSwaps, posn, player);
@@ -37,7 +40,7 @@ public abstract class HumanUnit extends BasicUnit {
   }
   
   public HumanUnit(String name, String animationName,
-  List<String> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
+  List<Activity> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(name, animationName, activities, paletteSwaps, posn, player);
     this.setYOffset(Y_OFFSET);
   }
@@ -53,7 +56,7 @@ public abstract class HumanUnit extends BasicUnit {
   }
   
   @Override
-  public void setCurrentActivity(String newActivity) {
+  public void setCurrentActivity(Activity newActivity) {
     currentActivity = newActivity;
     setCurrentAnimation(newActivity, getCurrentDirection());
   }

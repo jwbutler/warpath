@@ -35,7 +35,6 @@ import javax.swing.event.ChangeListener;
 import jwbgl.*;
 import warpath.core.Constants;
 import warpath.core.RPG;
-import warpath.core.RPGDriver;
 import warpath.core.Utils;
 import warpath.layouts.StackLayout;
 import warpath.layouts.StretchLayout;
@@ -137,7 +136,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     leftPanel.setBorder(BorderFactory.createEmptyBorder(Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING, Constants.MENU_PADDING));
     
     // Add the unit graphic at the top of the left panel.
-    unitSurfaceBase = new Surface(String.format("%s_standing_E_1.%s", template.getAnimName(), Constants.IMAGE_FORMAT));
+    unitSurfaceBase = new Surface(String.format("%s_standing_E_1.%s", template.getSpriteName(), Constants.IMAGE_FORMAT));
     
     try {
       unitSurface = unitSurfaceBase.clone();
@@ -304,9 +303,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    */
   private void equipItem() {
     String slot = (String)(slotComboBox.getSelectedItem());
-    String animName = getAnimName();
-    if (animName != null && !animName.equals(template.getAnimName())) {
-      template.addItem(slot, (AccessoryTemplate)TemplateFactory.getTemplate(animName));
+    String spriteName = getSpriteName();
+    if (spriteName != null && !spriteName.equals(template.getSpriteName())) {
+      template.addItem(slot, (AccessoryTemplate)TemplateFactory.getTemplate(spriteName));
       updateUnitSurface();
     } else {
       System.out.println("fox");
@@ -315,13 +314,13 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
 
   // TODO: OOP
   private void refreshColorComboBox() {
-    String animName = getAnimName();
+    String spriteName = getSpriteName();
     ItemListener listener = colorComboBox.getItemListeners()[0];
     colorComboBox.removeItemListener(listener);
-    if (animName != null) {
+    if (spriteName != null) {
       // TODO store current item template somewhere
       colorComboBox.removeAllItems();
-      for (String colorName : TemplateFactory.getTemplate(animName).getColorList()) {
+      for (String colorName : TemplateFactory.getTemplate(spriteName).getColorList()) {
         colorComboBox.addItem(colorName);
       }
     } else {
@@ -332,10 +331,10 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   }
 
   /**
-   * Returns the animName of the active model/item.
+   * Returns the spriteName of the active model/item.
    * "Intelligently" identifies the item or model.
    */
-  private String getAnimName() {
+  private String getSpriteName() {
     String slot = (String)(slotComboBox.getSelectedItem());
     String item = (String)(itemComboBox.getSelectedItem());
     if (slot == null) {
@@ -361,11 +360,11 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     String slot = (String)(slotComboBox.getSelectedItem());
     //String itemName = (String)(itemComboBox.getSelectedItem());
     String colorName = (String)(colorComboBox.getSelectedItem());
-    String animName = getAnimName();
-    if (animName != null) {
+    String spriteName = getSpriteName();
+    if (spriteName != null) {
       Map<String, Color> colorMap;
       Color c;
-      //HashMap<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
+      //HashMap<String, Color> colorMap = TemplateFactory.getTemplate(spriteName).getColorMap();
       if (slot == BASE_MODEL) {
         colorMap = template.getColorMap();
         c = template.getPaletteSwaps().get(colorMap.get(colorName));
@@ -539,8 +538,8 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     String slot = (String)(slotComboBox.getSelectedItem());
     String itemName = (String)(itemComboBox.getSelectedItem());
     String colorName = (String)(colorComboBox.getSelectedItem());
-    String animName = getAnimName();
-    Map<String, Color> colorMap = TemplateFactory.getTemplate(animName).getColorMap();
+    String spriteName = getSpriteName();
+    Map<String, Color> colorMap = TemplateFactory.getTemplate(spriteName).getColorMap();
     Color c = colorMap.get(colorName);
     if (c != null) {
       Color dest = colorPicker.getColor();
@@ -699,9 +698,9 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
     if (template.getItem(slot) != null) {
       
       // TODO this sux
-      String animName = template.getItem(slot).getAnimName();
+      String spriteName = template.getItem(slot).getSpriteName();
       String displayName;
-      switch (animName) {
+      switch (spriteName) {
       case "sword":
         displayName = "Sword";
         break;
@@ -723,7 +722,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
    * TODO correct overlap
    */
   private void updateUnitSurface() {
-    unitSurfaceBase = new Surface(String.format("%s_standing_E_1.%s", template.getAnimName(), Constants.IMAGE_FORMAT));
+    unitSurfaceBase = new Surface(String.format("%s_standing_E_1.%s", template.getSpriteName(), Constants.IMAGE_FORMAT));
     
     unitSurfaceBase.setPaletteSwaps(template.getPaletteSwaps());
     unitSurfaceBase.applyPaletteSwaps();
@@ -750,12 +749,12 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   }
 
   private Surface getItemSurface(AccessoryTemplate item) {
-    String imageFilename = String.format("%s_standing_E_1", item.getAnimName());
+    String imageFilename = String.format("%s_standing_E_1", item.getSpriteName());
     Surface itemSurface = null;
     if (Utils.imageExists(imageFilename)) {
       itemSurface = new Surface(String.format("%s.%s", imageFilename, Constants.IMAGE_FORMAT));
     } else {
-      String behindFilename = String.format("%s_standing_E_1_B", item.getAnimName());
+      String behindFilename = String.format("%s_standing_E_1_B", item.getSpriteName());
       if (Utils.imageExists(behindFilename)) {
         itemSurface = new Surface(String.format("%s.%s", behindFilename, Constants.IMAGE_FORMAT));
       } else {

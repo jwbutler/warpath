@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 
 import warpath.core.RPG;
 import warpath.ui.components.UnitCard;
-import warpath.units.BasicUnit;
 import warpath.units.Unit;
 
 /**

@@ -5,7 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jwbgl.*;
-import warpath.core.Direction;
+import warpath.activities.Activity;
+import warpath.internals.Direction;
 
 /**
  * Represents a single animation of a unit.  Corresponds to a particular
@@ -14,13 +15,12 @@ import warpath.core.Direction;
  */
 
 public class Animation {
-  
   private final List<Surface> frames;
   
   // Used for items to determine whether they render in front of or behind the
   // main unit sprite.
   private final List<Boolean> drawBehind;
-  private String activity;
+  private Activity activity;
   private Direction direction;
   private int index;
   
@@ -28,7 +28,7 @@ public class Animation {
     return frames;
   }
 
-  public String getActivity() {
+  public Activity getActivity() {
     return activity;
   }
 
@@ -44,7 +44,7 @@ public class Animation {
    * @param direction - The direction of the animation (e.g. "NW")
    * @param frameCache - The parent object's frame cache 
    */
-  public Animation(String spriteName, String activity, Direction direction, List<String> filenames, Map<String, Surface> frameCache) {
+  public Animation(String spriteName, Activity activity, Direction direction, List<String> filenames, Map<String, Surface> frameCache) {
     filenames.stream()
       .forEach(filename -> frameCache.computeIfAbsent(filename,
         f -> {
@@ -100,7 +100,7 @@ public class Animation {
     return drawBehind.get(index);
   }
 
-  public static Animation fromTemplate(String spriteName, String activity, Direction direction, List<String> filenames,
+  public static Animation fromTemplate(String spriteName, Activity activity, Direction direction, List<String> filenames,
   Map<String, Surface> frameCache, boolean isAccessory) {
     List<String> outFilenames = filenames.stream()
       .map(filename -> AnimationUtils.formatFilename(spriteName, filename.split("_")[0], direction, filename.split("_")[1], isAccessory))
@@ -108,7 +108,7 @@ public class Animation {
     return new Animation(spriteName, activity, direction, outFilenames, frameCache);
   }
 
-  public static Animation fromTemplate(String spriteName, String activity, Direction direction, List<String> filenames,
+  public static Animation fromTemplate(String spriteName, Activity activity, Direction direction, List<String> filenames,
     Map<String, Surface> frameCache) {
     return Animation.fromTemplate(spriteName, activity, direction, filenames, frameCache, false);
   }

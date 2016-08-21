@@ -11,13 +11,13 @@ import java.util.Map;
  */
 public class SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 1L;
-  private final String animName;
+  private final String spriteName;
   private final List<String> colorList;
   private final Map<String, Color> colorMap;
   private final Map<Color, Color> paletteSwaps;
   
-  public SpriteTemplate(String animName, List<String> colorList, Map<String, Color> colorMap, Map<Color, Color> paletteSwaps) {
-    this.animName = animName;
+  public SpriteTemplate(String spriteName, List<String> colorList, Map<String, Color> colorMap, Map<Color, Color> paletteSwaps) {
+    this.spriteName = spriteName;
     this.colorList = colorList;
     this.colorMap = colorMap;
     this.paletteSwaps = paletteSwaps;
@@ -35,7 +35,7 @@ public class SpriteTemplate implements Serializable {
     return paletteSwaps;
   }
   
-  public String getAnimName() {
-    return animName;
+  public String getSpriteName() {
+    return spriteName;
   }
 }

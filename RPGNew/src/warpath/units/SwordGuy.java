@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
-import warpath.activities.ActivityNames;
+import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.items.ItemFactory;
 import warpath.players.Player;
@@ -19,10 +19,10 @@ import warpath.players.Player;
 public class SwordGuy extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage, bashDamage, slashDamage;
-  private static final List<String> ACTIVITIES = Arrays.asList(
-    ActivityNames.WALKING, ActivityNames.STANDING, ActivityNames.ATTACKING, ActivityNames.BASHING,
-    ActivityNames.BLOCKING_1, ActivityNames.BLOCKING_2, ActivityNames.BLOCKING_3, ActivityNames.SLASHING_1,
-    ActivityNames.SLASHING_2, ActivityNames.SLASHING_3, ActivityNames.FALLING
+  private static final List<Activity> ACTIVITIES = Arrays.asList(
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.BASHING,
+    Activity.BLOCKING_1, Activity.BLOCKING_2, Activity.BLOCKING_3, Activity.SLASHING_1,
+    Activity.SLASHING_2, Activity.SLASHING_3, Activity.FALLING
   );
 
   public SwordGuy(String name, Posn posn, Player player, Map<Color, Color> paletteSwaps) {
@@ -39,16 +39,16 @@ public class SwordGuy extends HumanUnit {
     //addAccessory(new Shield(game, this, "shield2"));
   }
   public SwordGuy(String name, Posn posn, Player player) {
-    this(name, posn, player, new HashMap<Color, Color>());
+    this(name, posn, player, new HashMap<>());
   }
 
-  public void doAttackHit(BasicUnit u) {
+  public void doAttackHit(Unit u) {
     int dmg = RPG.getInstance().getRNG().nextInt(maxDamage - minDamage) + minDamage + 1;
     // soundFX
     u.takeHit(this, dmg);
     playHitSound();
   }
-  public void doBashHit(BasicUnit u) {
+  public void doBashHit(Unit u) {
     RPG game = RPG.getInstance();
     int dx = u.getX() - getX();
     int dy = u.getY() - getY();
@@ -64,7 +64,7 @@ public class SwordGuy extends HumanUnit {
     //System.out.println(this + " hit unit " + u);
   }
   
-  public void doSlashHit(BasicUnit u) {
+  public void doSlashHit(Unit u) {
     RPG game = RPG.getInstance();
     int dx = u.getX() - getX();
     int dy = u.getY() - getY();

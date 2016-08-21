@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 
 import warpath.core.RPG;
-import warpath.units.BasicUnit;
 import warpath.units.Unit;
 
 /**

@@ -3,11 +3,11 @@ import java.awt.Graphics;
 import java.util.*;
 
 import jwbgl.*;
-import warpath.activities.ActivityNames;
+import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
 import warpath.core.Constants;
-import warpath.core.Direction;
+import warpath.internals.Direction;
 import warpath.core.RPG;
 import warpath.units.Unit;
 
@@ -25,10 +25,10 @@ public abstract class Accessory {
   protected final Map<String, Surface> frameCache;
 
   protected final List<Animation> animations;
-  protected final List<String> activities = Arrays.asList(
-    ActivityNames.WALKING, ActivityNames.STANDING, ActivityNames.ATTACKING, ActivityNames.BASHING,
-    ActivityNames.BLOCKING_1, ActivityNames.BLOCKING_2, ActivityNames.BLOCKING_3, ActivityNames.SLASHING_1,
-    ActivityNames.SLASHING_2, ActivityNames.SLASHING_3, ActivityNames.FALLING
+  protected final List<Activity> activities = Arrays.asList(
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.BASHING,
+    Activity.BLOCKING_1, Activity.BLOCKING_2, Activity.BLOCKING_3, Activity.SLASHING_1,
+    Activity.SLASHING_2, Activity.SLASHING_3, Activity.FALLING
   );
   
   private Animation currentAnimation;
@@ -52,13 +52,13 @@ public abstract class Accessory {
    * Calls loadActivityAnimations() for each activity.
    */
   public void loadAnimations() {
-    for (String activity : activities) {
+    for (Activity activity : activities) {
       loadActivityAnimations(activity);
     }
   }
     
-  private void loadActivityAnimations(String activity) {
-    if (activity.equals(ActivityNames.FALLING)) {
+  private void loadActivityAnimations(Activity activity) {
+    if (activity.equals(Activity.FALLING)) {
       loadFallingAnimations();
     } else {
       loadGenericAnimations(activity);
@@ -82,7 +82,7 @@ public abstract class Accessory {
     return currentAnimation;
   }
 
-  public void setCurrentAnimation(String activity, Direction direction) {
+  public void setCurrentAnimation(Activity activity, Direction direction) {
     int i = 0;
     while (i < animations.size()) {
       if (!animations.get(i).getActivity().equals(activity)) {
@@ -114,7 +114,7 @@ public abstract class Accessory {
    * Load animations in the expected format used by Units.
    * C&P from BasicUnit!
    */
-  public void loadGenericAnimations(String activity) {
+  public void loadGenericAnimations(Activity activity) {
     loadGenericAnimations(activity, AnimationTemplates.getTemplate(activity));
   }
 
@@ -122,7 +122,7 @@ public abstract class Accessory {
    * Load animations in the expected format used by Units.
    * C&P from BasicUnit!
    */
-  public void loadGenericAnimations(String activity, List<String> filenames) {
+  public void loadGenericAnimations(Activity activity, List<String> filenames) {
     for (Direction dir : Direction.directions()) {
       animations.add(Animation.fromTemplate(spriteName, activity, dir, filenames, frameCache, true));
     }
@@ -139,9 +139,9 @@ public abstract class Accessory {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.NE, AnimationTemplates.FALLING, frameCache, true));
+        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.NE, AnimationTemplates.FALLING, frameCache, true));
       } else {
-        animations.add(Animation.fromTemplate(spriteName, "falling", Direction.S, AnimationTemplates.FALLING, frameCache, true));
+        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.S, AnimationTemplates.FALLING, frameCache, true));
       }
     }
   }

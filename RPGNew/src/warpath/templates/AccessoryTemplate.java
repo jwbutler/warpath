@@ -8,7 +8,7 @@ import java.util.Map;
 public class AccessoryTemplate extends SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  public AccessoryTemplate(String animName, List<String> colorList, Map<String, Color> colorMap, Map<Color, Color> paletteSwaps) {
-    super(animName, colorList, colorMap, paletteSwaps);
+  public AccessoryTemplate(String spriteName, List<String> colorList, Map<String, Color> colorMap, Map<Color, Color> paletteSwaps) {
+    super(spriteName, colorList, colorMap, paletteSwaps);
   }
 }

@@ -1,7 +1,7 @@
 package warpath.animations;
 
 import warpath.core.Constants;
-import warpath.core.Direction;
+import warpath.internals.Direction;
 import warpath.core.Utils;
 
 /**

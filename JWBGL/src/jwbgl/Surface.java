@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
@@ -26,7 +27,7 @@ public class Surface {
   private Color colorkey;
   private String imagePath;
   private Rect transparencyRect;
-  private HashMap<Color,Color> paletteSwaps;
+  private Map<Color,Color> paletteSwaps;
   private final static Color DEFAULT_COLOR = Color.BLACK;
   private final static Color TRANSPARENT_WHITE = new Color(0x00FFFFFF, true);
 
@@ -38,15 +39,15 @@ public class Surface {
     g.dispose();
     colorkey = null;
     this.imagePath = null;
-    transparencyRect = new Rect(0,0,getWidth(),getHeight());
-    paletteSwaps = new HashMap<Color,Color>();
+    transparencyRect = new Rect(0, 0, getWidth(), getHeight());
+    paletteSwaps = new HashMap<>();
   }
   
   public Surface(BufferedImage image) {
     this.image = image;
     colorkey = null;
     this.imagePath = null;
-    transparencyRect = new Rect(0,0,getWidth(),getHeight());
+    transparencyRect = new Rect(0, 0, getWidth(), getHeight());
   }
   
   public Surface(String imagePath) {
@@ -63,7 +64,7 @@ public class Surface {
       //g.dispose();
       colorkey = null;
       load(imagePath);
-      transparencyRect = new Rect(0,0,getWidth(),getHeight());
+      transparencyRect = new Rect(0, 0, getWidth(), getHeight());
       
     } catch (IOException e) {
       // invalid path
@@ -138,7 +139,7 @@ public class Surface {
 
     
   public void draw(Graphics g, int left, int top) {
-    draw(g, left, top, (float)1.0);
+    draw(g, left, top, 1.0f);
   }
   
   public Surface clone() throws CloneNotSupportedException {
@@ -155,9 +156,9 @@ public class Surface {
 
   public Surface scale(double tx, double ty) {
     // Scales the surface up by a factor of 2 in each dimension.
-    Surface newSurface = new Surface((int)(getWidth()*tx), (int)(getHeight()*ty));
+    Surface newSurface = new Surface((int)(getWidth() * tx), (int)(getHeight() * ty));
     Graphics g = newSurface.getGraphics();
-    g.drawImage(this.image, 0, 0, (int)(getWidth()*tx), (int)(getHeight()*ty), null);
+    g.drawImage(this.image, 0, 0, (int)(getWidth() * tx), (int)(getHeight() * ty), null);
     newSurface.setColorkey(this.colorkey);
     return newSurface;
   }
@@ -198,7 +199,7 @@ public class Surface {
 
   // ===== ACCESSOR METHODS =====
 
-  public HashMap<Color, Color> getPaletteSwaps() {
+  public Map<Color, Color> getPaletteSwaps() {
     return paletteSwaps;
   }
   
@@ -279,7 +280,7 @@ public class Surface {
   /**
    * NB: Does not apply the palette swaps
    */
-  public void setPaletteSwaps(HashMap<Color,Color> paletteSwaps) {
+  public void setPaletteSwaps(Map<Color,Color> paletteSwaps) {
     this.paletteSwaps = paletteSwaps;
   }
   

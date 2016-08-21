@@ -8,7 +8,7 @@ import warpath.core.RPG;
  **/
 public abstract class NonBlockingObject extends BasicObject {
 
-  public NonBlockingObject( Posn posn) {
+  public NonBlockingObject(Posn posn) {
     super(posn);
   }
 

@@ -89,7 +89,6 @@ public class StackLayout implements LayoutManager2 {
         width = (int)(c.getPreferredSize().getWidth());
       }
 
-      height = (int)(c.getPreferredSize().getHeight());
       if (c.getPreferredSize().getHeight() == 0) {
         // What is a reasonable default value?
         height = (int)((double)extraSpace / numUnsizedComponents);

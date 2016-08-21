@@ -1,7 +1,8 @@
 package warpath.units;
 
 import jwbgl.Posn;
-import warpath.core.Direction;
+import warpath.activities.Activity;
+import warpath.internals.Direction;
 import warpath.objects.GameObject;
 import warpath.players.Player;
 import warpath.ui.components.FloorOverlay;
@@ -20,16 +21,16 @@ public interface Unit extends GameObject {
   void doEvents();
   Unit getTargetUnit();
   Posn getTargetPosn();
-  void setCurrentActivity(String activity);
+  void setCurrentActivity(Activity activity);
   void setTargetUnit(Unit u);
   void setTargetPosn(Posn p);
   FloorOverlay getFloorOverlay();
   void setFloorOverlay(FloorOverlay o);
   void updateFloorOverlay();
   void setTargetPosnOverlay(Posn o);
-  String getCurrentActivity();
-  String getNextActivity();
-  void setNextActivity(String activity);
+  Activity getCurrentActivity();
+  Activity getNextActivity();
+  void setNextActivity(Activity activity);
   void setNextTargetPosn(Posn p);
   int getBlockCost();
   int getSlashCost();
@@ -43,12 +44,12 @@ public interface Unit extends GameObject {
   boolean isMoving();
 
   boolean isHostile(Unit playerUnit);
-
   void die();
-
-  void takeHit(GameObject src, int damage);
-
   FloorOverlay getTargetPosnOverlay();
-
   void moveTo(Posn posn);
+  void move(int dx, int dy);
+  void takeDamage(int dmg);
+  void takeBashHit(GameObject src, int dmg);
+  void takeSlashHit(GameObject src, int dmg);
+  void takeHit(GameObject src, int damage);
 }

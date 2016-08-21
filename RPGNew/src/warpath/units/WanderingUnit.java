@@ -2,6 +2,7 @@ package warpath.units;
 import java.util.Random;
 
 import jwbgl.*;
+import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.players.Player;
 
@@ -11,15 +12,13 @@ import warpath.players.Player;
  */
 public class WanderingUnit extends HumanUnit {
   private static final long serialVersionUID = 1L;
-  private Random RNG;
   public WanderingUnit(String name, Posn posn, Player player) {
     super(name, posn, player);
-    RNG = new Random();
   }
 
   public void doEvents() {
     RPG game = RPG.getInstance();
-    if (getCurrentActivity().equals("walking")) {
+    if (getCurrentActivity().equals(Activity.WALKING)) {
       if (getCurrentAnimation().getIndex() <= 2) {
         checkNextTile();
       }
@@ -28,7 +27,8 @@ public class WanderingUnit extends HumanUnit {
         move(dx, dy);
         path.remove(0);
       }
-    } else if (getCurrentActivity().equals("standing")) {
+    } else if (getCurrentActivity().equals(Activity.STANDING)) {
+      Random RNG = RPG.getInstance().getRNG();
       if (RNG.nextInt(30) == 0) {
         int x,y;
         x = RNG.nextInt(game.getFloor().getWidth());

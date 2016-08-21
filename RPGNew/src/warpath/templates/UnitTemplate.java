@@ -2,8 +2,9 @@ package warpath.templates;
 
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used by the character creator (especially its save/load functionality).
@@ -14,9 +15,9 @@ public class UnitTemplate extends SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 2L;
   private final HashMap<String, AccessoryTemplate> equipment;
   
-  public UnitTemplate(String animName, ArrayList<String> colorList, HashMap<String, Color> colorMap, HashMap<Color, Color> paletteSwaps) {
-    super(animName, colorList, colorMap, paletteSwaps);
-    this.equipment = new HashMap<String, AccessoryTemplate>();
+  public UnitTemplate(String spriteName, List<String> colorList, Map<String, Color> colorMap, Map<Color, Color> paletteSwaps) {
+    super(spriteName, colorList, colorMap, paletteSwaps);
+    this.equipment = new HashMap<>();
   }
   
   /**

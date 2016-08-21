@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager2;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is a custom container layout based on the BoxLayout, but hopefully
@@ -13,14 +14,14 @@ import java.util.ArrayList;
  * add(Component, weight), and if for example weight = 2, it will be twice
  * as wide/tall as a component with weight=1.  Like BoxLayout, it supports
  * both horizontal and vertical orientations.
- * @see https://docs.oracle.com/javase/tutorial/uiswing/layout/custom.html
+ * @see 'https://docs.oracle.com/javase/tutorial/uiswing/layout/custom.html'
  */
 public class StretchLayout implements LayoutManager2 {
   private static final int DEFAULT_GAP = 10;
   public static final int X_AXIS = 0;
   public static final int Y_AXIS = 1;
-  private final ArrayList<Component> components;
-  private final ArrayList<Double> weights;
+  private final List<Component> components;
+  private final List<Double> weights;
   private final int axis;
   private int gap;
 
@@ -28,8 +29,8 @@ public class StretchLayout implements LayoutManager2 {
     super();
     this.axis = axis;
     this.gap = gap;
-    components = new ArrayList<Component>();
-    weights = new ArrayList<Double>();
+    components = new ArrayList<>();
+    weights = new ArrayList<>();
   }
   public StretchLayout(int axis) {
     this(axis, DEFAULT_GAP);

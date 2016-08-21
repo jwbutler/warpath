@@ -6,8 +6,8 @@ import warpath.units.Unit;
  * Created by Jack on 8/20/2016.
  */
 public class ActivityFactory {
-    public static Activity standing(Unit sourceUnit) {
-      return new Activity.Builder()
+    public static FancyActivity standing(Unit sourceUnit) {
+      return new FancyActivity.Builder()
       .sourceUnit(sourceUnit)
       .length(4)
       .build();

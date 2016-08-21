@@ -3,10 +3,13 @@ import java.awt.Graphics;
 
 import warpath.objects.GameObject;
 
-/** This is my attempt to use CSE 2100 principles to draw stuff in a
+/**
+ * This is my attempt to use CSE 2100 principles to draw stuff in a
  * semi-efficient way.  It's a binary search tree of GameObjects, ordered by
  * their depth.
- * TODO See if we can optimize some of these methods. */
+ * TODO See if we can optimize some of these methods.
+ * TODO TreeMap??
+ * */
 public class DepthTree {
   private DepthTreeNode root;
   
@@ -155,6 +158,5 @@ public class DepthTree {
 
   public void clear() {
     root = null;
-    
   }
 }

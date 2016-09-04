@@ -99,7 +99,6 @@ MouseListener, MouseMotionListener  {
 
   @Override
   public void mouseEntered(MouseEvent e) {
-    
   }
 
   @Override
@@ -110,10 +109,12 @@ MouseListener, MouseMotionListener  {
   public void mousePressed(MouseEvent e) {
   }
 
-  /** Called when a mouse button is released.  Used to process player unit
+  /**
+   * Called when a mouse button is released.  Used to process player unit
    * actions such as attacking, special attacks, movement and other
    * interactions.
-   * @param e - The event containing mouse information */
+   * @param e - The event containing mouse information
+   */
   @Override
   public void mouseReleased(MouseEvent e) {
     switch (e.getButton()) {

@@ -31,13 +31,12 @@ public class EnemySwordGuy extends HumanUnit {
    * @see BasicUnit#nextActivity
    */
   public void nextActivity() {
-    RPG game = RPG.getInstance();
     super.nextActivity();
     Unit targetUnit = getNextTargetUnit();
     if (currentActivity.equals(Activity.STANDING)) {
-      for (Unit u: game.getUnits()) {
+      for (Unit u: RPG.getInstance().getUnits()) {
         if (isHostile(u)) {
-          if (targetUnit == null || Utils.distance2(this,u) < Utils.distance2(this,targetUnit)) {
+          if (targetUnit == null || Utils.distance(this, u) < Utils.distance(this, targetUnit)) {
             setNextTargetUnit(u);
           }
         }

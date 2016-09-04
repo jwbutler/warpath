@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * For use in the character creator AFAIK.
+ */
 public class AccessoryTemplate extends SpriteTemplate implements Serializable {
   private static final long serialVersionUID = 1L;
 

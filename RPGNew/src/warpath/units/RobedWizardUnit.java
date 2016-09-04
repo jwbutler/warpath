@@ -24,9 +24,9 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
   public static final int TELEPORT_COST = 200;
   public static final int REZ_COST = 200;
   
-  public RobedWizardUnit(String name, String animationName, List<Activity> activities, Map<Color, Color> paletteSwaps,
+  public RobedWizardUnit(String name, String spriteName, List<Activity> activities, Map<Color, Color> paletteSwaps,
   Posn posn, Player player) {
-    super(name, animationName, activities, paletteSwaps, posn, player);
+    super(name, spriteName, activities, paletteSwaps, posn, player);
     setXOffset(X_OFFSET);
     setYOffset(Y_OFFSET);
     hpBarOffset = -40;

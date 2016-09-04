@@ -20,9 +20,6 @@ public abstract class BasicObject implements GameObject {
   
   public BasicObject(Posn posn) {
     this.posn = posn;
-    //this.xOffset = 0;
-    //this.yOffset = 0;
-    //this.depthOffset = 0;
     updateDepth();
   }
   
@@ -125,7 +122,7 @@ public abstract class BasicObject implements GameObject {
   }
   
   public void updateDepth() {
-    depth = (getX()+getY()) * Constants.TILE_HEIGHT/2 + getDepthOffset();
+    depth = (getX() + getY()) * Constants.TILE_HEIGHT/2 + getDepthOffset();
   }
   
 }

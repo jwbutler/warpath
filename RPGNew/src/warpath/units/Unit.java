@@ -8,7 +8,7 @@ import warpath.players.Player;
 import warpath.ui.components.FloorOverlay;
 
 /**
- * Created by Jack on 8/20/2016.
+ * @author jbutler
  */
 public interface Unit extends GameObject {
   Posn getPosn();

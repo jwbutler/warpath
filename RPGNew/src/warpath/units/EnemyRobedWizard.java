@@ -51,9 +51,9 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       Corpse closestCorpse = null;
       
       for (Unit u : game.getUnits()) {
-        if (isHostile(u) && Utils.distance2(this, u) <= EVASIVE_RADIUS) {
+        if (isHostile(u) && Utils.distance(this, u) <= EVASIVE_RADIUS) {
           hostileInRange = true;
-          if (closestEnemy == null || Utils.distance2(this, u) < Utils.distance2(this, closestEnemy)) {
+          if (closestEnemy == null || Utils.distance(this, u) < Utils.distance(this, closestEnemy)) {
             closestEnemy = u;
           }
         }
@@ -61,7 +61,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       if (!hostileInRange) {
         for (GameObject c : game.getObjects()) {
           if (c.isCorpse()) {
-            if (closestCorpse == null || Utils.distance2(this, c) < Utils.distance2(this, closestCorpse)) {
+            if (closestCorpse == null || Utils.distance(this, c) < Utils.distance(this, closestCorpse)) {
               if (!game.getFloor().getTile(c.getPosn()).isBlocked() || c.getPosn().equals(getPosn())) {
                 closestCorpse = (Corpse) c;
               }
@@ -71,7 +71,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       }
       // Execute flowchart.
       // Are we standing on a corpse? Start rezzing, regardless of threats.
-      if ((closestCorpse != null) && (Utils.distance2(this, closestCorpse) <= VISION_RADIUS) && (closestCorpse.getPosn().equals(getPosn()))) {
+      if ((closestCorpse != null) && (Utils.distance(this, closestCorpse) <= VISION_RADIUS) && (closestCorpse.getPosn().equals(getPosn()))) {
         setNextActivity(Activity.REZZING);
         // Is there an enemy (player) unit in the danger zone? Teleport or walk away.
       } else if (hostileInRange) {
@@ -94,15 +94,15 @@ public class EnemyRobedWizard extends RobedWizardUnit {
           y = RNG.nextInt(game.getFloor().getHeight());
           p = new Posn(x,y);
           if (!game.getFloor().getTile(x,y).isBlocked()) {
-            if (Utils.distance2(getPosn(), p) <= moveRadius) {
-              if (Utils.distance2(p, closestEnemy.getPosn()) >= EVASIVE_RADIUS) {
+            if (Utils.distance(getPosn(), p) <= moveRadius) {
+              if (Utils.distance(p, closestEnemy.getPosn()) >= EVASIVE_RADIUS) {
                 goodPosn = true;
               }
             }
           }
         } while (!goodPosn);
         setNextTargetPosn(p);
-      } else if ((closestCorpse != null) && (Utils.distance2(this, closestCorpse) <= VISION_RADIUS)) {
+      } else if ((closestCorpse != null) && (Utils.distance(this, closestCorpse) <= VISION_RADIUS)) {
         setNextActivity(Activity.WALKING);
         setNextTargetPosn(closestCorpse.getPosn());
       } else {

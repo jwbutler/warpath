@@ -11,7 +11,10 @@ import warpath.objects.Floor;
 import warpath.objects.GameObject;
 import warpath.objects.Tile;
 import warpath.objects.Wall;
-import warpath.units.*;
+import warpath.units.EnemyRobedWizard;
+import warpath.units.EnemySwordGuy;
+import warpath.units.EnemyZombie;
+import warpath.units.Unit;
 
 /**
  * Represents a level.  Initialized from a bitmap where colors represent

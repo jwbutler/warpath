@@ -42,9 +42,9 @@ public abstract class ZombieUnit extends BasicUnit implements Serializable {
     this(name, DEFAULT_ACTIVITIES, posn, player);
   }
   
-  public ZombieUnit(String name, String animationName,
+  public ZombieUnit(String name, String spriteName,
   List<Activity> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
-    super(name, animationName, activities, paletteSwaps, posn, player);
+    super(name, spriteName, activities, paletteSwaps, posn, player);
     this.setXOffset(X_OFFSET);
     this.setYOffset(Y_OFFSET);
   }
@@ -65,7 +65,7 @@ public abstract class ZombieUnit extends BasicUnit implements Serializable {
    * should correspond to. (FU Will)
    */
   @Override
-  public void loadFallingAnimations() {
+  protected void loadFallingAnimations() {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {

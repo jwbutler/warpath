@@ -69,10 +69,10 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   private TransHealthBar healthBar;
   protected List<Posn> path;
   
-  public BasicUnit(String name, String animationName, List<Activity> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
+  public BasicUnit(String name, String spriteName, List<Activity> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(posn);
     this.name = name;
-    this.spriteName = animationName;
+    this.spriteName = spriteName;
     this.activities = activities;
     this.player = player;
     equipment = new HashMap<>();
@@ -175,7 +175,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * Used to load any animation that follows the general pattern without
    * exceptions.
    */
-  public void loadGenericAnimations(Activity activity, List<String> filenames) {
+  protected void loadGenericAnimations(Activity activity, List<String> filenames) {
     for (Direction dir : Direction.directions()) {
       animations.add(Animation.fromTemplate(spriteName, activity, dir, filenames, frameCache));
     }
@@ -185,7 +185,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * Used to load any animation that follows the general pattern without
    * exceptions, where the filenames are specified in AnimationTemplates.
    */
-  public void loadGenericAnimations(Activity activity) {
+  protected void loadGenericAnimations(Activity activity) {
     loadGenericAnimations(activity, AnimationTemplates.getTemplate(activity));
   }
   
@@ -193,7 +193,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * Falling has a few variations; this is for human units I think.
    * Two directions, NE or S.
    */
-  public void loadFallingAnimations() {
+  protected void loadFallingAnimations() {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
@@ -344,7 +344,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         }
       // If next activity is attacking, we might have to path to the unit first.
       } else if (nextActivity.equals(Activity.ATTACKING)) {
-        if (Utils.distance2(this, targetUnit) == 1) {
+        if (Utils.distance(this, targetUnit) == 1) {
           if (currentEP >= ATTACK_COST) {
             pointAt(targetUnit);
             setCurrentActivity(Activity.ATTACKING);
@@ -366,7 +366,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           // Don't clear nextActivity/nextTargetUnit 
         }
       } else if (nextActivity.equals(Activity.BASHING)) {
-        if (Utils.distance2(this, targetUnit) == 1) {
+        if (Utils.distance(this, targetUnit) == 1) {
           if (currentEP >= BASH_COST) {
             pointAt(targetUnit);
             setCurrentActivity(Activity.BASHING);
@@ -427,10 +427,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     }
   }
 
-  /**
-   * This is the code that loops the walking!
-   */
-  public void refreshWalk() {
+  private void refreshWalk() {
     RPG game = RPG.getInstance();
     // This is the case where the next tile is non-empty but we're only
     // pausing for one turn. 
@@ -533,7 +530,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
       }
     } else if (getCurrentActivity().equals(Activity.BASHING)) {
       if (getCurrentAnimation().getIndex() == 0) {
-        if (Utils.distance2(this, targetUnit) > 1) {
+        if (Utils.distance(this, targetUnit) > 1) {
           setPath(game.findPath(this, targetUnit));
           if (path != null && path.size() > 0) {
             targetPosn = targetUnit.getPosn();
@@ -610,10 +607,6 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     t = game.getFloor().getTile(getX(), getY());
     t.setUnit(this);
     updateFloorOverlay();
-  }
-
-  public void move() {
-    move(dx, dy);
   }
   
   /**
@@ -720,14 +713,14 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           clearTargets();
         }
 
-      /* If we're not next to the target posn and our next tile is
-       * blocked, compute a new path.  This fails if the target tile is
-       * perma-blocked - what do we do? */
+      // If we're not next to the target posn and our next tile is
+      // blocked, compute a new path.  This fails if the target tile is
+      // perma-blocked - what do we do?
       
       } else { // blocked and nextposn != targetposn
         blockingUnit = nextTile.getUnit();
         if (blockingUnit != null && blockingUnit.isMoving()) {
-          /* Just walking, no unit target */
+          // Just walking, no unit target
           if (nextActivity == null || nextActivity.equals(Activity.WALKING)) {
             setCurrentActivity(Activity.STANDING);
             setNextTargetPosn(targetPosn);
@@ -740,9 +733,9 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
             //printDebug();
           }
         } else {
-          /* If the path is blocked by an object or a non-moving unit, better re-path around it. */
+          // If the path is blocked by an object or a non-moving unit, better re-path around it.
           
-          /* Just walking, no unit target */
+          // Just walking, no unit target
           if (nextActivity == null) {
             setCurrentActivity(Activity.STANDING);
             setNextTargetPosn(targetPosn);
@@ -759,12 +752,6 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         }
       }
     }
-  }
-
-  // Stop walking, reset to standing, cancel walk.
-  public void stopWalking() {
-    setCurrentActivity(Activity.STANDING);
-    clearTargets();
   }
 
   // Add the appropriate red/green highlight under the unit.
@@ -809,11 +796,12 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     return targetUnit;
   }
   
-  public void setPath(List<Posn> path) {
+  private void setPath(List<Posn> path) {
     this.path = path;
   }
 
   // Important: this takes a Posn as an argument, not a FloorOverlay
+  // TODO this should be private!
   public void setTargetPosnOverlay(Posn posn) {
     RPG game = RPG.getInstance();
     if (targetPosnOverlay != null) {
@@ -851,7 +839,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     setCurrentAnimation(newActivity, getCurrentDirection());
   }
   
-  public void setCurrentAnimation(Activity activity, Direction direction) {
+  protected void setCurrentAnimation(Activity activity, Direction direction) {
     int i = 0;
     Animation oldAnimation = currentAnimation;
     currentAnimation = null;
@@ -1069,6 +1057,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     this.floorOverlay = floorOverlay;
   }
 
+  // TODO this should be private
   public FloorOverlay getTargetPosnOverlay() {
     return targetPosnOverlay;
   }
@@ -1087,9 +1076,5 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
 
   public void setNewSlashDirection(boolean newSlashDirection) {
     this.newSlashDirection = newSlashDirection;
-  }
-
-  public List<Posn> getPath() {
-    return path;
   }
 }

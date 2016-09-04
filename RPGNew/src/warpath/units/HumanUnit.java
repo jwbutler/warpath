@@ -39,9 +39,9 @@ public abstract class HumanUnit extends BasicUnit {
     this(name, DEFAULT_ACTIVITIES, posn, player);
   }
   
-  public HumanUnit(String name, String animationName,
+  public HumanUnit(String name, String spriteName,
   List<Activity> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
-    super(name, animationName, activities, paletteSwaps, posn, player);
+    super(name, spriteName, activities, paletteSwaps, posn, player);
     this.setYOffset(Y_OFFSET);
   }
 

@@ -103,7 +103,7 @@ public class StackLayout implements LayoutManager2 {
 
   @Override
   public Dimension minimumLayoutSize(Container parent) {
-    return new Dimension(0,0);
+    return new Dimension(0, 0);
   }
 
   @Override

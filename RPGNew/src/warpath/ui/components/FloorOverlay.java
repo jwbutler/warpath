@@ -54,7 +54,6 @@ public class FloorOverlay extends NonBlockingObject {
   }
   
   public String toString() {
-    //return "<FloorOverlay("+outerColor+","+innerColor+")>";
     return String.format("<FloorOverlay(%s, %d)>", getPosn(), this.hashCode());
   }
 }

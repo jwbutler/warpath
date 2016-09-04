@@ -44,21 +44,21 @@ public class RPG implements ActionListener {
 
   // Using a HashMap for this is pretty strange.  But it lets us access
   // players by number, which I think is useful.
-  private final HashMap<Integer, Player> players;
-  private final List<Unit> units;
-  private final List<GameObject> objects; // Non-units
-  private final List<Level> levels;
+  private final Map<Integer, Player> players = new HashMap<>();
+  private final List<Unit> units = new ArrayList<>();
+  private final List<GameObject> objects = new ArrayList<>(); // Non-units
+  private final List<Level> levels = new ArrayList<>();
 
   // These are kinda hacks to get around concurrent modification exceptions.
   // Maybe there is a better solution.
-  private final List<Unit> unitsToAdd;
-  private final List<Unit> unitsToRemove;
+  private final List<Unit> unitsToAdd = new ArrayList<>();
+  private final List<Unit> unitsToRemove = new ArrayList<>();
 
   // Unsure if we should keep this reference, he's always going to be player 1, right?
   private HumanPlayer humanPlayer;
 
   private final DepthTree depthTree;
-  private final Random RNG;
+  private static final Random RNG = new Random();
   private final SoundPlayer soundPlayer;
   private final InputHandler inputHandler;
 
@@ -76,14 +76,7 @@ public class RPG implements ActionListener {
     frameTimer = new Timer(1000/Constants.FPS, this);
     ticks = 0;
     nextEnemyID = 1;
-    players = new HashMap<>();
     addHumanPlayer();
-    units = new ArrayList<>();
-    objects = new ArrayList<>();
-    levels = new ArrayList<>();
-    unitsToAdd = new ArrayList<>();
-    unitsToRemove = new ArrayList<>();
-    RNG = new Random();
     soundPlayer = new SoundPlayer();
     inputHandler = new InputHandler(this);
     //playSound("crystal.wav");
@@ -147,6 +140,13 @@ public class RPG implements ActionListener {
    * @param e - the Action event
    */
   public void actionPerformed(ActionEvent e) {
+    doUpkeep();
+  }
+
+  /**
+   * Fires at the start of the turn.
+   */
+  public void doUpkeep() {
     // Do blocking event code.  Should this go to Upkeep?
     doBlockUpkeep();
 
@@ -184,10 +184,10 @@ public class RPG implements ActionListener {
    * Handle persistent actions (i.e. bash, block, slash):
    * every upkeep, we check if the SHIFT / CTRL keys are held down and queue
    * up activities accordingly.
+   * This fires at the beginning of the upkeep.
    * TODO the whole newSlashDirection thing seems inconsistent and awkward.
    */
   public void doBlockUpkeep() {
-
     Unit playerUnit = getPlayerUnit();
     Activity currentActivity = playerUnit.getCurrentActivity();
     Activity nextActivity = playerUnit.getNextActivity();
@@ -242,11 +242,11 @@ public class RPG implements ActionListener {
         }
         // Calculate the tiles corresponding to rotating 45 degrees clockwise or
         // counterclockwise.
-        Posn cwPosn = playerUnit.getPosn().add(rotateClockwise(dir.toPosn()));
-        Posn ccwPosn = playerUnit.getPosn().add(rotateCounterclockwise(dir.toPosn()));
-        if (Utils.distance2(cwPosn, nextPosn) < Utils.distance2(ccwPosn, nextPosn)) {
+        Posn cwPosn = playerUnit.getPosn().add(dir.clockwise().toPosn());
+        Posn ccwPosn = playerUnit.getPosn().add(dir.counterClockwise().toPosn());
+        if (Utils.distance(cwPosn, nextPosn) < Utils.distance(ccwPosn, nextPosn)) {
           nextPosn = cwPosn;
-        } else if (Utils.distance2(ccwPosn, nextPosn) < Utils.distance2(cwPosn, nextPosn)) {
+        } else if (Utils.distance(ccwPosn, nextPosn) < Utils.distance(cwPosn, nextPosn)) {
           nextPosn = ccwPosn;
         } else {
           playerUnit.pointAt(nextPosn);
@@ -459,6 +459,7 @@ public class RPG implements ActionListener {
    * it's being drawn, and checking the transparency at the given point.
    * TODO If the coordinates are off the grid, find the closest valid grid
    * tile instead of returning null.
+   * TODO isn't this massively inefficient?
    * @param pixel - The (x,y) coordinates of the pixel
    * @return The corresponding grid tile
    */
@@ -670,69 +671,6 @@ public class RPG implements ActionListener {
   }
 
   /**
-   * Given (dx, dy), return the (dx, dy) pairs corresponding to 45 degrees CW and CCW.
-   * Should it return the input? Yes for now.
-   */
-  public ArrayList<Posn> getAdjacentDirections(Posn p) {
-    ArrayList<Posn> rtn = new ArrayList<>();
-    rtn.add(rotateClockwise(p));
-    rtn.add(rotateCounterclockwise(p));
-    return rtn;
-  }
-
-  /**
-   * Given a direction, rotate it 45 degrees counterclockwise.
-   * @param p - a <u>DIRECTIONAL</u> Posn.
-   */
-  public Posn rotateClockwise(Posn p) {
-    if (p.equals(new Posn(-1,-1))) {
-      return new Posn(0,-1);
-    } else if (p.equals(new Posn(0,-1))) {
-      return new Posn(1,-1);
-    } else if (p.equals(new Posn(1,-1))) {
-      return new Posn(1,0);
-    } else if (p.equals(new Posn(1,0))) {
-      return new Posn(1,1);
-    } else if (p.equals(new Posn(1,1))) {
-      return new Posn(0,1);
-    } else if (p.equals(new Posn(0,1))) {
-      return new Posn(-1,1);
-    } else if (p.equals(new Posn(-1,1))) {
-      return new Posn(-1,0);
-    } else if (p.equals(new Posn(-1,0))) {
-      return new Posn(-1,-1);
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * Given a direction, rotate it 45 degrees clockwise.
-   * @param p - a <u>DIRECTIONAL</u> Posn.
-   */
-  public Posn rotateCounterclockwise(Posn p) {
-    if (p.equals(new Posn(-1,-1))) {
-      return new Posn(-1,0);
-    } else if (p.equals(new Posn(0,-1))) {
-      return new Posn(-1,-1);
-    } else if (p.equals(new Posn(1,-1))) {
-      return new Posn(0,-1);
-    } else if (p.equals(new Posn(1,0))) {
-      return new Posn(1,-1);
-    } else if (p.equals(new Posn(1,1))) {
-      return new Posn(1,0);
-    } else if (p.equals(new Posn(0,1))) {
-      return new Posn(1,1);
-    } else if (p.equals(new Posn(-1,1))) {
-      return new Posn(0,1);
-    } else if (p.equals(new Posn(-1,0))) {
-      return new Posn(-1,1);
-    } else {
-      return null;
-    }
-  }
-
-  /**
    * An A* pathfinding attempt.
    * Basically just stealing the pseudocode from
    * http://www.policyalmanac.org/games/aStarTutorial.htm
@@ -839,13 +777,13 @@ public class RPG implements ActionListener {
               openList.add(e);
               posnParent.put(q, currentPosn);
     
-            /* If it is on the open list already, check to see if this path
-             * to that square is better, using G cost as the measure.  A lower
-             * G cost means that this is a better path. If so, change the parent
-             * of the square to the current square, and recalculate the G and F
-             * scores of the square. If you are keeping your open list sorted
-             * by F score, you may need to resort the list to account for the
-             * change. */
+            // If it is on the open list already, check to see if this path
+            // to that square is better, using G cost as the measure.  A lower
+            // G cost means that this is a better path. If so, change the parent
+            // of the square to the current square, and recalculate the G and F
+            // scores of the square. If you are keeping your open list sorted
+            // by F score, you may need to resort the list to account for the
+            // change.
 
             } else {
               if (h <= e.getWeight()) {
@@ -861,11 +799,11 @@ public class RPG implements ActionListener {
         }
       }
     }
-    /* No path available. We should probably define a helper method (boolean)
-     * to check this - can we do so more efficiently?
-     * 3) Save the path. Working backwards from the target square, go from
-     * each square to its parent square until you reach the starting square.
-     * That is your path. */
+    // No path available. We should probably define a helper method (boolean)
+    // to check this - can we do so more efficiently?
+    // 3) Save the path. Working backwards from the target square, go from
+    // each square to its parent square until you reach the starting square.
+    // That is your path.
     if (closedList.getPosnEntry(p2) != null) {
       PathfinderEntry e = closedList.getPosnEntry(p2);
       Posn p = e.getPosn();
@@ -893,8 +831,6 @@ public class RPG implements ActionListener {
   public List<Posn> findPath(GameObject x, GameObject y) {
     return findPath(x.getPosn(), y.getPosn());
   }
-
-  // ===== ACCESSOR METHODS =====
 
   public DepthTree getDepthTree() {
     return depthTree;
@@ -1016,7 +952,7 @@ public class RPG implements ActionListener {
   }
 
   /**
-   *  I'm not crazy about this solution, but there was a concurrent modification
+   * I'm not crazy about this solution, but there was a concurrent modification
    * exception thing happening.  Basically we add the unit to the deadUnits
    * array list now, and then after we finish iterating through we'll remove it
    * from both.
@@ -1060,14 +996,13 @@ public class RPG implements ActionListener {
   }
 
   /**
-   * Attempt to convert this to a Singleton.
+   * By using this as a Singleton, we can avoid having to constantly pass it around as a parameter and store
+   * references to it.
    */
-
   public static RPG getInstance() {
     if (instance == null) {
       instance = new RPG();
     }
     return instance;
   }
-
 }

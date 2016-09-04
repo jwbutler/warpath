@@ -3,6 +3,7 @@ import java.awt.Graphics;
 import java.util.*;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
@@ -26,9 +27,9 @@ public abstract class Accessory {
 
   protected final List<Animation> animations;
   protected final List<Activity> activities = Arrays.asList(
-    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.BASHING,
-    Activity.BLOCKING_1, Activity.BLOCKING_2, Activity.BLOCKING_3, Activity.SLASHING_1,
-    Activity.SLASHING_2, Activity.SLASHING_3, Activity.FALLING
+    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.BASHING,
+    Activities.BLOCKING_1, Activities.BLOCKING_2, Activities.BLOCKING_3, Activities.SLASHING_1,
+    Activities.SLASHING_2, Activities.SLASHING_3, Activities.FALLING
   );
   
   private Animation currentAnimation;
@@ -58,7 +59,7 @@ public abstract class Accessory {
   }
     
   private void loadActivityAnimations(Activity activity) {
-    if (activity.equals(Activity.FALLING)) {
+    if (activity.equals(Activities.FALLING)) {
       loadFallingAnimations();
     } else {
       loadGenericAnimations(activity);
@@ -139,9 +140,9 @@ public abstract class Accessory {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.NE, AnimationTemplates.FALLING, frameCache, true));
+        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, Direction.NE, AnimationTemplates.FALLING, frameCache, true));
       } else {
-        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.S, AnimationTemplates.FALLING, frameCache, true));
+        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, Direction.S, AnimationTemplates.FALLING, frameCache, true));
       }
     }
   }

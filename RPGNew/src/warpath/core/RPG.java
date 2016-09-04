@@ -8,6 +8,7 @@ import java.util.*;
 import javax.swing.Timer;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.internals.DepthTree;
 import warpath.internals.Direction;
@@ -24,7 +25,6 @@ import warpath.players.Player;
 import warpath.templates.TemplateFactory;
 import warpath.templates.UnitTemplate;
 import warpath.ui.GameWindow;
-import warpath.ui.InputHandler;
 import warpath.ui.SoundPlayer;
 import warpath.units.SwordGuy;
 import warpath.units.Unit;
@@ -78,7 +78,7 @@ public class RPG implements ActionListener {
     nextEnemyID = 1;
     addHumanPlayer();
     soundPlayer = new SoundPlayer();
-    inputHandler = new InputHandler(this);
+    inputHandler = new InputHandler();
     //playSound("crystal.wav");
 
     // Do we need to extend the JFrame class? I'm thinking no.
@@ -148,7 +148,7 @@ public class RPG implements ActionListener {
    */
   public void doUpkeep() {
     // Do blocking event code.  Should this go to Upkeep?
-    doBlockUpkeep();
+    doContinuousActivityUpkeep();
 
     for (Unit u: units) {
       u.doUpkeep();
@@ -158,8 +158,18 @@ public class RPG implements ActionListener {
       u.doEvents();
     }
 
-    // Kill units that have been queued for death. (This happens during
-    // nextActivity(), which happens during doUpkeep()...
+    addRemoveQueuedUnits();
+
+    // Repaint() includes a call to drawAll().
+    GameWindow.getInstance().repaint();
+
+    // WHERE DOES THIS BELONG IN THE ORDER?
+    checkVictoryConditions();
+
+    incrementTicks();
+  }
+
+  private void addRemoveQueuedUnits() {
     for (Unit u : unitsToRemove) {
       removeUnit(u);
     }
@@ -168,12 +178,9 @@ public class RPG implements ActionListener {
       addUnit(u);
     }
     unitsToAdd.clear();
+  }
 
-    // Repaint() includes a call to drawAll().
-    GameWindow.getInstance().repaint();
-    incrementTicks();
-
-    // WHERE DOES THIS BELONG IN THE ORDER?
+  private void checkVictoryConditions() {
     if (levels.get(levelIndex).checkVictory()) {
       levelIndex++;
       openLevel();
@@ -186,136 +193,116 @@ public class RPG implements ActionListener {
    * up activities accordingly.
    * This fires at the beginning of the upkeep.
    * TODO the whole newSlashDirection thing seems inconsistent and awkward.
+   * TODO move to unit's upkeep + InputHandler logic?
+   * Unlike most of the activity-related code, this should not be refactored
+   * to the Activity classes because it's player unit-related.
    */
-  public void doBlockUpkeep() {
+  public void doContinuousActivityUpkeep() {
+    Unit playerUnit = getPlayerUnit();
+    Posn mouseGridTile = pixelToGrid(InputHandler.getInstance().getMousePosn());
+
+    // If CTRL is down, queue up a block.
+    if (InputHandler.getInstance().ctrlIsDown()) {
+      doBlockUpkeep(mouseGridTile);
+    // If SHIFT is down, queue up a slash.
+    } else if (InputHandler.getInstance().shiftIsDown()) {
+      doSlashUpkeep(mouseGridTile);
+    // Neither SHIFT nor CTRL is down; cancel blocks, bashes, slashes.
+    } else {
+      if (playerUnit.getNextActivity() != null) {
+        // TODO bubble this up
+        List<Activity> cancelActivities = Arrays.asList(
+          Activities.BLOCKING_1, Activities.BLOCKING_2, Activities.SLASHING_1, Activities.SLASHING_2
+        );
+
+        if (cancelActivities.contains(playerUnit.getNextActivity())) {
+          playerUnit.setNextActivity(null);
+        }
+      }
+    }
+  }
+
+  /**
+   * "Input handler" to continue a slash action.
+   * Unlike most of the activity-related code, this should not be refactored
+   * to the Activity classes because it's player unit-related.
+   * @param mouseGridTile The grid tile that the mouse is hovering over
+   */
+  private void doSlashUpkeep(Posn mouseGridTile) {
     Unit playerUnit = getPlayerUnit();
     Activity currentActivity = playerUnit.getCurrentActivity();
     Activity nextActivity = playerUnit.getNextActivity();
+    Direction dir = playerUnit.getDirection();
+    Direction oldDir = playerUnit.getDirection();
+    Posn lastTargetPosn = playerUnit.getPosn().add(dir.toPosn());
+    Posn nextPosn = mouseGridTile;
 
-    // If CTRL is down, queue up a block.
-    if (ctrlIsDown()) {
-      if (currentActivity.equals(Activity.STANDING) || currentActivity.equals(Activity.WALKING)) {
-        if (nextActivity != null && nextActivity.equals(Activity.BASHING)) {
-          // Don't do anything, we're already getting ready to bash.
-        } else {
-          // Queue up a block order.
-          if (pixelToGrid(getMousePosn()) != null) {
-            if (playerUnit.getCurrentEP() >= getPlayerUnit().getBlockCost()) {
-              playerUnit.setNextActivity(Activity.BLOCKING_1);
-              playerUnit.setNextTargetPosn(pixelToGrid(getMousePosn()));
-              // TODO Is this the best way to handle target posn overlays?
-              playerUnit.setTargetPosnOverlay(null);
-            }
-          }
-        }
-      } else if (currentActivity.equals(Activity.BLOCKING_1) || currentActivity.equals(Activity.BLOCKING_2)) {
-        if (pixelToGrid(getMousePosn()) != null) {
-          if (nextActivity != null && nextActivity.equals(Activity.BASHING)) {
-            // Don't do anything, we're already getting ready to bash.
-          } else {
-            // We're already blocking; continue blocking.
-            playerUnit.setNextTargetPosn(pixelToGrid(getMousePosn()));
-            playerUnit.setTargetPosnOverlay(null);
-          }
-        }
-      } else if (currentActivity.equals(Activity.BASHING) || currentActivity.equals(Activity.ATTACKING)) {
-        if (pixelToGrid(getMousePosn()) != null) {
-          if (nextActivity != null && nextActivity.equals(Activity.BASHING)) {
-            // Don't do anything, we're already getting ready to bash.
-          } else {
-            // Queue up a block.
-            playerUnit.setNextActivity(Activity.BLOCKING_1);
-            playerUnit.setNextTargetPosn(pixelToGrid(getMousePosn()));
-            playerUnit.setTargetPosnOverlay(null);
-          }
-        }
-      }
+    if (nextPosn == null) {
+      nextPosn = lastTargetPosn;
+    }
+    // Calculate the tiles corresponding to rotating 45 degrees clockwise or
+    // counterclockwise.
+    Posn cwPosn = playerUnit.getPosn().add(dir.clockwise().toPosn());
+    Posn ccwPosn = playerUnit.getPosn().add(dir.counterClockwise().toPosn());
+    if (Utils.distance(cwPosn, nextPosn) < Utils.distance(ccwPosn, nextPosn)) {
+      nextPosn = cwPosn;
+    } else if (Utils.distance(ccwPosn, nextPosn) < Utils.distance(cwPosn, nextPosn)) {
+      nextPosn = ccwPosn;
     } else {
-      if (shiftIsDown()) {
-        // Slashing stuff!
-        Direction dir = playerUnit.getDirection();
-        Direction oldDir = playerUnit.getDirection();
-        Posn lastTargetPosn = playerUnit.getPosn().add(dir.toPosn());
-        Posn nextPosn = pixelToGrid(getMousePosn());
-        if (nextPosn == null) {
-          nextPosn = lastTargetPosn;
-        }
-        // Calculate the tiles corresponding to rotating 45 degrees clockwise or
-        // counterclockwise.
-        Posn cwPosn = playerUnit.getPosn().add(dir.clockwise().toPosn());
-        Posn ccwPosn = playerUnit.getPosn().add(dir.counterClockwise().toPosn());
-        if (Utils.distance(cwPosn, nextPosn) < Utils.distance(ccwPosn, nextPosn)) {
+      playerUnit.pointAt(nextPosn);
+      if (playerUnit.getDirection().equals(oldDir)) {
+        // do nothing
+        // These two lines appear to be redundant.
+        // getPlayerUnit().setDirection(oldDir);
+        // getPlayerUnit().pointAt(getPlayerUnit().getPosn().add(oldDir));
+        playerUnit.setNewSlashDirection(false);
+      } else {
+        // If we pick a point that's in a straight line from the current
+        // direction, it's not clear which way we should rotate; instead of
+        // staying still, we will pick a direction randomly.
+        if (RNG.nextBoolean()) {
           nextPosn = cwPosn;
-        } else if (Utils.distance(ccwPosn, nextPosn) < Utils.distance(cwPosn, nextPosn)) {
-          nextPosn = ccwPosn;
         } else {
-          playerUnit.pointAt(nextPosn);
-          if (playerUnit.getDirection().equals(oldDir)) {
-            // do nothing
-            // These two lines appear to be redundant.
-            // getPlayerUnit().setDirection(oldDir);
-            // getPlayerUnit().pointAt(getPlayerUnit().getPosn().add(oldDir));
-            playerUnit.setNewSlashDirection(false);
-          } else {
-            // If we pick a point that's in a straight line from the current
-            // direction, it's not clear which way we should rotate; instead of
-            // staying still, we will pick a direction randomly.
-            if (RNG.nextBoolean()) {
-              nextPosn = cwPosn;
-            } else {
-              nextPosn = ccwPosn;
-            }
+          nextPosn = ccwPosn;
+        }
+        playerUnit.setNewSlashDirection(true);
+      }
+    }
+
+    if (currentActivity.equals(Activities.STANDING) || currentActivity.equals(Activities.WALKING)) {
+      if (nextActivity != null && nextActivity.equals(Activities.BASHING)) {
+        // Bashing is queued up, let that happen.
+      } else {
+        if (mouseGridTile != null) {
+          if (playerUnit.getCurrentEP() >= playerUnit.getSlashCost()) {
+            // Queue up a slash order.
+            playerUnit.setNextActivity(Activities.SLASHING_1);
+            playerUnit.setNextTargetPosn(nextPosn);
+            playerUnit.setTargetPosnOverlay(null);
             playerUnit.setNewSlashDirection(true);
           }
         }
-
-        if (currentActivity.equals(Activity.STANDING) || currentActivity.equals(Activity.WALKING)) {
-          if (nextActivity != null && nextActivity.equals(Activity.BASHING)) {
-            // Bashing is queued up, let that happen.
-          } else {
-            if (pixelToGrid(getMousePosn()) != null) {
-              if (playerUnit.getCurrentEP() >= playerUnit.getSlashCost()) {
-                // Queue up a slash order.
-                playerUnit.setNextActivity(Activity.SLASHING_1);
-                playerUnit.setNextTargetPosn(nextPosn);
-                playerUnit.setTargetPosnOverlay(null);
-                playerUnit.setNewSlashDirection(true);
-              }
-            }
-          }
-        } else if (currentActivity.equals(Activity.SLASHING_1) || currentActivity.equals(Activity.SLASHING_2)) {
-          if (pixelToGrid(getMousePosn()) != null) {
-            if (nextActivity != null && nextActivity.equals(Activity.BASHING)) {
-              // Don't overwrite a queued bash order.
-            } else {
-              // Currently slashing, just set the next posn and continue slashing.
-              // TODO do we need to set new slash direction?
-              playerUnit.setNextTargetPosn(nextPosn);
-              playerUnit.setTargetPosnOverlay(null);
-            }
-          }
-        } else if (currentActivity.equals(Activity.BASHING) || currentActivity.equals(Activity.ATTACKING)) {
-          if (pixelToGrid(getMousePosn()) != null) {
-            if (nextActivity != null && nextActivity.equals(Activity.BASHING)) {
-              // Bashing is queued up, let that happen.
-            } else {
-              // Start a new slash.
-              playerUnit.setNextActivity(Activity.SLASHING_1);
-              playerUnit.setNextTargetPosn(nextPosn);
-              playerUnit.setTargetPosnOverlay(null);
-              playerUnit.pointAt(nextPosn);
-              if (playerUnit.getDirection().equals(oldDir)) {
-                playerUnit.setNewSlashDirection(false);
-              }
-              playerUnit.setDirection(oldDir);
-              playerUnit.pointAt(playerUnit.getPosn().add(oldDir.toPosn()));
-            }
-          }
+      }
+    } else if (currentActivity.equals(Activities.SLASHING_1) || currentActivity.equals(Activities.SLASHING_2)) {
+      if (mouseGridTile != null) {
+        if (nextActivity != null && nextActivity.equals(Activities.BASHING)) {
+          // Don't overwrite a queued bash order.
+        } else {
+          // Currently slashing, just set the next posn and continue slashing.
+          // TODO do we need to set new slash direction?
+          playerUnit.setNextTargetPosn(nextPosn);
+          playerUnit.setTargetPosnOverlay(null);
         }
-        // Determine whether we are slashing in a new direction.
-        if (playerUnit.getNextActivity() != null && playerUnit.getNextActivity().equals(Activity.SLASHING_2)) {
-          playerUnit.pointAt(playerUnit.getNextTargetPosn());
-          playerUnit.setNewSlashDirection(!oldDir.equals(playerUnit.getDirection()));
+      }
+    } else if (currentActivity.equals(Activities.BASHING) || currentActivity.equals(Activities.ATTACKING)) {
+      if (mouseGridTile != null) {
+        if (nextActivity != null && nextActivity.equals(Activities.BASHING)) {
+          // Bashing is queued up, let that happen.
+        } else {
+          // Start a new slash.
+          playerUnit.setNextActivity(Activities.SLASHING_1);
+          playerUnit.setNextTargetPosn(nextPosn);
+          playerUnit.setTargetPosnOverlay(null);
           playerUnit.pointAt(nextPosn);
           if (playerUnit.getDirection().equals(oldDir)) {
             playerUnit.setNewSlashDirection(false);
@@ -323,20 +310,63 @@ public class RPG implements ActionListener {
           playerUnit.setDirection(oldDir);
           playerUnit.pointAt(playerUnit.getPosn().add(oldDir.toPosn()));
         }
+      }
+    }
+    // Determine whether we are slashing in a new direction.
+    if (playerUnit.getNextActivity() != null && playerUnit.getNextActivity().equals(Activities.SLASHING_2)) {
+      playerUnit.pointAt(playerUnit.getNextTargetPosn());
+      playerUnit.setNewSlashDirection(!oldDir.equals(playerUnit.getDirection()));
+      playerUnit.pointAt(nextPosn);
+      if (playerUnit.getDirection().equals(oldDir)) {
+        playerUnit.setNewSlashDirection(false);
+      }
+      playerUnit.setDirection(oldDir);
+      playerUnit.pointAt(playerUnit.getPosn().add(oldDir.toPosn()));
+    }
+  }
 
-        //System.out.println(getPlayerUnit().newSlashDirection);
+  /**
+   * Unlike most of the activity-related code, this should not be refactored
+   * to the Activity classes because it's player unit-related.
+   * @param mouseGridTile
+   */
+  private void doBlockUpkeep(Posn mouseGridTile) {
+    Unit playerUnit = getPlayerUnit();
+    Activity currentActivity = playerUnit.getCurrentActivity();
+    Activity nextActivity = playerUnit.getNextActivity();
+    if (currentActivity.equals(Activities.STANDING) || currentActivity.equals(Activities.WALKING)) {
+      if (nextActivity != null && nextActivity.equals(Activities.BASHING)) {
+        // Don't do anything, we're already getting ready to bash.
       } else {
-
-        // Neither SHIFT nor CTRL is down; cancel blocks, bashes, slashes.
-        if (playerUnit.getNextActivity() != null) {
-          // TODO bubble this up
-          List<Activity> cancelActivities = Arrays.asList(
-            Activity.BLOCKING_1, Activity.BLOCKING_2, Activity.SLASHING_1, Activity.SLASHING_2
-          );
-
-          if (cancelActivities.contains(playerUnit.getNextActivity())) {
-            playerUnit.setNextActivity(null);
+        // Queue up a block order.
+        if (mouseGridTile != null) {
+          if (playerUnit.getCurrentEP() >= getPlayerUnit().getBlockCost()) {
+            playerUnit.setNextActivity(Activities.BLOCKING_1);
+            playerUnit.setNextTargetPosn(mouseGridTile);
+            // TODO Is this the best way to handle target posn overlays?
+            playerUnit.setTargetPosnOverlay(null);
           }
+        }
+      }
+    } else if (currentActivity.equals(Activities.BLOCKING_1) || currentActivity.equals(Activities.BLOCKING_2)) {
+      if (mouseGridTile != null) {
+        if (nextActivity != null && nextActivity.equals(Activities.BASHING)) {
+          // Don't do anything, we're already getting ready to bash.
+        } else {
+          // We're already blocking; continue blocking.
+          playerUnit.setNextTargetPosn(mouseGridTile);
+          playerUnit.setTargetPosnOverlay(null);
+        }
+      }
+    } else if (currentActivity.equals(Activities.BASHING) || currentActivity.equals(Activities.ATTACKING)) {
+      if (mouseGridTile != null) {
+        if (nextActivity != null && nextActivity.equals(Activities.BASHING)) {
+          // Don't do anything, we're already getting ready to bash.
+        } else {
+          // Queue up a block.
+          playerUnit.setNextActivity(Activities.BLOCKING_1);
+          playerUnit.setNextTargetPosn(mouseGridTile);
+          playerUnit.setTargetPosnOverlay(null);
         }
       }
     }
@@ -411,7 +441,7 @@ public class RPG implements ActionListener {
     // Find any units targeting this unit and clear their target.
     for (int i = 0; i < units.size(); i++) {
       if (units.get(i).getTargetUnit() != null && units.get(i).getTargetUnit().equals(u)) {
-        units.get(i).setCurrentActivity(Activity.STANDING);
+        units.get(i).setCurrentActivity(Activities.STANDING);
         units.get(i).setTargetUnit(null);
         units.get(i).setTargetPosn(null);
       }
@@ -570,7 +600,7 @@ public class RPG implements ActionListener {
     Unit u = getPlayerUnit();
     u.setNextTargetPosn(posn);
     u.setTargetPosnOverlay(posn);
-    u.setNextActivity(Activity.WALKING);
+    u.setNextActivity(Activities.WALKING);
   }
 
   /**
@@ -616,16 +646,16 @@ public class RPG implements ActionListener {
     // targeting a floor tile
     u.setNextTargetPosn(posn);
     u.setTargetPosnOverlay(posn);
-    u.setNextActivity(Activity.WALKING);
+    u.setNextActivity(Activities.WALKING);
   }
 
 
   public void doAttackOrder(Posn pixel) {
-    doRightClick(pixel, Activity.ATTACKING);
+    doRightClick(pixel, Activities.ATTACKING);
   }
 
   public void doBashOrder(Posn pixel) {
-    doRightClick(pixel, Activity.BASHING);
+    doRightClick(pixel, Activities.BASHING);
 
   }
   // Moves the camera posn; x and y are offsets in pixels (not coords).
@@ -903,23 +933,11 @@ public class RPG implements ActionListener {
     }
     //System.out.printf("%s %s\n", posn, targetPosn);
     getPlayerUnit().setNextTargetPosn(targetPosn);
-    getPlayerUnit().setNextActivity(Activity.BLOCKING_1);
-  }
-
-  public boolean ctrlIsDown() {
-    return inputHandler.ctrlIsDown;
-  }
-
-  public boolean shiftIsDown() {
-    return inputHandler.shiftIsDown;
+    getPlayerUnit().setNextActivity(Activities.BLOCKING_1);
   }
 
   public boolean isObstacle(Posn p) {
     return getFloor().getTile(p).isBlocked();
-  }
-
-  public Posn getMousePosn() {
-    return inputHandler.getMousePosn();
   }
 
   public void openLevel() {

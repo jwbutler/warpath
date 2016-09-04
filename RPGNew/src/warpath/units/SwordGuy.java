@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.items.ItemFactory;
@@ -20,9 +21,9 @@ public class SwordGuy extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage, bashDamage, slashDamage;
   private static final List<Activity> ACTIVITIES = Arrays.asList(
-    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.BASHING,
-    Activity.BLOCKING_1, Activity.BLOCKING_2, Activity.BLOCKING_3, Activity.SLASHING_1,
-    Activity.SLASHING_2, Activity.SLASHING_3, Activity.FALLING
+    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.BASHING,
+    Activities.BLOCKING_1, Activities.BLOCKING_2, Activities.BLOCKING_3, Activities.SLASHING_1,
+    Activities.SLASHING_2, Activities.SLASHING_3, Activities.FALLING
   );
 
   public SwordGuy(String name, Posn posn, Player player, Map<Color, Color> paletteSwaps) {

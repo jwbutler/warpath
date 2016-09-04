@@ -1,6 +1,7 @@
 package warpath.units;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
@@ -13,7 +14,7 @@ public class EnemySwordGuy extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static final List<Activity> ACTIVITIES = Arrays.asList(
-    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.STUNNED_SHORT, Activity.FALLING
+    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.STUNNED_SHORT, Activities.FALLING
   );
   public EnemySwordGuy(String name, Posn posn, Player player) {
     super(name, ACTIVITIES, posn, player);
@@ -33,7 +34,7 @@ public class EnemySwordGuy extends HumanUnit {
   public void nextActivity() {
     super.nextActivity();
     Unit targetUnit = getNextTargetUnit();
-    if (currentActivity.equals(Activity.STANDING)) {
+    if (currentActivity.equals(Activities.STANDING)) {
       for (Unit u: RPG.getInstance().getUnits()) {
         if (isHostile(u)) {
           if (targetUnit == null || Utils.distance(this, u) < Utils.distance(this, targetUnit)) {
@@ -42,7 +43,7 @@ public class EnemySwordGuy extends HumanUnit {
         }
       }
       if (getNextTargetUnit() != null) {
-        setNextActivity(Activity.ATTACKING);
+        setNextActivity(Activities.ATTACKING);
       }
       if (targetUnit != null) {
         super.nextActivity();

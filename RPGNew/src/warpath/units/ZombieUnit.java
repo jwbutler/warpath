@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
@@ -21,7 +22,7 @@ import warpath.players.Player;
  */
 public abstract class ZombieUnit extends BasicUnit implements Serializable {
   private static final long serialVersionUID = 1L;
-  private static final List<Activity> DEFAULT_ACTIVITIES = Arrays.asList(Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.FALLING);
+  private static final List<Activity> DEFAULT_ACTIVITIES = Arrays.asList(Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.FALLING);
   private static final int X_OFFSET = 0;
   private static final int Y_OFFSET = -32;
   private static final String HIT_SOUND = "hit1.wav";
@@ -69,9 +70,9 @@ public abstract class ZombieUnit extends BasicUnit implements Serializable {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
       } else {
-        animations.add(Animation.fromTemplate(spriteName, Activity.ZOMBIE_FALLING_ALT, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, Activities.ZOMBIE_FALLING_ALT, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
       }
     }
   }

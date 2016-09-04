@@ -1,6 +1,7 @@
 package warpath.units;
 
 import jwbgl.Posn;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.internals.Direction;
 import warpath.objects.GameObject;

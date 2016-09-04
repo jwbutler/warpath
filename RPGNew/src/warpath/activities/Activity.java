@@ -1,27 +1,26 @@
 package warpath.activities;
 
+import warpath.units.Unit;
+
 /**
  * @author jbutler
- * TODO - how can we put more information into this??
+ * @since August 2016
  */
-public enum Activity {
-  // Keep these alphabetized
-  APPEARING,
-  ATTACKING,
-  BASHING,
-  BLOCKING_1,
-  BLOCKING_2,
-  BLOCKING_3,
-  FALLING,
-  REZZING,
-  SLASHING_1,
-  SLASHING_2,
-  SLASHING_3,
-  STANDING,
-  STUNNED_LONG,
-  STUNNED_SHORT,
-  TELEPORTING,
-  VANISHING,
-  WALKING,
-  ZOMBIE_FALLING_ALT;
+public interface Activity {
+  int getLength();
+
+  /**
+   * Called at the beginning of the turn.
+   * Includes things like resource cost payment for continuous activities
+   * (e.g. SLASHING_2, BLOCKING_2).  Ideally it will include any checks
+   * for conditions that may cancel the activity (e.g. blocked path,
+   * insufficient resources).
+   */
+  void doUpkeep(Unit u);
+
+  /**
+   * Core activity handler code.
+   * @param u
+   */
+  void doEvents(Unit u);
 }

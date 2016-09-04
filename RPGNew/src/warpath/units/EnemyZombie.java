@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
@@ -18,7 +19,7 @@ public class EnemyZombie extends ZombieUnit {
   private final static int VISION_RADIUS = 6;
   private final static int SMELL_RADIUS = 12;
   private static List<Activity> activities = Arrays.asList(
-    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.STUNNED_SHORT, Activity.FALLING
+    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.STUNNED_SHORT, Activities.FALLING
   );
   public EnemyZombie(String name, Posn posn, Player player) {
     super(name, activities, posn, player);
@@ -35,7 +36,7 @@ public class EnemyZombie extends ZombieUnit {
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
     Unit tu = getNextTargetUnit();
-    if (currentActivity.equals(Activity.STANDING)) {
+    if (currentActivity.equals(Activities.STANDING)) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
           if (Utils.distance(this,u) <= SMELL_RADIUS) {
@@ -53,13 +54,13 @@ public class EnemyZombie extends ZombieUnit {
         }
       }
       if (getNextTargetUnit() != null) {
-        setNextActivity(Activity.ATTACKING);
+        setNextActivity(Activities.ATTACKING);
       }
       if (targetUnit != null) {
         super.nextActivity();
       }
     }
-    if (currentActivity.equals(Activity.WALKING)) {
+    if (currentActivity.equals(Activities.WALKING)) {
       double cancelChance = 1 - SLOW_MOVE_SPEED;
       tu = getNextTargetUnit();
       if (tu != null) {
@@ -70,12 +71,12 @@ public class EnemyZombie extends ZombieUnit {
         }
       }
       if (RNG.nextDouble() < cancelChance) {
-        setCurrentActivity(Activity.STANDING);
+        setCurrentActivity(Activities.STANDING);
         setTargetPosn(null);
       }
-    } else if (currentActivity.equals(Activity.ATTACKING)) {
+    } else if (currentActivity.equals(Activities.ATTACKING)) {
       if (RNG.nextDouble() > ATTACK_CHANCE) {
-        setCurrentActivity(Activity.STANDING);
+        setCurrentActivity(Activities.STANDING);
         currentEP += ATTACK_COST;
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);

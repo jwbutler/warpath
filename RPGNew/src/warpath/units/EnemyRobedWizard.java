@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
@@ -20,8 +21,8 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   private static final long serialVersionUID = 1L;
 
   private static final List<Activity> ACTIVITIES = Arrays.asList(
-    Activity.APPEARING, Activity.FALLING, Activity.REZZING, Activity.STANDING, Activity.STUNNED_SHORT,
-    Activity.STUNNED_LONG, Activity.TELEPORTING, Activity.WALKING
+    Activities.APPEARING, Activities.FALLING, Activities.REZZING, Activities.STANDING, Activities.STUNNED_SHORT,
+    Activities.STUNNED_LONG, Activities.TELEPORTING, Activities.WALKING
   );
   
   // These two percentages are additive
@@ -44,7 +45,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
     super.nextActivity();
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
-    if (currentActivity.equals(Activity.STANDING)) {
+    if (currentActivity.equals(Activities.STANDING)) {
       // Set up variables for the flowchart.
       boolean hostileInRange = false;
       Unit closestEnemy = null;
@@ -72,7 +73,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       // Execute flowchart.
       // Are we standing on a corpse? Start rezzing, regardless of threats.
       if ((closestCorpse != null) && (Utils.distance(this, closestCorpse) <= VISION_RADIUS) && (closestCorpse.getPosn().equals(getPosn()))) {
-        setNextActivity(Activity.REZZING);
+        setNextActivity(Activities.REZZING);
         // Is there an enemy (player) unit in the danger zone? Teleport or walk away.
       } else if (hostileInRange) {
         int x,y;
@@ -80,10 +81,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         boolean goodPosn = false;
         int moveRadius;
         if (currentEP >= TELEPORT_COST) {
-          setNextActivity(Activity.TELEPORTING);
+          setNextActivity(Activities.TELEPORTING);
           moveRadius = TELEPORT_RADIUS;
         } else {
-          setNextActivity(Activity.WALKING);
+          setNextActivity(Activities.WALKING);
           moveRadius = 3;
         }
         // Find a tile to teleport to.
@@ -103,7 +104,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         } while (!goodPosn);
         setNextTargetPosn(p);
       } else if ((closestCorpse != null) && (Utils.distance(this, closestCorpse) <= VISION_RADIUS)) {
-        setNextActivity(Activity.WALKING);
+        setNextActivity(Activities.WALKING);
         setNextTargetPosn(closestCorpse.getPosn());
       } else {
         double r = RNG.nextDouble();
@@ -115,7 +116,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
             y = RNG.nextInt(game.getFloor().getHeight());
           } while (game.getFloor().getTile(x,y).isBlocked());
           setNextTargetPosn(new Posn(x,y));
-          setNextActivity(Activity.WALKING);
+          setNextActivity(Activities.WALKING);
         }
       }
     }
@@ -139,17 +140,17 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       // IMPORTANT: take the damage BEFORE changing the activity, since we don't want to take
       // the multiplied damage on this hit.
       takeDamage(dmg);
-      if (getCurrentActivity().equals(Activity.REZZING)) {
-        setCurrentActivity(Activity.STUNNED_LONG);
+      if (getCurrentActivity().equals(Activities.REZZING)) {
+        setCurrentActivity(Activities.STUNNED_LONG);
       } else {
-        setCurrentActivity(Activity.STUNNED_SHORT);
+        setCurrentActivity(Activities.STUNNED_SHORT);
       }
       clearTargets();
     }
   }
   
   public void takeDamage(int dmg) {
-    if (getCurrentActivity().equals(currentActivity.STUNNED_LONG)) {
+    if (getCurrentActivity().equals(Activities.STUNNED_LONG)) {
       super.takeDamage((int)(dmg * STUNNED_DAMAGE_MODIFIER));
     } else {
       super.takeDamage(dmg);

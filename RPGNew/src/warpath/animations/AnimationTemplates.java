@@ -1,5 +1,6 @@
 package warpath.animations;
 
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 
 import java.util.ArrayList;
@@ -192,33 +193,33 @@ public class AnimationTemplates {
    * switch to the Enum.
    */
   public static List<String> getTemplate(Activity activity) {
-    if (activity.equals(Activity.STANDING)) {
+    if (activity.equals(Activities.STANDING)) {
       return STANDING;
-    } else if (activity.equals(Activity.WALKING)) {
+    } else if (activity.equals(Activities.WALKING)) {
       return WALKING;
-    } else if (activity.equals(Activity.ATTACKING)) {
+    } else if (activity.equals(Activities.ATTACKING)) {
       return ATTACKING;
-    } else if (activity.equals(Activity.STUNNED_SHORT)) {
+    } else if (activity.equals(Activities.STUNNED_SHORT)) {
       return STUNNED_SHORT;
-    } else if (activity.equals(Activity.STUNNED_LONG)) {
+    } else if (activity.equals(Activities.STUNNED_LONG)) {
       return STUNNED_LONG;
-    } else if (activity.equals(Activity.BASHING)) {
+    } else if (activity.equals(Activities.BASHING)) {
       return BASHING;
-    } else if (activity.equals(Activity.BLOCKING_1)) {
+    } else if (activity.equals(Activities.BLOCKING_1)) {
       return BLOCKING_1;
-    } else if (activity.equals(Activity.BLOCKING_2)) {
+    } else if (activity.equals(Activities.BLOCKING_2)) {
       return BLOCKING_2;
-    } else if (activity.equals(Activity.BLOCKING_3)) {
+    } else if (activity.equals(Activities.BLOCKING_3)) {
       return BLOCKING_3;
-    } else if (activity.equals(Activity.SLASHING_1)) {
+    } else if (activity.equals(Activities.SLASHING_1)) {
       return SLASHING_1;
-    } else if (activity.equals(Activity.SLASHING_2)) {
+    } else if (activity.equals(Activities.SLASHING_2)) {
       return SLASHING_2;
-    } else if (activity.equals(Activity.SLASHING_3)) {
+    } else if (activity.equals(Activities.SLASHING_3)) {
       return SLASHING_3;
-    } else if (activity.equals(Activity.FALLING)) {
+    } else if (activity.equals(Activities.FALLING)) {
       return FALLING;
-    } else if (activity.equals(Activity.ZOMBIE_FALLING_ALT)) {
+    } else if (activity.equals(Activities.ZOMBIE_FALLING_ALT)) {
       return ZOMBIE_FALLING_ALT;
     } else {
       System.out.println("fuck fuck fuck " + activity);

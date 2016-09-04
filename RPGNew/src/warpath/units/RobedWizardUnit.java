@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import jwbgl.*;
+import warpath.activities.Activities;
 import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
@@ -16,8 +17,8 @@ import warpath.players.Player;
 public abstract class RobedWizardUnit extends BasicUnit implements Serializable {
   private static final long serialVersionUID = 1L;
   private static final List<Activity> ACTIVITIES = Arrays.asList(
-    Activity.APPEARING, Activity.FALLING, Activity.REZZING, Activity.STANDING,
-    Activity.STUNNED_SHORT, Activity.STUNNED_LONG, Activity.TELEPORTING, Activity.WALKING
+    Activities.APPEARING, Activities.FALLING, Activities.REZZING, Activities.STANDING,
+    Activities.STUNNED_SHORT, Activities.STUNNED_LONG, Activities.TELEPORTING, Activities.WALKING
   );
   private static final int X_OFFSET = 0;
   private static final int Y_OFFSET = -32;
@@ -78,21 +79,21 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
   @Override
   // We can probably optimize this further but this is decently concise now.
   public void loadActivityAnimations(Activity activity) {
-    if (activity.equals(Activity.FALLING)) {
+    if (activity.equals(Activities.FALLING)) {
       loadFallingAnimations();
-    } else if (activity.equals(Activity.STANDING)) {
+    } else if (activity.equals(Activities.STANDING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_STANDING);
-    } else if (activity.equals(Activity.WALKING)) {
+    } else if (activity.equals(Activities.WALKING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_WALKING);
-    } else if (activity.equals(Activity.TELEPORTING)) {
+    } else if (activity.equals(Activities.TELEPORTING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_TELEPORTING);
-    } else if (activity.equals(Activity.APPEARING)) {
+    } else if (activity.equals(Activities.APPEARING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_APPEARING);
-    } else if (activity.equals(Activity.REZZING)) {
+    } else if (activity.equals(Activities.REZZING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_REZZING);
-    } else if (activity.equals(Activity.STUNNED_SHORT)) {
+    } else if (activity.equals(Activities.STUNNED_SHORT)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_STUNNED_SHORT);
-    } else if (activity.equals(Activity.APPEARING)) {
+    } else if (activity.equals(Activities.APPEARING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_STUNNED_LONG);
     } else {
       loadGenericAnimations(activity);
@@ -101,7 +102,7 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
 
   public void loadFallingAnimations() {
     for (Direction dir : Direction.directions()) {
-      animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, dir, AnimationTemplates.WIZARD_FALLING, frameCache));
+      animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, dir, AnimationTemplates.WIZARD_FALLING, frameCache));
     }
   }
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
@@ -21,8 +21,8 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   private static final long serialVersionUID = 1L;
 
   private static final List<Activity> ACTIVITIES = Arrays.asList(
-    Activities.APPEARING, Activities.FALLING, Activities.REZZING, Activities.STANDING, Activities.STUNNED_SHORT,
-    Activities.STUNNED_LONG, Activities.TELEPORTING, Activities.WALKING
+    Activity.APPEARING, Activity.FALLING, Activity.REZZING, Activity.STANDING, Activity.STUNNED_SHORT,
+    Activity.STUNNED_LONG, Activity.TELEPORTING, Activity.WALKING
   );
   
   // These two percentages are additive
@@ -36,8 +36,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
 
   public EnemyRobedWizard(String name, Posn posn, Player player) {
     super(name, ACTIVITIES, posn, player);
-    currentHP = maxHP = 200;
-    currentEP = maxEP = 200;
+    setCurrentHP(200);
+    setMaxHP(200);
+    setCurrentEP(200);
+    setMaxEP(200);
   }
   
   @Override
@@ -45,7 +47,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
     super.nextActivity();
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
-    if (currentActivity.equals(Activities.STANDING)) {
+    if (getCurrentActivity().equals(Activity.STANDING)) {
       // Set up variables for the flowchart.
       boolean hostileInRange = false;
       Unit closestEnemy = null;
@@ -73,7 +75,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
       // Execute flowchart.
       // Are we standing on a corpse? Start rezzing, regardless of threats.
       if ((closestCorpse != null) && (Utils.distance(this, closestCorpse) <= VISION_RADIUS) && (closestCorpse.getPosn().equals(getPosn()))) {
-        setNextActivity(Activities.REZZING);
+        setNextActivity(Activity.REZZING);
         // Is there an enemy (player) unit in the danger zone? Teleport or walk away.
       } else if (hostileInRange) {
         int x,y;
@@ -81,10 +83,10 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         boolean goodPosn = false;
         int moveRadius;
         if (currentEP >= TELEPORT_COST) {
-          setNextActivity(Activities.TELEPORTING);
+          setNextActivity(Activity.TELEPORTING);
           moveRadius = TELEPORT_RADIUS;
         } else {
-          setNextActivity(Activities.WALKING);
+          setNextActivity(Activity.WALKING);
           moveRadius = 3;
         }
         // Find a tile to teleport to.
@@ -104,7 +106,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         } while (!goodPosn);
         setNextTargetPosn(p);
       } else if ((closestCorpse != null) && (Utils.distance(this, closestCorpse) <= VISION_RADIUS)) {
-        setNextActivity(Activities.WALKING);
+        setNextActivity(Activity.WALKING);
         setNextTargetPosn(closestCorpse.getPosn());
       } else {
         double r = RNG.nextDouble();
@@ -116,7 +118,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
             y = RNG.nextInt(game.getFloor().getHeight());
           } while (game.getFloor().getTile(x,y).isBlocked());
           setNextTargetPosn(new Posn(x,y));
-          setNextActivity(Activities.WALKING);
+          setNextActivity(Activity.WALKING);
         }
       }
     }
@@ -133,24 +135,25 @@ public class EnemyRobedWizard extends RobedWizardUnit {
   }
   
   public void takeBashHit(GameObject src, int dmg) {
-    Posn blockedPosn = new Posn(getX() + dx, getY() + dy);
+    //Posn blockedPosn = new Posn(getX() + dx, getY() + dy);
+    Posn blockedPosn = getPosn().add(getDirection().toPosn());
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
       // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
       // IMPORTANT: take the damage BEFORE changing the activity, since we don't want to take
       // the multiplied damage on this hit.
       takeDamage(dmg);
-      if (getCurrentActivity().equals(Activities.REZZING)) {
-        setCurrentActivity(Activities.STUNNED_LONG);
+      if (getCurrentActivity().equals(Activity.REZZING)) {
+        setCurrentActivity(Activity.STUNNED_LONG);
       } else {
-        setCurrentActivity(Activities.STUNNED_SHORT);
+        setCurrentActivity(Activity.STUNNED_SHORT);
       }
       clearTargets();
     }
   }
   
   public void takeDamage(int dmg) {
-    if (getCurrentActivity().equals(Activities.STUNNED_LONG)) {
+    if (getCurrentActivity().equals(Activity.STUNNED_LONG)) {
       super.takeDamage((int)(dmg * STUNNED_DAMAGE_MODIFIER));
     } else {
       super.takeDamage(dmg);

@@ -7,7 +7,7 @@ public class Helmet extends Accessory {
   private final static int Y_OFFSET = -10;
 
   public Helmet(Unit unit, String spriteName) {
-    super(unit, spriteName, "head", X_OFFSET, Y_OFFSET);
+    super(unit, spriteName, ItemSlot.HEAD, X_OFFSET, Y_OFFSET);
   }
 
   // Default sprite

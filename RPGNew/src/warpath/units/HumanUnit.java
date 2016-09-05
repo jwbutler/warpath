@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.internals.Direction;
 import warpath.core.RPG;
@@ -20,7 +20,7 @@ import warpath.players.Player;
 public abstract class HumanUnit extends BasicUnit {
   private static final long serialVersionUID = 1L;
   private static final List<Activity> DEFAULT_ACTIVITIES = Arrays.asList(
-    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.FALLING
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.FALLING
   );
   private static final String HIT_SOUND = "hit1.wav";
   private static final int Y_OFFSET = -32;
@@ -54,12 +54,6 @@ public abstract class HumanUnit extends BasicUnit {
   @Override
   public void playBashSound() {
     RPG.getInstance().playSound(HIT_SOUND);
-  }
-  
-  @Override
-  public void setCurrentActivity(Activity newActivity) {
-    currentActivity = newActivity;
-    setCurrentAnimation(newActivity, getCurrentDirection());
   }
   
   @Override

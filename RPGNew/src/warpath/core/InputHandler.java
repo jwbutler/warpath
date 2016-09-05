@@ -1,5 +1,5 @@
 package warpath.core;
-import java.awt.KeyEventDispatcher;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -189,6 +189,13 @@ MouseListener, MouseMotionListener  {
   }
   
   public Posn getMousePosn() {
+    if (mousePosn == null) {
+      // ehhh
+      return new Posn(
+        (int)MouseInfo.getPointerInfo().getLocation().getX(),
+        (int)MouseInfo.getPointerInfo().getLocation().getY()
+      );
+    }
     return mousePosn;
   }
 

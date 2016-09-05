@@ -28,8 +28,7 @@ public class RPGDriver {
       //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
       JFrame.setDefaultLookAndFeelDecorated(true);
-    } catch (ClassNotFoundException | InstantiationException
-        | IllegalAccessException | UnsupportedLookAndFeelException e) {
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
       e.printStackTrace();
     }
     GameWindow window = GameWindow.getInstance();

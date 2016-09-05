@@ -4,20 +4,23 @@ import java.awt.Graphics;
 import java.util.*;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
 import warpath.core.Constants;
+import warpath.core.Logging;
 import warpath.internals.Direction;
 import warpath.core.RPG;
 import warpath.core.Utils;
 import warpath.items.Accessory;
+import warpath.items.ItemSlot;
 import warpath.objects.BasicObject;
 import warpath.objects.GameObject;
 import warpath.objects.Tile;
 import warpath.players.Player;
 import warpath.ui.components.FloorOverlay;
+import warpath.ui.components.HealthBar;
 import warpath.ui.components.TransHealthBar;
 
 /**
@@ -41,35 +44,35 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   protected final static int X_OFFSET = 0;
   protected final static int Y_OFFSET = -32;
   
-  protected final Map<String, Surface> frameCache;
-  protected final List<Animation> animations;
-  protected final Map<String, Accessory> equipment;
-  protected final Map<Color, Color> paletteSwaps;
-  protected final List<Activity> activities;
-  protected final String name;
-  protected final String spriteName;
-  protected int hpBarOffset;
+  private final Map<String, Surface> frameCache;
+  private final List<Animation> animations;
+  private final Map<ItemSlot, Accessory> equipment;
+  private final Map<Color, Color> paletteSwaps;
+  private final List<Activity> activities;
+  private final String name;
+  private final String spriteName;
+  private int hpBarOffset;
   
-  protected int dx;
-  protected int dy;
-  protected Unit targetUnit;
-  protected Unit nextTargetUnit;
-  protected Posn targetPosn;
-  protected Posn nextTargetPosn;
-  protected Activity currentActivity;
-  protected Activity nextActivity;
-  protected int currentHP, maxHP;
+  private int dx;
+  private int dy;
+  private int currentHP, maxHP;
   protected int currentEP, maxEP;
+  private boolean slashDirectionIsNew;
 
-  private boolean newSlashDirection;
+  private Unit targetUnit;
+  private Unit nextTargetUnit;
+  private Posn targetPosn;
+  private Posn nextTargetPosn;
+  private Activity currentActivity;
+  private Activity nextActivity;
   
   private Animation currentAnimation;
   private Player player;
   private FloorOverlay floorOverlay;
   private FloorOverlay targetPosnOverlay;
-  private TransHealthBar healthBar;
-  protected List<Posn> path;
-  
+  private HealthBar healthBar;
+  private List<Posn> path;
+
   public BasicUnit(String name, String spriteName, List<Activity> activities, Map<Color, Color> paletteSwaps, Posn posn, Player player) {
     super(posn);
     this.name = name;
@@ -79,26 +82,29 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     equipment = new HashMap<>();
     this.paletteSwaps = paletteSwaps;
     this.path = new LinkedList<>();
-    
-    dx = 0;
-    dy = -1;
-    setXOffset(0);
+
+    setDirection(Direction.N);
     // Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8
     // pixel space at bottom of player sprites. */
-    setYOffset(-32);
+    setOffsets(0, -32);
     frameCache = new HashMap<>();
     animations = new ArrayList<>();
     loadAnimations();
     applyPaletteSwaps();
-    setCurrentActivity(Activities.STANDING);
+    setCurrentActivity(Activity.STANDING);
     //player.getUnits().add(this); // NO, the game will do this.
     updateFloorOverlay();
     healthBar = new TransHealthBar(this, 48, 12);
     hpBarOffset = -20;
-    setNewSlashDirection(false);
+    setSlashDirectionIsNew(false);
     //System.out.printf("%s has %d frames\n",getClass(), frames.keySet().size());
   }
-  
+
+  public void setOffsets(int xOffset, int yOffset) {
+    setXOffset(xOffset);
+    setYOffset(yOffset);
+  }
+
   /**
    * Apply each of the palette swaps to each animation.
    */
@@ -165,7 +171,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * different units. Eventually that will likely be all of them.
    */
   public void loadActivityAnimations(Activity activity) {
-    if (activity.equals(Activities.FALLING)) {
+    if (activity.equals(Activity.FALLING)) {
       loadFallingAnimations();
     } else {
       loadGenericAnimations(activity);
@@ -198,9 +204,9 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, Direction.NE, AnimationTemplates.FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.NE, AnimationTemplates.FALLING, frameCache));
       } else {
-        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, Direction.S, AnimationTemplates.FALLING, frameCache));
+        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.S, AnimationTemplates.FALLING, frameCache));
       }
     }
   }
@@ -230,51 +236,51 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    */
   public void nextActivity() {
     RPG game = RPG.getInstance();
-    if (currentActivity.equals(Activities.FALLING)) {
+    if (currentActivity.equals(Activity.FALLING)) {
       // If we've reached the end of our falling animation, get ready to die.
       game.queueRemoveUnit(this);
       die();
-    } else if (currentActivity.equals(Activities.BLOCKING_1)) {
+    } else if (currentActivity.equals(Activity.BLOCKING_1)) {
       // If we've started blocking, either continue the block or terminate it
       // based on whether we've queued up additional blocking.
-      if (nextActivity != null && nextActivity.equals(Activities.BLOCKING_2)) {
+      if (nextActivity != null && nextActivity.equals(Activity.BLOCKING_2)) {
         pointAt(nextTargetPosn);
-        setCurrentActivity(Activities.BLOCKING_2);
+        setCurrentActivity(Activity.BLOCKING_2);
       } else {
-        setCurrentActivity(Activities.BLOCKING_3);
+        setCurrentActivity(Activity.BLOCKING_3);
       }
-    } else if (currentActivity.equals(Activities.BLOCKING_2)) {
+    } else if (currentActivity.equals(Activity.BLOCKING_2)) {
       // If we're currently blocking, either continue the block or terminate it
       // based on whether we've queued up additional blocking; also, check
       // whether we have enough EPs to continue blocking.
-      if (nextActivity != null && nextActivity.equals(Activities.BLOCKING_2) && currentEP >= getBlockCost()) {
+      if (nextActivity != null && nextActivity.equals(Activity.BLOCKING_2) && currentEP >= getBlockCost()) {
         pointAt(nextTargetPosn);
-        setCurrentActivity(Activities.BLOCKING_2);
+        setCurrentActivity(Activity.BLOCKING_2);
       } else {
-        setCurrentActivity(Activities.BLOCKING_3);
+        setCurrentActivity(Activity.BLOCKING_3);
       }
     
     // BEGIN SHAMELESS C/P
-    } else if (currentActivity.equals(Activities.SLASHING_1)) {
-      if (nextActivity != null && nextActivity.equals(Activities.SLASHING_2)) {
+    } else if (currentActivity.equals(Activity.SLASHING_1)) {
+      if (nextActivity != null && nextActivity.equals(Activity.SLASHING_2)) {
         pointAt(nextTargetPosn);
-        setCurrentActivity(Activities.SLASHING_2);
+        setCurrentActivity(Activity.SLASHING_2);
       } else {
-        setCurrentActivity(Activities.SLASHING_3);
+        setCurrentActivity(Activity.SLASHING_3);
       }
-    } else if (currentActivity.equals(Activities.SLASHING_2)) {
+    } else if (currentActivity.equals(Activity.SLASHING_2)) {
       if (nextActivity == null) {
-        setCurrentActivity(Activities.SLASHING_3);
-      } else if (nextActivity.equals(Activities.SLASHING_2) && currentEP >= getSlashCost()) {
+        setCurrentActivity(Activity.SLASHING_3);
+      } else if (nextActivity.equals(Activity.SLASHING_2) && currentEP >= getSlashCost()) {
         pointAt(nextTargetPosn);
-        setCurrentActivity(Activities.SLASHING_2);
+        setCurrentActivity(Activity.SLASHING_2);
       } else {
-        setCurrentActivity(Activities.SLASHING_3);
+        setCurrentActivity(Activity.SLASHING_3);
       }
     // END SHAMELESS C/P
-    } else if (currentActivity.equals(Activities.TELEPORTING)) {
+    } else if (currentActivity.equals(Activity.TELEPORTING)) {
       moveTo(getTargetPosn());
-      setCurrentActivity(Activities.TELEPORTING);
+      setCurrentActivity(Activity.TELEPORTING);
       setTargetPosn(null);
       currentEP -= RobedWizardUnit.TELEPORT_COST;
       
@@ -283,8 +289,8 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     // 2) Make sure there's a free adjacent square to put the zombie on.
     // ...
     //
-    } else if (currentActivity.equals(Activities.REZZING)) {
-      setCurrentActivity(Activities.STANDING);
+    } else if (currentActivity.equals(Activity.REZZING)) {
+      setCurrentActivity(Activity.STANDING);
       setTargetPosn(null);
       GameObject targetCorpse = null;
       for (GameObject o : game.getFloor().getTile(getPosn()).getObjects()) {
@@ -302,6 +308,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
             do {
               p = game.getAdjacentSquares(getPosn()).get(game.getRNG().nextInt(8));
             } while (game.getFloor().getTile(p).isBlocked());
+
             game.queueAddUnit(new EnemyZombie(String.format("Zombie %d", game.nextEnemyID()), p, game.getPlayer(2)));
           } else {
             // What should we do if all the tiles are blocked?
@@ -320,10 +327,12 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
       }
       setTargetPosn(nextTargetPosn);
       setTargetUnit(nextTargetUnit);
-      if (lastTargetUnit != null) lastTargetUnit.updateFloorOverlay();
-      if (nextActivity.equals(Activities.WALKING)) {
+      if (lastTargetUnit != null) {
+        lastTargetUnit.updateFloorOverlay();
+      }
+      if (nextActivity.equals(Activity.WALKING)) {
         if (getPosn().equals(targetPosn)) {
-          setCurrentActivity(Activities.STANDING);
+          setCurrentActivity(Activity.STANDING);
           targetPosn = null;
           nextActivity = null;
           setNextTargetPosn(null);
@@ -334,27 +343,27 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           // currently moving.  This is for the case where the first tile in
           // the path contains a moving unit.
           if (game.getFloor().getTile(path.get(0)).isBlocked()) {
-            // System.out.println("fux");
+            Logging.debugPrint("fux");
           } else {
             pointAt(path.get(0));
-            setCurrentActivity(Activities.WALKING);
+            setCurrentActivity(Activity.WALKING);
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
           }
         }
       // If next activity is attacking, we might have to path to the unit first.
-      } else if (nextActivity.equals(Activities.ATTACKING)) {
+      } else if (nextActivity.equals(Activity.ATTACKING)) {
         if (Utils.distance(this, targetUnit) == 1) {
           if (currentEP >= ATTACK_COST) {
             pointAt(targetUnit);
-            setCurrentActivity(Activities.ATTACKING);
+            setCurrentActivity(Activity.ATTACKING);
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
             currentEP -= ATTACK_COST;
           } else {
-            setCurrentActivity(Activities.STANDING);
+            setCurrentActivity(Activity.STANDING);
             targetPosn = null;
             nextActivity = null;
             setNextTargetPosn(null);
@@ -363,20 +372,20 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           setTargetPosn(targetUnit.getPosn());
           setPath(game.findPath(getPosn(), targetPosn));
           pointAt(path.get(0));
-          setCurrentActivity(Activities.WALKING);
+          setCurrentActivity(Activity.WALKING);
           // Don't clear nextActivity/nextTargetUnit 
         }
-      } else if (nextActivity.equals(Activities.BASHING)) {
+      } else if (nextActivity.equals(Activity.BASHING)) {
         if (Utils.distance(this, targetUnit) == 1) {
           if (currentEP >= BASH_COST) {
             pointAt(targetUnit);
-            setCurrentActivity(Activities.BASHING);
+            setCurrentActivity(Activity.BASHING);
             nextActivity = null;
             setNextTargetPosn(null);
             setNextTargetUnit(null);
             currentEP -= BASH_COST;
           } else {
-            setCurrentActivity(Activities.STANDING);
+            setCurrentActivity(Activity.STANDING);
             targetPosn = null;
             nextActivity = null;
             setNextTargetPosn(null);
@@ -389,28 +398,28 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
             // System.out.println("fux2");
           } else {
             pointAt(path.get(0));
-            setCurrentActivity(Activities.WALKING);
+            setCurrentActivity(Activity.WALKING);
           }
           // Don't clear nextActivity/nextTargetUnit 
         }
-      } else if (nextActivity.equals(Activities.BLOCKING_1)) {
+      } else if (nextActivity.equals(Activity.BLOCKING_1)) {
         setTargetPosn(getNextTargetPosn());
         pointAt(targetPosn);
-        setCurrentActivity(Activities.BLOCKING_1);
+        setCurrentActivity(Activity.BLOCKING_1);
         //System.out.printf("startblock - %s - %s\n", getPosn(), targetPosn);
-        setNextActivity(Activities.BLOCKING_2);
-      } else if (nextActivity.equals(Activities.SLASHING_1)) {
+        setNextActivity(Activity.BLOCKING_2);
+      } else if (nextActivity.equals(Activity.SLASHING_1)) {
         setTargetPosn(getNextTargetPosn());
         pointAt(targetPosn);
-        setCurrentActivity(Activities.SLASHING_1);
-        setNextActivity(Activities.SLASHING_2);
-      } else if (nextActivity.equals(Activities.TELEPORTING)) {
+        setCurrentActivity(Activity.SLASHING_1);
+        setNextActivity(Activity.SLASHING_2);
+      } else if (nextActivity.equals(Activity.TELEPORTING)) {
         setTargetPosn(getNextTargetPosn());
-        setCurrentActivity(Activities.TELEPORTING);
+        setCurrentActivity(Activity.TELEPORTING);
         setNextActivity(null);
         setNextTargetPosn(null);
-      } else if (nextActivity.equals(Activities.REZZING)) {
-        setCurrentActivity(Activities.REZZING);
+      } else if (nextActivity.equals(Activity.REZZING)) {
+        setCurrentActivity(Activity.REZZING);
         setNextActivity(null);
       }
       // Shouldn't need to do this anymore now that setters do it for us automatically. 
@@ -419,10 +428,10 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
       //}
     // no nextactivity
     } else { // if (nextActivity == null) {
-      if (currentActivity.equals(Activities.WALKING)) {
+      if (currentActivity.equals(Activity.WALKING)) {
         refreshWalk();
       } else {
-        setCurrentActivity(Activities.STANDING);
+        setCurrentActivity(Activity.STANDING);
         setTargetUnit(null);
       }
     }
@@ -439,10 +448,10 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     // These two cases basically represent the same thing: we've arrived, or
     // we're otherwise out of path for some reason. 
     } else if (path == null || path.size() == 0) {
-      setCurrentActivity(Activities.STANDING);
+      setCurrentActivity(Activity.STANDING);
       clearTargets();
     } else if (getPosn().equals(targetPosn)) {
-      setCurrentActivity(Activities.STANDING);
+      setCurrentActivity(Activity.STANDING);
       clearTargets();
     // Proceed.
     } else {
@@ -452,7 +461,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         //System.out.println("fux4");
       } else {
         pointAt(path.get(0));
-        setCurrentActivity(Activities.WALKING);
+        setCurrentActivity(Activity.WALKING);
       }
     }
   }
@@ -467,13 +476,14 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    */
   public void doUpkeep() {
     RPG game = RPG.getInstance();
-    if (getCurrentActivity().equals(Activities.BLOCKING_2)) {
+    if (getCurrentActivity().equals(Activity.BLOCKING_2)) {
       currentEP -= getBlockCost();
-    } else if (getCurrentActivity().equals(Activities.SLASHING_2)) {
+    } else if (getCurrentActivity().equals(Activity.SLASHING_2)) {
       currentEP -= getSlashCost();
     }
-    
-    if (!getCurrentActivity().equals(Activities.FALLING)) {
+
+    // TODO awk
+    if (!getCurrentActivity().equals(Activity.FALLING)) {
       if ((game.getTicks() % HP_REGEN == 0) && (currentHP < maxHP)) {
         currentHP++;
       }
@@ -481,7 +491,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         currentEP++;
       }
     }
-    if (currentEP < 0) currentEP=0;
+    if (currentEP < 0) currentEP = 0;
     this.nextFrame();
   }
   
@@ -504,23 +514,23 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    */
   public void doEvents() {
     RPG game = RPG.getInstance();
-    if (getCurrentActivity().equals(Activities.WALKING)) {
+    if (getCurrentActivity().equals(Activity.WALKING)) {
       // If the unit is walking and its target tile is blocked,
       // handle it (cancel, etc. - checkNextTile does a lot.)
       if (getCurrentAnimation().getIndex() <= getWalkMoveFrame()) {
         checkNextTile();
       }
       // If the unit is walking, the actual movement occurs on frame 2.
-      if (getCurrentActivity().equals(Activities.WALKING)) {
+      if (getCurrentActivity().equals(Activity.WALKING)) {
         if (getCurrentAnimation().getIndex() == getWalkMoveFrame()) {
-          move(dx, dy);
+          moveBy(dx, dy);
           path.remove(0);
         }
       }
     }
     
     // The attack hit occurs on frame 2; maybe we can generalize this.
-    else if (getCurrentActivity().equals(Activities.ATTACKING)) {
+    else if (getCurrentActivity().equals(Activity.ATTACKING)) {
       if (getCurrentAnimation().getIndex() == getAttackHitFrame()) {
         // What happens if the unit has moved away?
         Posn nextPosn = new Posn(getX()+dx, getY()+dy);
@@ -529,7 +539,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           doAttackHit(targetUnit);
         }
       }
-    } else if (getCurrentActivity().equals(Activities.BASHING)) {
+    } else if (getCurrentActivity().equals(Activity.BASHING)) {
       if (getCurrentAnimation().getIndex() == 0) {
         if (Utils.distance(this, targetUnit) > 1) {
           setPath(game.findPath(this, targetUnit));
@@ -538,12 +548,12 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
             if (game.getFloor().getTile(path.get(0)).isBlocked()) {
               // System.out.println("fux5");
             } else {
-              setCurrentActivity(Activities.WALKING);
+              setCurrentActivity(Activity.WALKING);
             }
           } else {
-            setCurrentActivity(Activities.STANDING);
+            setCurrentActivity(Activity.STANDING);
             clearTargets();
-            System.out.println("uh oh");
+            Logging.debugPrint("uh oh");
           }
         }
       } else if (getCurrentAnimation().getIndex() == 2) {
@@ -555,16 +565,16 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         } else {
         }
       }
-    } else if (getCurrentActivity().equals(Activities.BLOCKING_2)) {
+    } else if (getCurrentActivity().equals(Activity.BLOCKING_2)) {
       // WTF?
       if (currentHP == 0) {
         setNextActivity(null);
         setNextTargetPosn(null);
       }
-    } else if (getCurrentActivity().equals(Activities.SLASHING_2)) {
+    } else if (getCurrentActivity().equals(Activity.SLASHING_2)) {
       if (getCurrentAnimation().getIndex() == 0) {
-        if (getNewSlashDirection()) {
-          setNewSlashDirection(false);
+        if (getSlashDirectionIsNew()) {
+          setSlashDirectionIsNew(false);
           Posn nextPosn = getPosn().add(getDirection().toPosn());
           Unit tu = game.getFloor().getTile(nextPosn).getUnit();
           if (tu != null && isHostile(tu)) {
@@ -595,9 +605,9 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * Does NOT validate the tile we're moving to. You have to do that yourself!
    * checkNextTile() was supposed to do that but it kind of grew in scope.
    */
-  public void move(int dx, int dy) {
+  public void moveBy(int dx, int dy) {
     RPG game = RPG.getInstance();
-    //System.out.printf("move: %s %s\n", getPosn(), new Posn(getX() + dx, getY() + dy));
+    //System.out.printf("moveBy: %s %s\n", getPosn(), new Posn(getX() + dx, getY() + dy));
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
     t.setUnit(null);
@@ -609,11 +619,15 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     t.setUnit(this);
     updateFloorOverlay();
   }
+
+  public void moveBy(Posn p) {
+    moveBy(p.x, p.y);
+  }
   
   /**
    * Moves the unit to an absolute location, in Posn form.
-   * Like {@link #move(int, int)}, this method does not validate.
-   * @param p - the Posn to move to
+   * Like {@link #moveBy(int, int)}, this method does not validate.
+   * @param p - the Posn to moveBy to
    */
   public void moveTo(Posn p) {
     RPG game = RPG.getInstance();
@@ -628,6 +642,8 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     t.setUnit(this);
     updateFloorOverlay();
   }
+
+
   
   /**
    * We can call this on any GameObject for differentiation purposes.
@@ -646,7 +662,15 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   
   @Override
   public String toString() {
-    return "<BasicUnit("+getName()+")>";
+    return String.format(
+      "<%s - %s (%s) - %s_%s_%d",
+      getName(),
+      getCurrentActivity(),
+      getNextActivity(),
+      getCurrentAnimation().getActivity(),
+      getCurrentAnimation().getDirection(),
+      getCurrentAnimation().getIndex()
+    );
   }
   
   /**
@@ -679,38 +703,38 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         // note that we're using setCurrentActivity, not setNextActivity
         
         // If there's a unit at the target position:
-        // if it's walking, wait for it to move,
+        // if it's walking, wait for it to moveBy,
         // otherwise, cancel pathing.
         if (nextTile.getUnit() != null) {
           if (targetUnit != null && blockingUnit.equals(targetUnit)) {
             setNextTargetUnit(targetUnit);
-            setNextActivity(Activities.ATTACKING);
-            setCurrentActivity(Activities.STANDING);
+            setNextActivity(Activity.ATTACKING);
+            setCurrentActivity(Activity.STANDING);
             setTargetUnit(null);
           } else if (blockingUnit.isMoving()) {
             // Nothing queued up, just moving to a spot.
-            if (nextActivity == null || nextActivity.equals(Activities.WALKING)) {
-              setCurrentActivity(Activities.STANDING);
+            if (nextActivity == null || nextActivity.equals(Activity.WALKING)) {
+              setCurrentActivity(Activity.STANDING);
               //System.out.println("W1");
-              setNextActivity(Activities.WALKING);
+              setNextActivity(Activity.WALKING);
               setNextTargetPosn(targetPosn);
               setTargetPosn(null);
             // Attacking is queued up; keep it queued.
-            } else if (nextActivity.equals(Activities.ATTACKING)) { // || nextActivity.equals("blocking")) {
-              setCurrentActivity(Activities.STANDING);
+            } else if (nextActivity.equals(Activity.ATTACKING)) { // || nextActivity.equals("blocking")) {
+              setCurrentActivity(Activity.STANDING);
             } else {
-              System.out.println("Debug 1");
+              Logging.debugPrint("Debug 1");
               printDebug();
             }
           } else { 
-            /* There's a unit on our target posn and it's not moving: cancel pathing. */
-            setCurrentActivity(Activities.STANDING);
+            // There's a unit on our target posn and it's not moving: cancel pathing.
+            setCurrentActivity(Activity.STANDING);
             clearTargets();
           }
         // If the target posn is blocked by an object - maybe this would
         // happen with fog of war - stop pathing.
         } else {
-          setCurrentActivity(Activities.STANDING);
+          setCurrentActivity(Activity.STANDING);
           clearTargets();
         }
 
@@ -722,13 +746,13 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         blockingUnit = nextTile.getUnit();
         if (blockingUnit != null && blockingUnit.isMoving()) {
           // Just walking, no unit target
-          if (nextActivity == null || nextActivity.equals(Activities.WALKING)) {
-            setCurrentActivity(Activities.STANDING);
+          if (nextActivity == null || nextActivity.equals(Activity.WALKING)) {
+            setCurrentActivity(Activity.STANDING);
             setNextTargetPosn(targetPosn);
             setTargetPosn(null);
-            setNextActivity(Activities.WALKING);
-          } else if (nextActivity.equals(Activities.ATTACKING) || nextActivity.equals(Activities.BASHING)) {
-            setCurrentActivity(Activities.STANDING);
+            setNextActivity(Activity.WALKING);
+          } else if (nextActivity.equals(Activity.ATTACKING) || nextActivity.equals(Activity.BASHING)) {
+            setCurrentActivity(Activity.STANDING);
             setTargetPosn(null);
           } else { 
             //printDebug();
@@ -738,17 +762,17 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           
           // Just walking, no unit target
           if (nextActivity == null) {
-            setCurrentActivity(Activities.STANDING);
+            setCurrentActivity(Activity.STANDING);
             setNextTargetPosn(targetPosn);
             targetPosn = null;
-            setNextActivity(Activities.WALKING);
+            setNextActivity(Activity.WALKING);
             setPath(game.findPath(getPosn(), nextTargetPosn));
-          } else if (nextActivity.equals(Activities.ATTACKING) || nextActivity.equals(Activities.BASHING)) {
-            setCurrentActivity(Activities.STANDING);
+          } else if (nextActivity.equals(Activity.ATTACKING) || nextActivity.equals(Activity.BASHING)) {
+            setCurrentActivity(Activity.STANDING);
             targetPosn = null;
             setPath(game.findPath(this, nextTargetUnit));
           } else {
-            System.out.println("Debug 3");
+            Logging.debugPrint("Debug 3");
           }
         }
       }
@@ -779,7 +803,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   }
   
   public boolean isMoving() {
-    return currentActivity.equals(Activities.WALKING);
+    return currentActivity.equals(Activity.WALKING);
   }
   
   public void setTargetUnit(Unit u) {
@@ -912,8 +936,8 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   public void takeDamage(int dmg) {
     if (dmg >= currentHP) {
       currentHP = 0;
-      if (!getCurrentActivity().equals(Activities.FALLING)) {
-        setCurrentActivity(Activities.FALLING);
+      if (!getCurrentActivity().equals(Activity.FALLING)) {
+        setCurrentActivity(Activity.FALLING);
       }
     } else {
       currentHP -= dmg;
@@ -938,7 +962,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
       // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
-      setCurrentActivity(Activities.STUNNED_SHORT);
+      setCurrentActivity(Activity.STUNNED_SHORT);
       clearTargets();
       takeDamage(dmg);
     }
@@ -949,7 +973,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     if (isBlocking() && src.getPosn().equals(blockedPosn)) {
       // Do we want to take partial damage? Do we want to block adjacent angles?
     } else {
-      setCurrentActivity(Activities.STANDING);
+      setCurrentActivity(Activity.STANDING);
       clearTargets();
       takeDamage(dmg);
     }
@@ -961,9 +985,9 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    * we want.
    */
   public boolean isBlocking() {
-    if (getCurrentActivity().equals(Activities.BLOCKING_1)) return true;
-    else if (getCurrentActivity().equals(Activities.BLOCKING_2)) return true;
-    else if (getCurrentActivity().equals(Activities.BLOCKING_3)) return true;
+    if (getCurrentActivity().equals(Activity.BLOCKING_1)) return true;
+    else if (getCurrentActivity().equals(Activity.BLOCKING_2)) return true;
+    else if (getCurrentActivity().equals(Activity.BLOCKING_3)) return true;
     else return false;
   }
 
@@ -1004,25 +1028,25 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   public void draw(Graphics g) {
     RPG game = RPG.getInstance();
 
-    if (equipment.get("mainhand") != null) {
-      if (equipment.get("mainhand").drawBehind() ) {
-        equipment.get("mainhand").draw(g);
+    if (equipment.get(ItemSlot.MAINHAND) != null) {
+      if (equipment.get(ItemSlot.MAINHAND).drawBehind() ) {
+        equipment.get(ItemSlot.MAINHAND).draw(g);
       }
     }
-    if (equipment.get("offhand") != null) {
-      if (equipment.get("offhand").drawBehind() ) {
-        equipment.get("offhand").draw(g);
+    if (equipment.get(ItemSlot.OFFHAND) != null) {
+      if (equipment.get(ItemSlot.OFFHAND).drawBehind() ) {
+        equipment.get(ItemSlot.OFFHAND).draw(g);
       }
     }
     super.draw(g);
-    if (equipment.get("mainhand") != null) {
-      if (!equipment.get("mainhand").drawBehind()) {
-        equipment.get("mainhand").draw(g);
+    if (equipment.get(ItemSlot.MAINHAND) != null) {
+      if (!equipment.get(ItemSlot.MAINHAND).drawBehind()) {
+        equipment.get(ItemSlot.MAINHAND).draw(g);
       }
     }
-    if (equipment.get("offhand") != null) {
-      if (!equipment.get("offhand").drawBehind() ) {
-        equipment.get("offhand").draw(g);
+    if (equipment.get(ItemSlot.OFFHAND) != null) {
+      if (!equipment.get(ItemSlot.OFFHAND).drawBehind() ) {
+        equipment.get(ItemSlot.OFFHAND).draw(g);
       }
     }
     Posn pixel = game.gridToPixel(getPosn()); // returns top left
@@ -1035,7 +1059,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   
   public void addAccessory(Accessory e) {
     equipment.put(e.getSlot(), e);
-    e.setCurrentAnimation(this.getCurrentActivity(), Direction.from(dx,dy));
+    e.setCurrentAnimation(this.getCurrentActivity(), getDirection());
   }
 
   @Override
@@ -1072,11 +1096,62 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     return SLASH_COST;
   }
 
-  public boolean getNewSlashDirection() {
-    return newSlashDirection;
+  public boolean getSlashDirectionIsNew() {
+    return slashDirectionIsNew;
   }
 
-  public void setNewSlashDirection(boolean newSlashDirection) {
-    this.newSlashDirection = newSlashDirection;
+  public void setSlashDirectionIsNew(boolean slashDirectionIsNew) {
+    this.slashDirectionIsNew = slashDirectionIsNew;
+  }
+
+
+
+  public Map<String, Surface> getFrameCache() {
+    return frameCache;
+  }
+
+  public List<Animation> getAnimations() {
+    return animations;
+  }
+
+  public Map<ItemSlot, Accessory> getEquipment() {
+    return equipment;
+  }
+
+  public Map<Color, Color> getPaletteSwaps() {
+    return paletteSwaps;
+  }
+
+  public List<Activity> getActivity() {
+    return activities;
+  }
+
+  public HealthBar getHealthBar() {
+    return healthBar;
+  }
+
+  public List<Posn> getPath() {
+    return path;
+  }
+
+  public void setCurrentHP(int hp) {
+    currentHP = hp;
+  }
+
+  public void setMaxHP(int hp) {
+    maxHP = hp;
+  }
+
+  public void setCurrentEP(int ep) {
+    currentEP = ep;
+  }
+
+  public void setMaxEP(int ep) {
+    maxEP = ep;
+  }
+
+  // TODO this really needs to be refactored out
+  public void setHPBarOffset(int offset) {
+    hpBarOffset = offset;
   }
 }

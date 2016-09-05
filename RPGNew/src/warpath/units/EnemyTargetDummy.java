@@ -1,7 +1,7 @@
 package warpath.units;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.players.Player;
 
@@ -12,11 +12,12 @@ public class EnemyTargetDummy extends HumanUnit {
   private static final long serialVersionUID = 1L;
   private int minDamage, maxDamage;
   private static List<Activity> activities = Arrays.asList(
-    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.STUNNED_SHORT
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.STUNNED_SHORT
   );
   public EnemyTargetDummy(String name, Posn posn, Player player) {
     super(name, activities, posn, player);
-    currentHP = maxHP = 100;
+    setCurrentHP(100);
+    setMaxHP(100);
     minDamage = 5;
     maxDamage = 10;
   }

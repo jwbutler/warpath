@@ -7,7 +7,7 @@ public class Shield extends Accessory {
   private final static int Y_OFFSET = -10;
 
   public Shield(Unit unit, String spriteName) {
-    super(unit, spriteName, "offhand", X_OFFSET, Y_OFFSET);
+    super(unit, spriteName, ItemSlot.OFFHAND, X_OFFSET, Y_OFFSET);
   }
 
   // Default sprite

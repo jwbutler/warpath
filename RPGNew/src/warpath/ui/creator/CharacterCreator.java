@@ -388,7 +388,7 @@ public class CharacterCreator extends JPanel implements ActionListener, ChangeLi
   /**
    * Called when a button is pressed.
    * Handles events from any of the buttons on the page.
-   * TODO: maybe move these to anonymous handlers?
+   * TODO: maybe moveBy these to anonymous handlers?
    * @param e - the ActionEvent from the button press
    */
   @Override

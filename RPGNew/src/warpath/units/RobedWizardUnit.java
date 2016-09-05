@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
@@ -17,21 +17,17 @@ import warpath.players.Player;
 public abstract class RobedWizardUnit extends BasicUnit implements Serializable {
   private static final long serialVersionUID = 1L;
   private static final List<Activity> ACTIVITIES = Arrays.asList(
-    Activities.APPEARING, Activities.FALLING, Activities.REZZING, Activities.STANDING,
-    Activities.STUNNED_SHORT, Activities.STUNNED_LONG, Activities.TELEPORTING, Activities.WALKING
+    Activity.APPEARING, Activity.FALLING, Activity.REZZING, Activity.STANDING,
+    Activity.STUNNED_SHORT, Activity.STUNNED_LONG, Activity.TELEPORTING, Activity.WALKING
   );
-  private static final int X_OFFSET = 0;
-  private static final int Y_OFFSET = -32;
   public static final int TELEPORT_COST = 200;
   public static final int REZ_COST = 200;
   
   public RobedWizardUnit(String name, String spriteName, List<Activity> activities, Map<Color, Color> paletteSwaps,
   Posn posn, Player player) {
     super(name, spriteName, activities, paletteSwaps, posn, player);
-    setXOffset(X_OFFSET);
-    setYOffset(Y_OFFSET);
-    hpBarOffset = -40;
-    
+    setOffsets(0, -32);
+    setHPBarOffset(-40);
   }
   
   public RobedWizardUnit(String name, List<Activity> activities, Posn posn, Player player) {
@@ -50,12 +46,6 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
   }
 
   @Override
-  public void setCurrentActivity(Activity newActivity) {
-    currentActivity = newActivity;
-    setCurrentAnimation(newActivity, getCurrentDirection());
-  }
-  
-  @Override
   public void die() {
     super.die();
     RPG game = RPG.getInstance();
@@ -65,11 +55,11 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
   @Override
   public void loadAnimations() {
     long t = System.currentTimeMillis();
-    for (Activity activity : activities) {
+    for (Activity activity : getActivity()) {
       loadActivityAnimations(activity);
     }
     
-    for (Accessory e: equipment.values()) {
+    for (Accessory e: getEquipment().values()) {
       e.loadAnimations();
     }
     t = System.currentTimeMillis() - t;
@@ -79,21 +69,21 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
   @Override
   // We can probably optimize this further but this is decently concise now.
   public void loadActivityAnimations(Activity activity) {
-    if (activity.equals(Activities.FALLING)) {
+    if (activity.equals(Activity.FALLING)) {
       loadFallingAnimations();
-    } else if (activity.equals(Activities.STANDING)) {
+    } else if (activity.equals(Activity.STANDING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_STANDING);
-    } else if (activity.equals(Activities.WALKING)) {
+    } else if (activity.equals(Activity.WALKING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_WALKING);
-    } else if (activity.equals(Activities.TELEPORTING)) {
+    } else if (activity.equals(Activity.TELEPORTING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_TELEPORTING);
-    } else if (activity.equals(Activities.APPEARING)) {
+    } else if (activity.equals(Activity.APPEARING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_APPEARING);
-    } else if (activity.equals(Activities.REZZING)) {
+    } else if (activity.equals(Activity.REZZING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_REZZING);
-    } else if (activity.equals(Activities.STUNNED_SHORT)) {
+    } else if (activity.equals(Activity.STUNNED_SHORT)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_STUNNED_SHORT);
-    } else if (activity.equals(Activities.APPEARING)) {
+    } else if (activity.equals(Activity.APPEARING)) {
       loadGenericAnimations(activity, AnimationTemplates.WIZARD_STUNNED_LONG);
     } else {
       loadGenericAnimations(activity);
@@ -101,8 +91,14 @@ public abstract class RobedWizardUnit extends BasicUnit implements Serializable 
   }
 
   public void loadFallingAnimations() {
-    for (Direction dir : Direction.directions()) {
-      animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, dir, AnimationTemplates.WIZARD_FALLING, frameCache));
+    for (Direction direction : Direction.directions()) {
+      getAnimations().add(Animation.fromTemplate(
+        getSpriteName(),
+        Activity.FALLING,
+        direction,
+        AnimationTemplates.WIZARD_FALLING,
+        getFrameCache())
+      );
     }
   }
 }

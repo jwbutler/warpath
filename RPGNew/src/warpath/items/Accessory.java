@@ -3,7 +3,7 @@ import java.awt.Graphics;
 import java.util.*;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
@@ -12,12 +12,14 @@ import warpath.internals.Direction;
 import warpath.core.RPG;
 import warpath.units.Unit;
 
-/** A generic class for any unit accessories such as weapons, armor or hair. */
+/**
+ * A generic class for any unit accessories such as weapons, armor or hair.
+ */
 public abstract class Accessory {
   // we should make a generic class to subclass. there's a lot of copying and pasting
   // going on here - BUT i can't think of a way to do this without multiple
   // inheritance. fuck java
-  private final String slot;
+  private final ItemSlot slot;
   protected final Unit unit;
   protected final int xOffset;
   protected final int yOffset;
@@ -27,14 +29,14 @@ public abstract class Accessory {
 
   protected final List<Animation> animations;
   protected final List<Activity> activities = Arrays.asList(
-    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.BASHING,
-    Activities.BLOCKING_1, Activities.BLOCKING_2, Activities.BLOCKING_3, Activities.SLASHING_1,
-    Activities.SLASHING_2, Activities.SLASHING_3, Activities.FALLING
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.BASHING,
+    Activity.BLOCKING_1, Activity.BLOCKING_2, Activity.BLOCKING_3, Activity.SLASHING_1,
+    Activity.SLASHING_2, Activity.SLASHING_3, Activity.FALLING
   );
   
   private Animation currentAnimation;
   
-  public Accessory(Unit unit, String spriteName, String slot, int xOffset, int yOffset) {
+  public Accessory(Unit unit, String spriteName, ItemSlot slot, int xOffset, int yOffset) {
     this.unit = unit;
     this.slot = slot;
     this.spriteName = spriteName;
@@ -45,7 +47,7 @@ public abstract class Accessory {
     this.xOffset = xOffset;
     this.yOffset = yOffset;
   }
-  public Accessory(Unit unit, String spriteName, String slot) {
+  public Accessory(Unit unit, String spriteName,ItemSlot slot) {
     this(unit, spriteName, slot, 0, 0);
   }
   
@@ -59,7 +61,7 @@ public abstract class Accessory {
   }
     
   private void loadActivityAnimations(Activity activity) {
-    if (activity.equals(Activities.FALLING)) {
+    if (activity.equals(Activity.FALLING)) {
       loadFallingAnimations();
     } else {
       loadGenericAnimations(activity);
@@ -103,7 +105,7 @@ public abstract class Accessory {
     currentAnimation.nextFrame();
   }
 
-  public String getSlot() {
+  public ItemSlot getSlot() {
     return slot;
   }
   
@@ -140,9 +142,9 @@ public abstract class Accessory {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, Direction.NE, AnimationTemplates.FALLING, frameCache, true));
+        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.NE, AnimationTemplates.FALLING, frameCache, true));
       } else {
-        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, Direction.S, AnimationTemplates.FALLING, frameCache, true));
+        animations.add(Animation.fromTemplate(spriteName, Activity.FALLING, Direction.S, AnimationTemplates.FALLING, frameCache, true));
       }
     }
   }

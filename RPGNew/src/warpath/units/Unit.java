@@ -1,12 +1,15 @@
 package warpath.units;
 
 import jwbgl.Posn;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
+import warpath.animations.Animation;
 import warpath.internals.Direction;
 import warpath.objects.GameObject;
 import warpath.players.Player;
 import warpath.ui.components.FloorOverlay;
+
+import java.util.List;
 
 /**
  * @author jbutler
@@ -37,7 +40,7 @@ public interface Unit extends GameObject {
   int getSlashCost();
   Direction getDirection();
   void pointAt(Posn nextPosn);
-  void setNewSlashDirection(boolean b);
+  void setSlashDirectionIsNew(boolean b);
   void setDirection(Direction dir);
   Posn getNextTargetPosn();
   void setNextTargetUnit(Unit v);
@@ -48,9 +51,17 @@ public interface Unit extends GameObject {
   void die();
   FloorOverlay getTargetPosnOverlay();
   void moveTo(Posn posn);
-  void move(int dx, int dy);
+  void moveBy(int dx, int dy);
   void takeDamage(int dmg);
   void takeBashHit(GameObject src, int dmg);
   void takeSlashHit(GameObject src, int dmg);
   void takeHit(GameObject src, int damage);
+
+  Animation getCurrentAnimation();
+
+  void checkNextTile();
+
+  void moveBy(Posn posn);
+
+  List<Posn> getPath();
 }

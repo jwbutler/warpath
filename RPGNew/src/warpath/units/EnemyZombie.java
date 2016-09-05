@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
@@ -18,13 +18,15 @@ public class EnemyZombie extends ZombieUnit {
   private final static double ATTACK_CHANCE = 0.75;
   private final static int VISION_RADIUS = 6;
   private final static int SMELL_RADIUS = 12;
-  private static List<Activity> activities = Arrays.asList(
-    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.STUNNED_SHORT, Activities.FALLING
+  private final static List<Activity> ACTIVITIES = Arrays.asList(
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.STUNNED_SHORT, Activity.FALLING
   );
   public EnemyZombie(String name, Posn posn, Player player) {
-    super(name, activities, posn, player);
-    currentHP = maxHP = 45;
-    currentEP = maxEP = 30;
+    super(name, ACTIVITIES, posn, player);
+    setCurrentHP(45);
+    setMaxHP(45);
+    setCurrentEP(30);
+    setMaxEP(30);
     minDamage = 2;
     maxDamage = 4;
     //minDamage = maxDamage = 0;
@@ -35,53 +37,54 @@ public class EnemyZombie extends ZombieUnit {
     super.nextActivity();
     RPG game = RPG.getInstance();
     Random RNG = game.getRNG();
-    Unit tu = getNextTargetUnit();
-    if (currentActivity.equals(Activities.STANDING)) {
+    Unit targetUnit = getNextTargetUnit();
+    if (getCurrentActivity().equals(Activity.STANDING)) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
           if (Utils.distance(this,u) <= SMELL_RADIUS) {
-            /* This should be where the "smell" sound is played, but we're losing the target
-             * due to endAttack() [maybe]. Work on this later */
-            if (tu == null) {
+            // TODO This should be where the "smell" sound is played, but we're
+            // losing the target due to endAttack() [maybe]. Work on this later
+            if (targetUnit == null) {
               setNextTargetUnit(u);
-              tu = u;
+              targetUnit = u;
               //System.out.println("smell");
-            } else if (Utils.distance(this,u) < Utils.distance(this,tu)) {
+            } else if (Utils.distance(this,u) < Utils.distance(this,targetUnit)) {
               setNextTargetUnit(u);
-              tu = u;
+              targetUnit = u;
             }
           }
         }
       }
       if (getNextTargetUnit() != null) {
-        setNextActivity(Activities.ATTACKING);
+        setNextActivity(Activity.ATTACKING);
       }
-      if (targetUnit != null) {
+      if (getTargetUnit() != null) {
         super.nextActivity();
       }
     }
-    if (currentActivity.equals(Activities.WALKING)) {
+    if (getCurrentActivity().equals(Activity.WALKING)) {
       double cancelChance = 1 - SLOW_MOVE_SPEED;
-      tu = getNextTargetUnit();
-      if (tu != null) {
-        if (Utils.distance(this, tu) <= VISION_RADIUS) {
+      targetUnit = getNextTargetUnit();
+      if (targetUnit != null) {
+        if (Utils.distance(this, targetUnit) <= VISION_RADIUS) {
           cancelChance = 1 - FAST_MOVE_SPEED;
         } else {
           cancelChance = 1 - SLOW_MOVE_SPEED;
         }
       }
       if (RNG.nextDouble() < cancelChance) {
-        setCurrentActivity(Activities.STANDING);
+        setCurrentActivity(Activity.STANDING);
         setTargetPosn(null);
       }
-    } else if (currentActivity.equals(Activities.ATTACKING)) {
+    } else if (getCurrentActivity().equals(Activity.ATTACKING)) {
       if (RNG.nextDouble() > ATTACK_CHANCE) {
-        setCurrentActivity(Activities.STANDING);
+        setCurrentActivity(Activity.STANDING);
         currentEP += ATTACK_COST;
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);
       }
     }
+   //System.out.println(this);
   }
   
   @Override

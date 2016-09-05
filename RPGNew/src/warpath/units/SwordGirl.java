@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.core.RPG;
 import warpath.players.Player;
@@ -17,14 +17,15 @@ public class SwordGirl extends HumanUnit {
   private int minDamage, maxDamage;
   //
   private static final List<Activity> ACTIVITIES = Arrays.asList(
-    Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.BASHING,
-    Activities.BLOCKING_1, Activities.BLOCKING_2, Activities.BLOCKING_3, Activities.SLASHING_1,
-    Activities.SLASHING_2, Activities.SLASHING_3, Activities.FALLING
+    Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.BASHING,
+    Activity.BLOCKING_1, Activity.BLOCKING_2, Activity.BLOCKING_3, Activity.SLASHING_1,
+    Activity.SLASHING_2, Activity.SLASHING_3, Activity.FALLING
   );
 
   public SwordGirl(String name, Posn posn, Player player) {
     super(name, "female", ACTIVITIES, new HashMap<>(), posn, player);
-    currentHP = maxHP = 100;
+    setCurrentHP(100);
+    setMaxHP(100);
     minDamage = 5;
     maxDamage = 10;
     //addAccessory(new Sword(game, this, "sword_female"));

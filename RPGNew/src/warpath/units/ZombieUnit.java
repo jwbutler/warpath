@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import jwbgl.*;
-import warpath.activities.Activities;
+
 import warpath.activities.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
@@ -22,25 +22,23 @@ import warpath.players.Player;
  */
 public abstract class ZombieUnit extends BasicUnit implements Serializable {
   private static final long serialVersionUID = 1L;
-  private static final List<Activity> DEFAULT_ACTIVITIES = Arrays.asList(Activities.WALKING, Activities.STANDING, Activities.ATTACKING, Activities.FALLING);
+  private static final List<Activity> ACTIVITIES = Arrays.asList(Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.FALLING);
   private static final int X_OFFSET = 0;
   private static final int Y_OFFSET = -32;
   private static final String HIT_SOUND = "hit1.wav";
   
   
   public ZombieUnit(String name, List<Activity> activities, Posn posn, Player player) {
-    //super(game, name, "player", activities, posn, player);
     this(name, "zombie", activities, new HashMap<>(), posn, player);
   }  
   
   public ZombieUnit(String name, List<Activity> activities, Map<Color, Color> paletteSwaps,
     Posn posn, Player player) {
-    //super(game, name, "player", activities, posn, player);
     this(name, "zombie", activities, paletteSwaps, posn, player);
   }  
   
   public ZombieUnit(String name, Posn posn, Player player) {
-    this(name, DEFAULT_ACTIVITIES, posn, player);
+    this(name, ACTIVITIES, posn, player);
   }
   
   public ZombieUnit(String name, String spriteName,
@@ -70,9 +68,13 @@ public abstract class ZombieUnit extends BasicUnit implements Serializable {
     for (Direction dir : Direction.directions()) {
       List<Direction> neDirections = Arrays.asList(Direction.N, Direction.NE, Direction.E, Direction.SE);
       if (neDirections.contains(dir)) {
-        animations.add(Animation.fromTemplate(spriteName, Activities.FALLING, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
+        getAnimations().add(Animation.fromTemplate(
+          getSpriteName(), Activity.FALLING, null, AnimationTemplates.ZOMBIE_FALLING, getFrameCache())
+        );
       } else {
-        animations.add(Animation.fromTemplate(spriteName, Activities.ZOMBIE_FALLING_ALT, null, AnimationTemplates.ZOMBIE_FALLING, frameCache));
+        getAnimations().add(Animation.fromTemplate(
+          getSpriteName(), Activity.ZOMBIE_FALLING_ALT, null, AnimationTemplates.ZOMBIE_FALLING, getFrameCache())
+        );
       }
     }
   }

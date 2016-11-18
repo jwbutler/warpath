@@ -5,7 +5,7 @@ import java.util.Random;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
 import warpath.objects.Corpse;
@@ -82,7 +82,7 @@ public class EnemyRobedWizard extends RobedWizardUnit {
         Posn p;
         boolean goodPosn = false;
         int moveRadius;
-        if (currentEP >= TELEPORT_COST) {
+        if (getCurrentEP() >= TELEPORT_COST) {
           setNextActivity(Activity.TELEPORTING);
           moveRadius = TELEPORT_RADIUS;
         } else {

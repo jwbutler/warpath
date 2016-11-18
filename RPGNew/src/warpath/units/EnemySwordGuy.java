@@ -2,7 +2,7 @@ package warpath.units;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
 import warpath.players.Player;

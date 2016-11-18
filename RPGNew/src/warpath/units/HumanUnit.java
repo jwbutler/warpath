@@ -7,7 +7,7 @@ import java.util.Map;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.internals.Direction;
 import warpath.core.RPG;
 import warpath.objects.Corpse;

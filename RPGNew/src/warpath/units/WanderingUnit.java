@@ -3,7 +3,7 @@ import java.util.Random;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.core.RPG;
 import warpath.players.Player;
 
@@ -21,7 +21,8 @@ public class WanderingUnit extends HumanUnit {
     RPG game = RPG.getInstance();
     if (getCurrentActivity().equals(Activity.WALKING)) {
       if (getCurrentAnimation().getIndex() <= 2) {
-        checkNextTile();
+        //checkNextTile();
+        doWalkEvents();
       }
       
       if (getCurrentAnimation().getIndex() == 2) {

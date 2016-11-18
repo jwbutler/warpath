@@ -5,7 +5,7 @@ import java.util.*;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.animations.Animation;
 import warpath.animations.AnimationTemplates;
 import warpath.core.Constants;
@@ -19,7 +19,7 @@ import warpath.objects.BasicObject;
 import warpath.objects.GameObject;
 import warpath.objects.Tile;
 import warpath.players.Player;
-import warpath.ui.components.FloorOverlay;
+import warpath.objects.FloorOverlay;
 import warpath.ui.components.HealthBar;
 import warpath.ui.components.TransHealthBar;
 
@@ -44,7 +44,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   protected final static int X_OFFSET = 0;
   protected final static int Y_OFFSET = -32;
   
-  private final Map<String, Surface> frameCache;
+  private static final Map<String, Surface> frameCache = new HashMap<>();
   private final List<Animation> animations;
   private final Map<ItemSlot, Accessory> equipment;
   private final Map<Color, Color> paletteSwaps;
@@ -56,7 +56,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   private int dx;
   private int dy;
   private int currentHP, maxHP;
-  protected int currentEP, maxEP;
+  private int currentEP, maxEP;
   private boolean slashDirectionIsNew;
 
   private Unit targetUnit;
@@ -87,7 +87,6 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     // Sprites are 80x80 (scaled), tiles are 96x48 (scaled).  There's an 8
     // pixel space at bottom of player sprites. */
     setOffsets(0, -32);
-    frameCache = new HashMap<>();
     animations = new ArrayList<>();
     loadAnimations();
     applyPaletteSwaps();
@@ -98,11 +97,6 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     hpBarOffset = -20;
     setSlashDirectionIsNew(false);
     //System.out.printf("%s has %d frames\n",getClass(), frames.keySet().size());
-  }
-
-  public void setOffsets(int xOffset, int yOffset) {
-    setXOffset(xOffset);
-    setYOffset(yOffset);
   }
 
   /**
@@ -343,7 +337,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           // currently moving.  This is for the case where the first tile in
           // the path contains a moving unit.
           if (game.getFloor().getTile(path.get(0)).isBlocked()) {
-            Logging.debugPrint("fux");
+            Logging.debug("fux");
           } else {
             pointAt(path.get(0));
             setCurrentActivity(Activity.WALKING);
@@ -491,7 +485,9 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
         currentEP++;
       }
     }
-    if (currentEP < 0) currentEP = 0;
+    if (currentEP < 0) {
+      currentEP = 0;
+    }
     this.nextFrame();
   }
   
@@ -517,16 +513,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     if (getCurrentActivity().equals(Activity.WALKING)) {
       // If the unit is walking and its target tile is blocked,
       // handle it (cancel, etc. - checkNextTile does a lot.)
-      if (getCurrentAnimation().getIndex() <= getWalkMoveFrame()) {
-        checkNextTile();
-      }
-      // If the unit is walking, the actual movement occurs on frame 2.
-      if (getCurrentActivity().equals(Activity.WALKING)) {
-        if (getCurrentAnimation().getIndex() == getWalkMoveFrame()) {
-          moveBy(dx, dy);
-          path.remove(0);
-        }
-      }
+      doWalkEvents();
     }
     
     // The attack hit occurs on frame 2; maybe we can generalize this.
@@ -553,7 +540,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
           } else {
             setCurrentActivity(Activity.STANDING);
             clearTargets();
-            Logging.debugPrint("uh oh");
+            Logging.debug("uh oh");
           }
         }
       } else if (getCurrentAnimation().getIndex() == 2) {
@@ -585,6 +572,107 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     }
   }
 
+  /**
+   * Moved checkNextTile() into this function, because it had grown to
+   * encompass nearly all walking-related events so I figured I would
+   * codify that.
+   */
+  public void doWalkEvents() {
+    RPG game = RPG.getInstance();
+    if (getCurrentAnimation().getIndex() <= getWalkMoveFrame()) {
+      Tile nextTile = game.getFloor().getTile(getPosn().add(getDirection().toPosn())); // should match path.first
+      if (nextTile.isBlocked()) {
+        // If our target posn is next in the path and it's blocked, cancel the movement.
+        // Is this good?
+        if (targetPosn != null && nextTile.getPosn().equals(targetPosn)) {
+          // note that we're using setCurrentActivity, not setNextActivity
+
+          // If there's a unit at the target position:
+          // if it's walking, wait for it to move,
+          // otherwise, cancel pathing.
+          Unit blockingUnit = nextTile.getUnit();
+          if (blockingUnit != null) {
+            if (targetUnit != null && blockingUnit.equals(targetUnit)) {
+              setNextTargetUnit(targetUnit);
+              setNextActivity(Activity.ATTACKING);
+              setCurrentActivity(Activity.STANDING);
+              setTargetUnit(null);
+            } else if (blockingUnit.isMoving()) {
+              // Nothing queued up, just moving to a spot.
+              if (nextActivity == null || nextActivity.equals(Activity.WALKING)) {
+                setCurrentActivity(Activity.STANDING);
+                //System.out.println("W1");
+                setNextActivity(Activity.WALKING);
+                setNextTargetPosn(targetPosn);
+                setTargetPosn(null);
+                // Attacking is queued up; keep it queued.
+              } else if (nextActivity.equals(Activity.ATTACKING)) { // || nextActivity.equals("blocking")) {
+                setCurrentActivity(Activity.STANDING);
+              } else {
+                Logging.debug("Next tile is blocked, unexpected nextActivity...");
+                printDebug();
+              }
+            } else {
+              // There's a unit on our target posn and it's not moving: cancel pathing.
+              setCurrentActivity(Activity.STANDING);
+              clearTargets();
+            }
+            // If the target posn is blocked by an object - maybe this would
+            // happen with fog of war - stop pathing.
+          } else {
+            setCurrentActivity(Activity.STANDING);
+            clearTargets();
+          }
+
+          // If we're not next to the target posn and our next tile is
+          // blocked, compute a new path.  This fails if the target tile is
+          // perma-blocked - what do we do?
+
+        } else { // blocked and nextposn != targetposn
+          Unit blockingUnit = nextTile.getUnit();
+          if (blockingUnit != null && blockingUnit.isMoving()) {
+            // Just walking, no unit target
+            if (nextActivity == null || nextActivity.equals(Activity.WALKING)) {
+              setCurrentActivity(Activity.STANDING);
+              setNextTargetPosn(targetPosn);
+              setTargetPosn(null);
+              setNextActivity(Activity.WALKING);
+            } else if (nextActivity.equals(Activity.ATTACKING) || nextActivity.equals(Activity.BASHING)) {
+              setCurrentActivity(Activity.STANDING);
+              setTargetPosn(null);
+            } else {
+              //printDebug();
+            }
+          } else {
+            // If the path is blocked by an object or a non-moving unit, better re-path around it.
+
+            // Just walking, no unit target
+            if (nextActivity == null) {
+              setCurrentActivity(Activity.STANDING);
+              setNextTargetPosn(targetPosn);
+              targetPosn = null;
+              setNextActivity(Activity.WALKING);
+              setPath(game.findPath(getPosn(), nextTargetPosn));
+            } else if (nextActivity.equals(Activity.ATTACKING) || nextActivity.equals(Activity.BASHING)) {
+              setCurrentActivity(Activity.STANDING);
+              targetPosn = null;
+              setPath(game.findPath(this, nextTargetUnit));
+            } else {
+              Logging.debug("Debug 3");
+            }
+          }
+        }
+      }
+    }
+    // If the unit is walking, the actual movement occurs on frame 2.
+    if (getCurrentActivity().equals(Activity.WALKING)) {
+      if (getCurrentAnimation().getIndex() == getWalkMoveFrame()) {
+        moveBy(dx, dy);
+        path.remove(0);
+      }
+    }
+  }
+
   protected int getAttackHitFrame() {
     return ATTACK_HIT_FRAME;
   }
@@ -596,8 +684,8 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   // deal with falling animations, sfx, etc later.
   // What to do with overlays?
   public void die() {
-    //game.removeObject(getFloorOverlay());
-    //floorOverlay = null;
+    RPG.getInstance().removeObject(getFloorOverlay());
+    floorOverlay = null;
   }
   
   /**
@@ -607,7 +695,6 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
    */
   public void moveBy(int dx, int dy) {
     RPG game = RPG.getInstance();
-    //System.out.printf("moveBy: %s %s\n", getPosn(), new Posn(getX() + dx, getY() + dy));
     game.getDepthTree().remove(this);
     Tile t = game.getFloor().getTile(getX(), getY());
     t.setUnit(null);
@@ -672,112 +759,6 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
       getCurrentAnimation().getIndex()
     );
   }
-  
-  /**
-   * Possibly poorly named.  This function will look at the tile directly in
-   * front of the unit, and do one of three things:<br>
-   * 1) Nothing, if the tile is open;<br>
-   *    - currentActivity = walking<br>
-   *    - nextActivity = null or attacking<br>
-   * 2) Cancel our movement, if there is something blocking us in the tile;<br>
-   *    - currentActivity = standing<br>
-   *    - nextActivity = null<br>
-   * 3) Wait for a turn, if there is something temporarily blocking us.<br>
-   *    - currentActivity = standing<br>
-   *    - nextActivity = walking or attacking<br>
-   * <br>
-   * Note that it does NOT set currentActivity to walking directly.<br>
-   * <br>
-   * There should always be a targetPosn, right?
-   * TODO A possible solution: make this method return something.  More than
-   * just a boolean, define some constants and return one of them.
-   */ 
-  public void checkNextTile() {
-    RPG game = RPG.getInstance();
-    Tile nextTile = game.getFloor().getTile(getX()+dx, getY()+dy); // should match path.first
-    if (nextTile.isBlocked()) {
-      // If our target posn is next in the path and it's blocked, cancel the movement.
-      // Is this good?
-      Unit blockingUnit = nextTile.getUnit();
-      if (targetPosn != null && nextTile.getPosn().equals(targetPosn)) {
-        // note that we're using setCurrentActivity, not setNextActivity
-        
-        // If there's a unit at the target position:
-        // if it's walking, wait for it to moveBy,
-        // otherwise, cancel pathing.
-        if (nextTile.getUnit() != null) {
-          if (targetUnit != null && blockingUnit.equals(targetUnit)) {
-            setNextTargetUnit(targetUnit);
-            setNextActivity(Activity.ATTACKING);
-            setCurrentActivity(Activity.STANDING);
-            setTargetUnit(null);
-          } else if (blockingUnit.isMoving()) {
-            // Nothing queued up, just moving to a spot.
-            if (nextActivity == null || nextActivity.equals(Activity.WALKING)) {
-              setCurrentActivity(Activity.STANDING);
-              //System.out.println("W1");
-              setNextActivity(Activity.WALKING);
-              setNextTargetPosn(targetPosn);
-              setTargetPosn(null);
-            // Attacking is queued up; keep it queued.
-            } else if (nextActivity.equals(Activity.ATTACKING)) { // || nextActivity.equals("blocking")) {
-              setCurrentActivity(Activity.STANDING);
-            } else {
-              Logging.debugPrint("Debug 1");
-              printDebug();
-            }
-          } else { 
-            // There's a unit on our target posn and it's not moving: cancel pathing.
-            setCurrentActivity(Activity.STANDING);
-            clearTargets();
-          }
-        // If the target posn is blocked by an object - maybe this would
-        // happen with fog of war - stop pathing.
-        } else {
-          setCurrentActivity(Activity.STANDING);
-          clearTargets();
-        }
-
-      // If we're not next to the target posn and our next tile is
-      // blocked, compute a new path.  This fails if the target tile is
-      // perma-blocked - what do we do?
-      
-      } else { // blocked and nextposn != targetposn
-        blockingUnit = nextTile.getUnit();
-        if (blockingUnit != null && blockingUnit.isMoving()) {
-          // Just walking, no unit target
-          if (nextActivity == null || nextActivity.equals(Activity.WALKING)) {
-            setCurrentActivity(Activity.STANDING);
-            setNextTargetPosn(targetPosn);
-            setTargetPosn(null);
-            setNextActivity(Activity.WALKING);
-          } else if (nextActivity.equals(Activity.ATTACKING) || nextActivity.equals(Activity.BASHING)) {
-            setCurrentActivity(Activity.STANDING);
-            setTargetPosn(null);
-          } else { 
-            //printDebug();
-          }
-        } else {
-          // If the path is blocked by an object or a non-moving unit, better re-path around it.
-          
-          // Just walking, no unit target
-          if (nextActivity == null) {
-            setCurrentActivity(Activity.STANDING);
-            setNextTargetPosn(targetPosn);
-            targetPosn = null;
-            setNextActivity(Activity.WALKING);
-            setPath(game.findPath(getPosn(), nextTargetPosn));
-          } else if (nextActivity.equals(Activity.ATTACKING) || nextActivity.equals(Activity.BASHING)) {
-            setCurrentActivity(Activity.STANDING);
-            targetPosn = null;
-            setPath(game.findPath(this, nextTargetUnit));
-          } else {
-            Logging.debugPrint("Debug 3");
-          }
-        }
-      }
-    }
-  }
 
   // Add the appropriate red/green highlight under the unit.
   // Eventually we'll want some other colors for neutral units, NPCs, etc.
@@ -789,14 +770,12 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     }
     if (game.getHumanPlayer().isHostile(getPlayer())) {
       if (game.getPlayerUnit().getTargetUnit() == this) {
-        Color transRed = new Color(255,0,0,64);
-        setFloorOverlay(floorOverlay = new FloorOverlay(this, Color.RED, transRed));
+        setFloorOverlay(new FloorOverlay(this, Color.RED, FloorOverlay.TRANS_RED));
       } else {
-        setFloorOverlay(floorOverlay = new FloorOverlay(this, Color.RED));
+        setFloorOverlay(new FloorOverlay(this, Color.RED));
       }
     } else {
-      Color transGreen = new Color(0,255,0,64);
-      setFloorOverlay(new FloorOverlay(this, Color.GREEN, transGreen));
+      setFloorOverlay(new FloorOverlay(this, Color.GREEN, FloorOverlay.TRANS_GREEN));
       //floorOverlay = new FloorOverlay(game, this, Color.GREEN);
     }
     game.getDepthTree().add(floorOverlay);
@@ -920,7 +899,7 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
     int d = 1; // ...
     u.takeHit(this, d);
     playHitSound();
-    System.out.println("OMG SLASH HIT");
+    Logging.info("OMG SLASH HIT");
   }
   public void setNextTargetUnit(Unit u) {
     nextTargetUnit = u;
@@ -1076,7 +1055,18 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   }
   
   public void printDebug() {
-    System.out.printf("<%s - %s %s %s %s %s %s>\n", getClass(), currentActivity, nextActivity, targetPosn, nextTargetPosn, targetUnit, nextTargetUnit);
+    Logging.debug(
+      String.format(
+        "<%s - %s %s %s %s %s %s>\n",
+        getClass(),
+        currentActivity,
+        nextActivity,
+        targetPosn,
+        nextTargetPosn,
+        targetUnit,
+        nextTargetUnit
+      )
+    );
   }
 
   public void setFloorOverlay(FloorOverlay floorOverlay) {
@@ -1103,8 +1093,6 @@ public abstract class BasicUnit extends BasicObject implements GameObject, Unit 
   public void setSlashDirectionIsNew(boolean slashDirectionIsNew) {
     this.slashDirectionIsNew = slashDirectionIsNew;
   }
-
-
 
   public Map<String, Surface> getFrameCache() {
     return frameCache;

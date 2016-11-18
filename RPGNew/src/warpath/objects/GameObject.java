@@ -8,22 +8,25 @@ import jwbgl.*;
  * BasicObject class that gets extended by stuff. */ 
 
 public interface GameObject {
-  public int getX();
-  public int getY();
-  public Posn getPosn();
-  public void setPosn(Posn p);
-  public int getDepth();
-  public Surface getSurface();
-  public Rect getRect();
-  public void draw(Graphics g);
-  public int getXOffset();
-  public int getYOffset();
-  public int getDepthOffset();
-  public void setXOffset(int xOffset);
-  public void setYOffset(int yOffset);
-  public void setDepthOffset(int depthOffset);
-  public boolean isUnit();
-  public boolean isObstacle();
-  public boolean isCorpse();
-  public boolean isInteractable();
+  int getX();
+  int getY();
+  Posn getPosn();
+  void setPosn(Posn p);
+  int getDepth();
+  Surface getSurface();
+  Rect getRect();
+  void draw(Graphics g);
+  int getXOffset();
+  int getYOffset();
+
+  void setOffsets(int xOffset, int yOffset);
+
+  int getDepthOffset();
+  void setXOffset(int xOffset);
+  void setYOffset(int yOffset);
+  void setDepthOffset(int depthOffset);
+  boolean isUnit();
+  boolean isObstacle();
+  boolean isCorpse();
+  boolean isInteractable();
 }

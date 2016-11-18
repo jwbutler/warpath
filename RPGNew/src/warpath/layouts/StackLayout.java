@@ -11,6 +11,8 @@ import java.awt.LayoutManager2;
  * will occur.
  * @see https://docs.oracle.com/javase/tutorial/uiswing/layout/custom.html
  * @see StretchLayout
+ *
+ * @author jbutler
  */
 public class StackLayout implements LayoutManager2 {
   private static final int DEFAULT_GAP = 10;

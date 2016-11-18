@@ -9,7 +9,6 @@ import javax.swing.Timer;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
 import warpath.internals.DepthTree;
 import warpath.internals.Direction;
 import warpath.internals.PathfinderEntry;
@@ -402,7 +401,7 @@ public class RPG implements ActionListener {
       GameWindow.getInstance().getHudPanel().init();
     }
     depthTree.add(u);
-    floor.getTile(u.getX(),u.getY()).setUnit(u);
+    floor.getTile(u.getX(), u.getY()).setUnit(u);
     u.updateFloorOverlay();
   }
 
@@ -419,7 +418,7 @@ public class RPG implements ActionListener {
     depthTree.remove(u);
 
     // Remove the unit from its floor tile's list.
-    floor.getTile(u.getX(),u.getY()).setUnit(null);
+    floor.getTile(u.getX(), u.getY()).setUnit(null);
 
     // Remove the unit from its owner player's list.
     for (int i = 1; i < players.size()+1; i++) {
@@ -430,13 +429,13 @@ public class RPG implements ActionListener {
     }
 
     // Find any units targeting this unit and clear their target.
-    for (int i = 0; i < units.size(); i++) {
-      if (units.get(i).getTargetUnit() != null && units.get(i).getTargetUnit().equals(u)) {
-        units.get(i).setCurrentActivity(Activity.STANDING);
-        units.get(i).setTargetUnit(null);
-        units.get(i).setTargetPosn(null);
+    units.forEach(unit -> {
+      if (unit.getTargetUnit() != null && unit.getTargetUnit().equals(u)) {
+        unit.setCurrentActivity(Activity.STANDING);
+        unit.setTargetUnit(null);
+        unit.setTargetPosn(null);
       }
-    }
+    });
 
     // Remove this unit's floor overlay.
     removeObject(u.getFloorOverlay());
@@ -502,7 +501,7 @@ public class RPG implements ActionListener {
               return new Posn(x,y);
             }
           } catch (NullPointerException e) {
-            /* do nothing */
+            Logging.warn("Could not convert posn " + pixel + " to grid tile");
           }
         }
       }
@@ -521,14 +520,14 @@ public class RPG implements ActionListener {
 
   /**
    * Centers the camera on a given posn.
-   * @param p
+   * @param tilePosn
    */
-  public void centerCamera(Posn p) {
-    int x = p.getX();
-    int y = p.getY();
-    int xx = Constants.TILE_WIDTH/2 * (x + (floor.getHeight()-y)) - GameWindow.getInstance().getGamePanel().getWidth()/2;
-    int yy = Constants.TILE_HEIGHT/2 * (x+y) - GameWindow.getInstance().getGamePanel().getHeight()/2;
-    setCameraPos(xx, yy);
+  public void centerCamera(Posn tilePosn) {
+    int x = tilePosn.getX();
+    int y = tilePosn.getY();
+    int pixelX = Constants.TILE_WIDTH/2 * (x + (floor.getHeight() - y)) - GameWindow.getInstance().getGamePanel().getWidth()/2;
+    int pixelY = Constants.TILE_HEIGHT/2 * (x+y) - GameWindow.getInstance().getGamePanel().getHeight()/2;
+    setCameraPos(pixelX, pixelY);
   }
 
   public void centerCamera() {

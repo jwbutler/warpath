@@ -1,6 +1,6 @@
 package warpath.animations;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 
 import java.util.ArrayList;
 import java.util.Arrays;

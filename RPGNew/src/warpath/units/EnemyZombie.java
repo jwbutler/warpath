@@ -5,19 +5,21 @@ import java.util.Random;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.core.RPG;
 import warpath.core.Utils;
 import warpath.players.Player;
 
 public class EnemyZombie extends ZombieUnit {
   private static final long serialVersionUID = 1L;
-  private int minDamage, maxDamage;
+  private int minDamage;
+  private int maxDamage;
   private final static double SLOW_MOVE_SPEED = 0.3;
   private final static double FAST_MOVE_SPEED = 0.7;
   private final static double ATTACK_CHANCE = 0.75;
   private final static int VISION_RADIUS = 6;
   private final static int SMELL_RADIUS = 12;
+
   private final static List<Activity> ACTIVITIES = Arrays.asList(
     Activity.WALKING, Activity.STANDING, Activity.ATTACKING, Activity.STUNNED_SHORT, Activity.FALLING
   );
@@ -41,14 +43,14 @@ public class EnemyZombie extends ZombieUnit {
     if (getCurrentActivity().equals(Activity.STANDING)) {
       for (Unit u: game.getUnits()) {
         if (isHostile(u)) {
-          if (Utils.distance(this,u) <= SMELL_RADIUS) {
+          if (Utils.distance(this, u) <= SMELL_RADIUS) {
             // TODO This should be where the "smell" sound is played, but we're
             // losing the target due to endAttack() [maybe]. Work on this later
             if (targetUnit == null) {
               setNextTargetUnit(u);
               targetUnit = u;
               //System.out.println("smell");
-            } else if (Utils.distance(this,u) < Utils.distance(this,targetUnit)) {
+            } else if (Utils.distance(this, u) < Utils.distance(this, targetUnit)) {
               setNextTargetUnit(u);
               targetUnit = u;
             }
@@ -77,14 +79,14 @@ public class EnemyZombie extends ZombieUnit {
         setTargetPosn(null);
       }
     } else if (getCurrentActivity().equals(Activity.ATTACKING)) {
+      // Seems hacky as shit
       if (RNG.nextDouble() > ATTACK_CHANCE) {
         setCurrentActivity(Activity.STANDING);
-        currentEP += ATTACK_COST;
+        setCurrentEP(getCurrentEP() + ATTACK_COST);
         // HOW MUCH OF THIS IS NECESSARY?
         setTargetPosn(null);
       }
     }
-   //System.out.println(this);
   }
   
   @Override

@@ -1,4 +1,4 @@
-package warpath.activities;
+package warpath.core;
 
 import warpath.units.Unit;
 

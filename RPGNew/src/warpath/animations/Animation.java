@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jwbgl.*;
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.internals.Direction;
 
 /**
@@ -56,7 +56,9 @@ public class Animation {
     frames = filenames.stream()
       .map(filename -> frameCache.get(filename))
       .collect(Collectors.toList());
-    drawBehind = filenames.stream().map(filename -> filename.endsWith("_B.png")).collect(Collectors.toList());
+    drawBehind = filenames.stream()
+      .map(filename -> filename.endsWith("_B.png"))
+      .collect(Collectors.toList());
     this.activity = activity;
     this.direction = direction;
     index = 0;
@@ -111,5 +113,10 @@ public class Animation {
   public static Animation fromTemplate(String spriteName, Activity activity, Direction direction, List<String> filenames,
     Map<String, Surface> frameCache) {
     return Animation.fromTemplate(spriteName, activity, direction, filenames, frameCache, false);
+  }
+
+  // haaaack
+  public void setDirection(Direction direction) {
+    this.direction = direction;
   }
 }

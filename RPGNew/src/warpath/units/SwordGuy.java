@@ -8,7 +8,7 @@ import java.util.Map;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.core.RPG;
 import warpath.items.ItemFactory;
 import warpath.players.Player;

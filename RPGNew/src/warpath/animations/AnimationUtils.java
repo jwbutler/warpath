@@ -9,6 +9,7 @@ import warpath.core.Utils;
  */
 public class AnimationUtils {
   public static String formatFilename(String spriteName, String activity, Direction direction, String animIndex, boolean checkBehind) {
+    // such a hack.
     if (direction == null) {
       String filename = String.format("%s_%s_%s.%s", spriteName, activity, animIndex, Constants.IMAGE_FORMAT);
       if (!checkBehind || Utils.imageExists(filename)) {

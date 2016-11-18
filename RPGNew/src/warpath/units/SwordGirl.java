@@ -5,7 +5,7 @@ import java.util.List;
 
 import jwbgl.*;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.core.RPG;
 import warpath.players.Player;
 

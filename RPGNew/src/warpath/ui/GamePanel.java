@@ -36,9 +36,7 @@ public class GamePanel extends JPanel {
   }
   
   public void paint(Graphics g) {
-    //System.out.println("paint");
     super.paint(g);
-    //game.drawAll(g);
   }
   
   /**

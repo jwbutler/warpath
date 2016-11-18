@@ -2,7 +2,7 @@ package warpath.units;
 
 import jwbgl.Posn;
 
-import warpath.activities.Activity;
+import warpath.core.Activity;
 import warpath.animations.Animation;
 import warpath.items.Accessory;
 import warpath.items.ItemSlot;

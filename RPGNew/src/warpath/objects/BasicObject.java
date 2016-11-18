@@ -77,6 +77,12 @@ public abstract class BasicObject implements GameObject {
   public void setYOffset(int yOffset) {
     this.yOffset = yOffset; 
   }
+
+  @Override
+  public void setOffsets(int xOffset, int yOffset) {
+    setXOffset(xOffset);
+    setYOffset(yOffset);
+  }
   
   @Override
   public int getDepthOffset() {
